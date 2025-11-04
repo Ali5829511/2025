@@ -21,6 +21,8 @@ A comprehensive system for managing faculty housing at Imam Mohammad Ibn Saud Is
 - Python 3.8 أو أحدث / Python 3.8 or higher
 - Flask 2.3.3
 - Flask-CORS 4.0.0
+- Werkzeug 3.0.1 (for password hashing)
+- SQLite 3 (included with Python)
 - متصفح حديث يدعم HTML5 و CSS3 / Modern browser with HTML5 and CSS3 support
 
 ## التثبيت / Installation
@@ -44,16 +46,28 @@ venv\Scripts\activate  # على Windows / On Windows
 pip install -r requirements.txt
 ```
 
+4. إنشاء قاعدة البيانات / Initialize the database:
+```bash
+python3 database.py
+```
+
+سيتم إنشاء قاعدة بيانات SQLite مع المستخدمين الافتراضيين.  
+This will create an SQLite database with default users.
+
 ## التشغيل / Running
 
-يمكن تشغيل التطبيق باستخدام أحد الملفين:
-
-You can run the application using either file:
+### الخادم الجديد مع قاعدة البيانات / New Server with Database (Recommended)
 
 ```bash
-python main.py
+python3 server.py
+```
+
+### الخادم القديم (بدون قاعدة بيانات) / Legacy Server (No Database)
+
+```bash
+python3 main.py
 # أو / or
-python app.py
+python3 app.py
 ```
 
 سيعمل التطبيق على المنفذ 5000. افتح المتصفح على:
@@ -66,17 +80,22 @@ http://localhost:5000
 
 ## بيانات تسجيل الدخول الافتراضية / Default Login Credentials
 
+**🔒 نظام المصادقة الآمن مع قاعدة البيانات / Secure Database Authentication**
+
 ### مدير النظام / System Administrator
 - اسم المستخدم / Username: `admin`
-- كلمة المرور / Password: `admin123`
+- كلمة المرور / Password: `Admin@2025`
 
 ### مسؤول المخالفات / Violations Officer
 - اسم المستخدم / Username: `violations_officer`
-- كلمة المرور / Password: `violations123`
+- كلمة المرور / Password: `Violations@2025`
 
 ### مسؤول الزوار / Visitors Officer
 - اسم المستخدم / Username: `visitors_officer`
-- كلمة المرور / Password: `visitors123`
+- كلمة المرور / Password: `Visitors@2025`
+
+**⚠️ يرجى تغيير كلمات المرور بعد أول تسجيل دخول**  
+**⚠️ Please change passwords after first login**
 
 ## هيكل المشروع / Project Structure
 
@@ -98,9 +117,14 @@ http://localhost:5000
 ├── comprehensive_reports_enhanced.html # التقارير الشاملة / Comprehensive reports
 ├── advanced_users_management.html      # إدارة المستخدمين / Users management
 ├── admin_permissions.js                # صلاحيات المدير / Admin permissions
-├── app.py                              # تطبيق Flask / Flask application
-├── main.py                             # تطبيق Flask (بديل) / Flask application (alternative)
+├── server.py                           # ✅ خادم Flask الجديد مع قاعدة البيانات / New Flask server with database
+├── database.py                         # ✅ نظام قاعدة البيانات / Database system
+├── auth.py                             # ✅ نظام المصادقة والجلسات / Authentication and session system
+├── app.py                              # خادم Flask القديم (بدون قاعدة بيانات) / Legacy Flask server (no database)
+├── main.py                             # خادم Flask القديم (بدون قاعدة بيانات) / Legacy Flask server (no database)
+├── housing.db                          # قاعدة بيانات SQLite (تُنشأ تلقائياً) / SQLite database (auto-created)
 ├── requirements.txt                    # متطلبات Python / Python dependencies
+├── .env.example                        # مثال ملف التكوين / Configuration file example
 └── README.md                           # هذا الملف / This file
 ```
 
@@ -120,34 +144,50 @@ http://localhost:5000
 ### اعتبارات الأمان / Security Considerations
 
 **المصادقة والترخيص / Authentication & Authorization:**
-- ⚠️ نظام المصادقة الحالي مبني على localStorage وهو للعرض التوضيحي فقط
-- ⚠️ Current authentication is localStorage-based and for demonstration only
-- يجب تنفيذ مصادقة من جانب الخادم قبل النشر / Implement server-side authentication before deployment
-- استخدم JWT أو OAuth2 للمصادقة الآمنة / Use JWT or OAuth2 for secure authentication
-- قم بتطبيق تحكم الوصول المبني على الأدوار (RBAC) من جانب الخادم / Implement server-side RBAC
+- ✅ **نظام مصادقة من جانب الخادم مُنفّذ / Server-side authentication implemented**
+- ✅ **قاعدة بيانات SQLite مع تشفير كلمات المرور / SQLite database with password hashing**
+- ✅ **استخدام Werkzeug لتشفير كلمات المرور بـ pbkdf2 / Using Werkzeug for pbkdf2 password hashing**
+- ✅ **إدارة الجلسات مع رموز آمنة / Session management with secure tokens**
+- ✅ **تسجيل الدخول والخروج آمن / Secure login and logout**
+- ✅ **سجل التدقيق للعمليات الحساسة / Audit log for sensitive operations**
+- ✅ **تحكم الوصول المبني على الأدوار (RBAC) / Role-based access control (RBAC)**
+
+**قاعدة البيانات / Database:**
+- ✅ **SQLite مع جداول منظمة / SQLite with structured tables**
+- ✅ **كلمات المرور مشفرة باستخدام pbkdf2:sha256 / Passwords hashed using pbkdf2:sha256**
+- ✅ **جداول للمستخدمين، الجلسات، السكان، المركبات، المخالفات، الشكاوى، الزوار، الوقائع الأمنية / Tables for users, sessions, residents, vehicles, violations, complaints, visitors, security incidents**
+- ✅ **سجل تدقيق شامل / Comprehensive audit log**
 
 **حماية البيانات / Data Protection:**
-- استخدم HTTPS في بيئة الإنتاج (مطلوب) / Use HTTPS in production (required)
-- قم بتشفير البيانات الحساسة في قاعدة البيانات / Encrypt sensitive data in database
-- لا تخزن كلمات المرور بنص عادي / Never store passwords in plain text
-- استخدم التشفير القوي (bcrypt، Argon2) لكلمات المرور / Use strong hashing (bcrypt, Argon2) for passwords
+- ✅ كلمات المرور مشفرة ولا تُخزن بنص عادي / Passwords hashed, not stored in plain text
+- ✅ رموز الجلسات آمنة مع انتهاء صلاحية تلقائي / Secure session tokens with automatic expiry
+- ⚠️ استخدم HTTPS في بيئة الإنتاج (مطلوب) / Use HTTPS in production (required)
+- قم بتشفير البيانات الحساسة في قاعدة البيانات للإنتاج / Encrypt sensitive data in production database
 
 **تطبيق Flask / Flask Application:**
 - ✅ تم تطبيق حماية من اختراق المسارات / Path traversal protection implemented
 - ✅ قائمة بيضاء لامتدادات الملفات المسموحة / Whitelist of allowed file extensions
-- ✅ حظر الملفات الحساسة (.env، .git، إلخ) / Blocked sensitive files (.env, .git, etc.)
-- ⚠️ وضع التصحيح مفعّل - يجب تعطيله في الإنتاج / Debug mode enabled - must be disabled in production
+- ✅ حظر الملفات الحساسة (.env، .git، .py، .db، إلخ) / Blocked sensitive files (.env, .git, .py, .db, etc.)
+- ✅ API endpoints للمصادقة الآمنة / Secure authentication API endpoints
+- ⚠️ وضع التصحيح مفعّل في التطوير - يجب تعطيله في الإنتاج / Debug mode enabled in development - must be disabled in production
 - استخدم خادم WSGI إنتاجي (Gunicorn، uWSGI) / Use production WSGI server (Gunicorn, uWSGI)
 
 ### قائمة فحص ما قبل النشر / Pre-Deployment Checklist
 
+**منجز / Completed:**
+- [x] ✅ تنفيذ مصادقة من جانب الخادم / Implement server-side authentication
+- [x] ✅ إعداد قاعدة بيانات آمنة (SQLite مع تشفير كلمات المرور) / Set up secure database (SQLite with password hashing)
+- [x] ✅ نظام إدارة الجلسات / Session management system
+- [x] ✅ سجل التدقيق / Audit logging
+- [x] ✅ حماية من اختراق المسارات / Path traversal protection
+
+**مطلوب للإنتاج / Required for Production:**
 - [ ] تغيير جميع كلمات المرور الافتراضية / Change all default passwords
-- [ ] تعطيل وضع التصحيح في Flask / Disable Flask debug mode
-- [ ] إعداد خادم WSGI إنتاجي / Set up production WSGI server
+- [ ] تعطيل وضع التصحيح في Flask (تعيين FLASK_DEBUG=False) / Disable Flask debug mode (set FLASK_DEBUG=False)
+- [ ] إعداد خادم WSGI إنتاجي (Gunicorn) / Set up production WSGI server (Gunicorn)
 - [ ] تكوين HTTPS مع شهادة SSL صالحة / Configure HTTPS with valid SSL certificate
-- [ ] تنفيذ مصادقة من جانب الخادم / Implement server-side authentication
-- [ ] إعداد قاعدة بيانات آمنة / Set up secure database
-- [ ] إعداد النسخ الاحتياطي التلقائي / Configure automated backups
+- [ ] نقل قاعدة البيانات إلى PostgreSQL أو MySQL (اختياري) / Migrate to PostgreSQL or MySQL (optional)
+- [ ] إعداد النسخ الاحتياطي التلقائي لقاعدة البيانات / Configure automated database backups
 - [ ] تكوين جدار الحماية / Configure firewall
 - [ ] مراجعة صلاحيات الملفات / Review file permissions
 - [ ] إعداد السجلات والمراقبة / Set up logging and monitoring

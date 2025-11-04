@@ -368,71 +368,105 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // التحقق من الجلسة الحالية عند تحميل الصفحة
+        // Check current session on page load
+        window.addEventListener('load', async function() {
+            try {
+                const response = await fetch('/api/auth/validate', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authenticated) {
+                        // المستخدم مسجل دخول مسبقاً
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.textContent = `مرحباً ${data.user.name}! جاري التحويل إلى لوحة التحكم...`;
+                        successMessage.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            window.location.href = 'main_dashboard.html';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                console.log('No active session');
+            }
+        });
+
+        // معالج نموذج تسجيل الدخول
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
+            const loginBtn = document.querySelector('.login-btn');
             
             // إخفاء الرسائل السابقة
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
             
-            // التحقق من بيانات الدخول
-            const users = {
-                'admin': { password: 'admin123', role: 'admin', name: 'مدير النظام' },
-                'violations_officer': { password: 'violations123', role: 'violations', name: 'مسؤول المخالفات' },
-                'visitors_officer': { password: 'visitors123', role: 'visitors', name: 'مسؤول الزوار' }
-            };
+            // تعطيل زر تسجيل الدخول
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'جاري تسجيل الدخول...';
             
-            if (users[username] && users[username].password === password) {
-                // حفظ بيانات المستخدم
-                localStorage.setItem('currentUser', JSON.stringify({
-                    username: username,
-                    role: users[username].role,
-                    name: users[username].name,
-                    loginTime: new Date().toISOString()
-                }));
+            try {
+                // إرسال طلب تسجيل الدخول إلى الخادم
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
                 
-                successMessage.textContent = 'تم تسجيل الدخول بنجاح! جاري التحويل...';
-                successMessage.style.display = 'block';
+                const data = await response.json();
                 
-                // التحويل إلى لوحة التحكم
-                setTimeout(() => {
-                    window.location.href = 'main_dashboard.html';
-                }, 1500);
-            } else {
-                errorMessage.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة';
-                errorMessage.style.display = 'block';
-                
-                // هز النموذج عند الخطأ
-                document.querySelector('.login-container').style.animation = 'shake 0.5s ease-in-out';
-                setTimeout(() => {
-                    document.querySelector('.login-container').style.animation = 'slideUp 0.6s ease-out';
-                }, 500);
-            }
-        });
-
-        // التحقق من تسجيل الدخول السابق
-        window.addEventListener('load', function() {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                const user = JSON.parse(currentUser);
-                const loginTime = new Date(user.loginTime);
-                const now = new Date();
-                const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-                
-                // إذا كان المستخدم مسجل دخول خلال آخر 24 ساعة
-                if (hoursDiff < 24) {
-                    successMessage.textContent = `مرحباً ${user.name}! جاري التحويل إلى لوحة التحكم...`;
+                if (response.ok && data.success) {
+                    // تسجيل دخول ناجح
+                    successMessage.textContent = `مرحباً ${data.user.name}! ${data.message_ar}`;
                     successMessage.style.display = 'block';
                     
+                    // حفظ معلومات المستخدم في localStorage للاستخدام في الصفحات الأخرى
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: data.user.id,
+                        username: data.user.username,
+                        name: data.user.name,
+                        role: data.user.role,
+                        email: data.user.email
+                    }));
+                    
+                    // التحويل إلى لوحة التحكم
                     setTimeout(() => {
                         window.location.href = 'main_dashboard.html';
-                    }, 2000);
+                    }, 1500);
+                } else {
+                    // فشل تسجيل الدخول
+                    errorMessage.textContent = data.error_ar || data.error || 'فشل تسجيل الدخول';
+                    errorMessage.style.display = 'block';
+                    
+                    // هز النموذج عند الخطأ
+                    document.querySelector('.login-container').style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        document.querySelector('.login-container').style.animation = 'slideUp 0.6s ease-out';
+                    }, 500);
+                    
+                    // إعادة تفعيل زر تسجيل الدخول
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
                 }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.';
+                errorMessage.style.display = 'block';
+                
+                // إعادة تفعيل زر تسجيل الدخول
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
             }
         });
     </script>

@@ -27,6 +27,11 @@ wheels/
 instance/
 .webassets-cache
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
 # IDEs
 .vscode/
 .idea/
@@ -44,3 +49,7 @@ Thumbs.db
 # Temporary files
 /tmp/
 *.tmp
+
+# Environment variables
+.env
+.env.local
