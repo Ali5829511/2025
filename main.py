@@ -1,10 +1,14 @@
 from flask import Flask, render_template, send_from_directory, abort
 from flask_cors import CORS
+from werkzeug.security import safe_join
 import os
 
 # Configure Flask to serve files from current directory
 app = Flask(__name__, static_folder='.', template_folder='.')
 CORS(app)
+
+# Define the base directory for serving files
+BASE_DIR = os.path.abspath('.')
 
 # Define allowed file extensions for security
 ALLOWED_EXTENSIONS = {'.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.pdf', '.md'}
@@ -16,7 +20,7 @@ def is_safe_path(filename):
         return False
     
     # Block sensitive files
-    blocked_files = {'.env', '.git', '__pycache__', 'requirements.txt', '.gitignore'}
+    blocked_files = {'.env', '.git', '__pycache__', 'requirements.txt', '.gitignore', '.py'}
     if any(blocked in filename for blocked in blocked_files):
         return False
     
@@ -36,7 +40,9 @@ def serve_static(filename):
     if not is_safe_path(filename):
         abort(403)
     
-    if not os.path.isfile(filename):
+    # Use safe_join to prevent path traversal attacks
+    safe_path = safe_join(BASE_DIR, filename)
+    if safe_path is None or not os.path.isfile(safe_path):
         abort(404)
         
     return send_from_directory('.', filename)

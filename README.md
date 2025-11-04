@@ -117,10 +117,43 @@ http://localhost:5000
 
 ⚠️ **Important Note:** Current login credentials are for testing only. They must be changed in production environment.
 
-- قم بتغيير كلمات المرور الافتراضية / Change default passwords
-- استخدم HTTPS في الإنتاج / Use HTTPS in production
-- قم بتأمين قاعدة البيانات / Secure the database
-- فعّل آليات المصادقة القوية / Enable strong authentication mechanisms
+### اعتبارات الأمان / Security Considerations
+
+**المصادقة والترخيص / Authentication & Authorization:**
+- ⚠️ نظام المصادقة الحالي مبني على localStorage وهو للعرض التوضيحي فقط
+- ⚠️ Current authentication is localStorage-based and for demonstration only
+- يجب تنفيذ مصادقة من جانب الخادم قبل النشر / Implement server-side authentication before deployment
+- استخدم JWT أو OAuth2 للمصادقة الآمنة / Use JWT or OAuth2 for secure authentication
+- قم بتطبيق تحكم الوصول المبني على الأدوار (RBAC) من جانب الخادم / Implement server-side RBAC
+
+**حماية البيانات / Data Protection:**
+- استخدم HTTPS في بيئة الإنتاج (مطلوب) / Use HTTPS in production (required)
+- قم بتشفير البيانات الحساسة في قاعدة البيانات / Encrypt sensitive data in database
+- لا تخزن كلمات المرور بنص عادي / Never store passwords in plain text
+- استخدم التشفير القوي (bcrypt، Argon2) لكلمات المرور / Use strong hashing (bcrypt, Argon2) for passwords
+
+**تطبيق Flask / Flask Application:**
+- ✅ تم تطبيق حماية من اختراق المسارات / Path traversal protection implemented
+- ✅ قائمة بيضاء لامتدادات الملفات المسموحة / Whitelist of allowed file extensions
+- ✅ حظر الملفات الحساسة (.env، .git، إلخ) / Blocked sensitive files (.env, .git, etc.)
+- ⚠️ وضع التصحيح مفعّل - يجب تعطيله في الإنتاج / Debug mode enabled - must be disabled in production
+- استخدم خادم WSGI إنتاجي (Gunicorn، uWSGI) / Use production WSGI server (Gunicorn, uWSGI)
+
+### قائمة فحص ما قبل النشر / Pre-Deployment Checklist
+
+- [ ] تغيير جميع كلمات المرور الافتراضية / Change all default passwords
+- [ ] تعطيل وضع التصحيح في Flask / Disable Flask debug mode
+- [ ] إعداد خادم WSGI إنتاجي / Set up production WSGI server
+- [ ] تكوين HTTPS مع شهادة SSL صالحة / Configure HTTPS with valid SSL certificate
+- [ ] تنفيذ مصادقة من جانب الخادم / Implement server-side authentication
+- [ ] إعداد قاعدة بيانات آمنة / Set up secure database
+- [ ] إعداد النسخ الاحتياطي التلقائي / Configure automated backups
+- [ ] تكوين جدار الحماية / Configure firewall
+- [ ] مراجعة صلاحيات الملفات / Review file permissions
+- [ ] إعداد السجلات والمراقبة / Set up logging and monitoring
+- [ ] اختبار الأمان والاختراق / Perform security and penetration testing
+- [ ] مراجعة وتحديث الوثائق / Review and update documentation
+- [ ] تدريب المستخدمين على الأمان / Train users on security practices
 
 ## المساهمة / Contributing
 
