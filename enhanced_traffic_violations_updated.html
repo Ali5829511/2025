@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المخالفات المرورية المتقدم - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+
+        .header-text h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .quick-action-section {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-action-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .quick-action-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-action-content h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .quick-action-content p {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .quick-violation-btn {
+            background: white;
+            color: #ff6b6b;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .quick-violation-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            color: #ee5a24;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.pending {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .stat-card.resolved {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .stat-card.critical {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+            opacity: 0.3;
+        }
+
+        .management-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #2e8bc0;
+            padding-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e7ef;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-family: 'Tajawal', Arial, sans-serif;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #2e8bc0;
+            border-bottom-color: #2e8bc0;
+        }
+
+        .tab:hover {
+            color: #2e8bc0;
+            background: rgba(46, 139, 192, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Tajawal', Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 139, 192, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 212, 59, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(116, 192, 252, 0.4);
+        }
+
+        .form-section {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e7ef;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .filters-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e7ef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-section {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .violations-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .violations-table th {
+            background: linear-gradient(135deg, #0f3d68 0%, #2e8bc0 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .violations-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ef;
+            transition: background-color 0.3s ease;
+        }
+
+        .violations-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .status-resolved {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .status-critical {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .status-investigating {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e7ef;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #fa5252;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+            color: #0c5460;
+            border: 1px solid #b3d9ff;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .violation-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #2e8bc0;
+            transition: transform 0.3s ease;
+        }
+
+        .violation-card:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .violation-card.critical {
+            border-left-color: #ff6b6b;
+        }
+
+        .violation-card.resolved {
+            border-left-color: #51cf66;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .violations-table {
+                font-size: 14px;
+            }
+
+            .violations-table th,
+            .violations-table td {
+                padding: 10px 5px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-action-content h2 {
+                font-size: 1.5em;
+            }
+
+            .quick-violation-btn {
+                font-size: 1.1em;
+                padding: 12px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <img src="university_logo.png" alt="شعار الجامعة" class="university-logo">
+                <div class="header-text">
+                    <h1>نظام المخالفات المرورية المتقدم</h1>
+                    <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                </div>
+            </div>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- الإجراء السريع -->
+        <div class="quick-action-section">
+            <div class="quick-action-content">
+                <h2><i class="fas fa-exclamation-triangle"></i> تسجيل مخالفة مرورية سريع</h2>
+                <p>سجل المخالفات المرورية بسرعة وسهولة من خلال النظام المتطور</p>
+                <button class="quick-violation-btn" onclick="showQuickViolationForm()">
+                    <i class="fas fa-plus-circle"></i>
+                    تسجيل مخالفة جديدة
+                </button>
+            </div>
+        </div>
+
+        <!-- الإحصائيات -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle stat-icon"></i>
+                    <div class="stat-number" id="totalViolations">127</div>
+                    <div class="stat-label">إجمالي المخالفات</div>
+                </div>
+                <div class="stat-card pending">
+                    <i class="fas fa-clock stat-icon"></i>
+                    <div class="stat-number" id="pendingViolations">23</div>
+                    <div class="stat-label">مخالفات معلقة</div>
+                </div>
+                <div class="stat-card resolved">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                    <div class="stat-number" id="resolvedViolations">89</div>
+                    <div class="stat-label">مخالفات محلولة</div>
+                </div>
+                <div class="stat-card critical">
+                    <i class="fas fa-fire stat-icon"></i>
+                    <div class="stat-number" id="criticalViolations">15</div>
+                    <div class="stat-label">مخالفات حرجة</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-day stat-icon"></i>
+                    <div class="stat-number" id="todayViolations">8</div>
+                    <div class="stat-label">مخالفات اليوم</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-money-bill stat-icon"></i>
+                    <div class="stat-number" id="totalFines">45,200</div>
+                    <div class="stat-label">إجمالي الغرامات (ريال)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الرسم البياني -->
+        <div class="chart-section">
+            <div class="section-title">
+                <i class="fas fa-chart-line"></i>
+                إحصائيات المخالفات المرورية
+            </div>
+            <div class="chart-container">
+                <canvas id="violationsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- إدارة المخالفات -->
+        <div class="management-section">
+            <div class="section-title">
+                <i class="fas fa-tasks"></i>
+                إدارة المخالفات المرورية المتقدمة
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('violations-list')">
+                    <i class="fas fa-list"></i>
+                    قائمة المخالفات
+                </button>
+                <button class="tab" onclick="showTab('add-violation')">
+                    <i class="fas fa-plus"></i>
+                    تسجيل مخالفة
+                </button>
+                <button class="tab" onclick="showTab('violation-types')">
+                    <i class="fas fa-tags"></i>
+                    أنواع المخالفات
+                </button>
+                <button class="tab" onclick="showTab('reports')">
+                    <i class="fas fa-chart-bar"></i>
+                    التقارير
+                </button>
+                <button class="tab" onclick="showTab('settings')">
+                    <i class="fas fa-cog"></i>
+                    الإعدادات
+                </button>
+            </div>
+
+            <!-- قائمة المخالفات -->
+            <div id="violations-list" class="tab-content active">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="refreshViolationsList()">
+                        <i class="fas fa-sync-alt"></i>
+                        تحديث القائمة
+                    </button>
+                    <button class="btn btn-success" onclick="exportViolationsData()">
+                        <i class="fas fa-download"></i>
+                        تصدير البيانات
+                    </button>
+                    <button class="btn btn-info" onclick="showViolationsFilters()">
+                        <i class="fas fa-filter"></i>
+                        تصفية متقدمة
+                    </button>
+                    <button class="btn btn-warning" onclick="printViolationsReport()">
+                        <i class="fas fa-print"></i>
+                        طباعة التقرير
+                    </button>
+                </div>
+
+                <!-- فلاتر متقدمة -->
+                <div class="filters-section" id="violationsFiltersSection" style="display: none;">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label>حالة المخالفة:</label>
+                            <select id="filterViolationStatus">
+                                <option value="">جميع الحالات</option>
+                                <option value="معلقة">معلقة</option>
+                                <option value="محلولة">محلولة</option>
+                                <option value="حرجة">حرجة</option>
+                                <option value="قيد التحقيق">قيد التحقيق</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع المخالفة:</label>
+                            <select id="filterViolationType">
+                                <option value="">جميع الأنواع</option>
+                                <option value="تجاوز السرعة">تجاوز السرعة</option>
+                                <option value="وقوف خاطئ">وقوف خاطئ</option>
+                                <option value="عدم الالتزام بالإشارة">عدم الالتزام بالإشارة</option>
+                                <option value="قيادة متهورة">قيادة متهورة</option>
+                                <option value="عدم ربط حزام الأمان">عدم ربط حزام الأمان</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>المبنى:</label>
+                            <input type="text" id="filterViolationBuilding" placeholder="رقم المبنى">
+                        </div>
+                        <div class="form-group">
+                            <label>من تاريخ:</label>
+                            <input type="date" id="filterViolationFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label>إلى تاريخ:</label>
+                            <input type="date" id="filterViolationToDate">
+                        </div>
+                        <div class="form-group">
+                            <label>مبلغ الغرامة:</label>
+                            <select id="filterFineAmount">
+                                <option value="">جميع المبالغ</option>
+                                <option value="0-200">أقل من 200 ريال</option>
+                                <option value="200-500">200-500 ريال</option>
+                                <option value="500-1000">500-1000 ريال</option>
+                                <option value="1000+">أكثر من 1000 ريال</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="applyViolationsFilters()">
+                            <i class="fas fa-search"></i>
+                            تطبيق الفلاتر
+                        </button>
+                        <button class="btn btn-warning" onclick="clearViolationsFilters()">
+                            <i class="fas fa-times"></i>
+                            مسح الفلاتر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <input type="text" class="search-box" id="searchViolations" placeholder="البحث برقم اللوحة أو اسم المخالف أو رقم الهوية..." onkeyup="searchViolations()">
+                </div>
+
+                <table class="violations-table" id="violationsTable">
+                    <thead>
+                        <tr>
+                            <th>رقم المخالفة</th>
+                            <th>رقم اللوحة</th>
+                            <th>اسم المخالف</th>
+                            <th>رقم الهوية</th>
+                            <th>نوع المخالفة</th>
+                            <th>المبنى</th>
+                            <th>الوحدة</th>
+                            <th>تاريخ المخالفة</th>
+                            <th>مبلغ الغرامة</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="violationsTableBody">
+                        <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- تسجيل مخالفة -->
+            <div id="add-violation" class="tab-content">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    يرجى التأكد من صحة البيانات قبل تسجيل المخالفة. هذا الإجراء يتطلب توثيق دقيق.
+                </div>
+
+                <form id="addViolationForm" class="form-section">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="violationPlateNumber">رقم اللوحة *</label>
+                            <input type="text" id="violationPlateNumber" name="violationPlateNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="violatorName">اسم المخالف *</label>
+                            <input type="text" id="violatorName" name="violatorName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="violatorId">رقم الهوية *</label>
+                            <input type="text" id="violatorId" name="violatorId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="violationType">نوع المخالفة *</label>
+                            <select id="violationType" name="violationType" required>
+                                <option value="">اختر نوع المخالفة</option>
+                                <option value="تجاوز السرعة">تجاوز السرعة</option>
+                                <option value="وقوف خاطئ">وقوف خاطئ</option>
+                                <option value="عدم الالتزام بالإشارة">عدم الالتزام بالإشارة</option>
+                                <option value="قيادة متهورة">قيادة متهورة</option>
+                                <option value="عدم ربط حزام الأمان">عدم ربط حزام الأمان</option>
+                                <option value="استخدام الهاتف أثناء القيادة">استخدام الهاتف أثناء القيادة</option>
+                                <option value="عدم إعطاء الأولوية">عدم إعطاء الأولوية</option>
+                                <option value="مخالفة أخرى">مخالفة أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="violationBuilding">المبنى *</label>
+                            <input type="text" id="violationBuilding" name="violationBuilding" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="violationUnit">رقم الوحدة</label>
+                            <input type="text" id="violationUnit" name="violationUnit">
+                        </div>
+                        <div class="form-group">
+                            <label for="violationDate">تاريخ ووقت المخالفة *</label>
+                            <input type="datetime-local" id="violationDate" name="violationDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fineAmount">مبلغ الغرامة (ريال) *</label>
+                            <input type="number" id="fineAmount" name="fineAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="violationLocation">موقع المخالفة *</label>
+                            <input type="text" id="violationLocation" name="violationLocation" placeholder="مثال: موقف المبنى رقم 15" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="officerName">اسم المسؤول *</label>
+                            <input type="text" id="officerName" name="officerName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="violationDescription">وصف المخالفة</label>
+                        <textarea id="violationDescription" name="violationDescription" placeholder="وصف تفصيلي للمخالفة..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="evidenceImages">صور الأدلة</label>
+                        <input type="file" id="evidenceImages" name="evidenceImages" accept="image/*" multiple>
+                        <small style="color: #666; font-size: 14px;">يمكن رفع عدة صور كأدلة على المخالفة</small>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            تسجيل المخالفة
+                        </button>
+                        <button type="reset" class="btn btn-warning">
+                            <i class="fas fa-undo"></i>
+                            إعادة تعيين
+                        </button>
+                        <button type="button" class="btn btn-info" onclick="validateViolationData()">
+                            <i class="fas fa-search"></i>
+                            التحقق من البيانات
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- أنواع المخالفات -->
+            <div id="violation-types" class="tab-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    يمكن إدارة أنواع المخالفات والغرامات المرتبطة بها من هذا القسم
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="addViolationType()">
+                        <i class="fas fa-plus"></i>
+                        إضافة نوع مخالفة
+                    </button>
+                    <button class="btn btn-warning" onclick="editViolationTypes()">
+                        <i class="fas fa-edit"></i>
+                        تعديل الأنواع
+                    </button>
+                </div>
+
+                <div id="violationTypesContainer">
+                    <!-- سيتم ملء أنواع المخالفات بواسطة JavaScript -->
+                </div>
+            </div>
+
+            <!-- التقارير -->
+            <div id="reports" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">127</div>
+                        <div class="stat-label">إجمالي المخالفات</div>
+                    </div>
+                    <div class="stat-card resolved">
+                        <div class="stat-number">70%</div>
+                        <div class="stat-label">معدل الحل</div>
+                    </div>
+                    <div class="stat-card pending">
+                        <div class="stat-number">45,200</div>
+                        <div class="stat-label">إجمالي الغرامات (ريال)</div>
+                    </div>
+                    <div class="stat-card critical">
+                        <div class="stat-number">2.3</div>
+                        <div class="stat-label">متوسط المخالفات/يوم</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="generateMonthlyViolationsReport()">
+                        <i class="fas fa-calendar-alt"></i>
+                        تقرير شهري
+                    </button>
+                    <button class="btn btn-info" onclick="generateViolationTypesReport()">
+                        <i class="fas fa-chart-pie"></i>
+                        تقرير أنواع المخالفات
+                    </button>
+                    <button class="btn btn-success" onclick="generateFinancialViolationsReport()">
+                        <i class="fas fa-money-bill"></i>
+                        التقرير المالي
+                    </button>
+                    <button class="btn btn-warning" onclick="generateViolationsStatisticsReport()">
+                        <i class="fas fa-chart-bar"></i>
+                        تقرير الإحصائيات
+                    </button>
+                </div>
+            </div>
+
+            <!-- الإعدادات -->
+            <div id="settings" class="tab-content">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>الغرامة الافتراضية (ريال):</label>
+                        <input type="number" value="300" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>مدة سداد الغرامة (بالأيام):</label>
+                        <input type="number" value="30" min="1" max="365">
+                    </div>
+                    <div class="form-group">
+                        <label>تفعيل التنبيهات التلقائية:</label>
+                        <input type="checkbox" checked>
+                    </div>
+                    <div class="form-group">
+                        <label>إرسال تنبيه قبل انتهاء مهلة السداد (بالأيام):</label>
+                        <input type="number" value="7" min="1" max="30">
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="saveViolationsSettings()">
+                        <i class="fas fa-save"></i>
+                        حفظ الإعدادات
+                    </button>
+                    <button class="btn btn-warning" onclick="resetViolationsSettings()">
+                        <i class="fas fa-undo"></i>
+                        إعادة تعيين
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل المخالفة -->
+    <div id="violationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="violationModalTitle">تفاصيل المخالفة</h2>
+                <span class="close" onclick="closeViolationModal()">&times;</span>
+            </div>
+            <div id="violationDetails">
+                <!-- سيتم ملء التفاصيل بواسطة JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التسجيل السريع -->
+    <div id="quickViolationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">تسجيل مخالفة سريع</h2>
+                <span class="close" onclick="closeQuickViolationModal()">&times;</span>
+            </div>
+            <form id="quickViolationForm" class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="quickPlateNumber">رقم اللوحة *</label>
+                        <input type="text" id="quickPlateNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickViolationType">نوع المخالفة *</label>
+                        <select id="quickViolationType" required>
+                            <option value="">اختر نوع المخالفة</option>
+                            <option value="وقوف خاطئ">وقوف خاطئ</option>
+                            <option value="تجاوز السرعة">تجاوز السرعة</option>
+                            <option value="عدم الالتزام بالإشارة">عدم الالتزام بالإشارة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickFineAmount">مبلغ الغرامة (ريال) *</label>
+                        <input type="number" id="quickFineAmount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickLocation">موقع المخالفة *</label>
+                        <input type="text" id="quickLocation" required>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-plus"></i>
+                        تسجيل المخالفة
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="closeQuickViolationModal()">
+                        <i class="fas fa-times"></i>
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // بيانات المخالفات المرورية
+        let violationsData = [
+            {
+                id: 'V001',
+                plateNumber: 'ر ق ل 1234',
+                violatorName: 'د. أحمد محمد علي',
+                violatorId: '1234567890',
+                violationType: 'وقوف خاطئ',
+                building: '15',
+                unit: '25',
+                violationDate: '2025-01-20T10:30',
+                fineAmount: 300,
+                status: 'معلقة',
+                location: 'موقف المبنى رقم 15',
+                officerName: 'محمد أحمد',
+                description: 'وقوف في موقف المعاقين'
+            },
+            {
+                id: 'V002',
+                plateNumber: 'ر ق ل 5678',
+                violatorName: 'د. فاطمة أحمد',
+                violatorId: '9876543210',
+                violationType: 'تجاوز السرعة',
+                building: '8',
+                unit: '45',
+                violationDate: '2025-01-18T14:15',
+                fineAmount: 500,
+                status: 'محلولة',
+                location: 'شارع المبنى رقم 8',
+                officerName: 'سعد محمد',
+                description: 'تجاوز السرعة المحددة بـ 20 كم/س'
+            },
+            {
+                id: 'V003',
+                plateNumber: 'ر ق ل 9999',
+                violatorName: 'د. محمد سعد',
+                violatorId: '5555555555',
+                violationType: 'عدم الالتزام بالإشارة',
+                building: '12',
+                unit: '10',
+                violationDate: '2025-01-25T16:45',
+                fineAmount: 800,
+                status: 'حرجة',
+                location: 'تقاطع المبنى رقم 12',
+                officerName: 'علي أحمد',
+                description: 'عدم التوقف عند الإشارة الحمراء'
+            }
+        ];
+
+        let filteredViolations = [...violationsData];
+
+        // تحميل البيانات عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            loadViolationsData();
+            updateViolationsStats();
+            createViolationsChart();
+            loadViolationTypes();
+            setCurrentDateTime();
+        });
+
+        function showTab(tabName) {
+            // إخفاء جميع التبويبات
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // إزالة الفئة النشطة من جميع الأزرار
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // إظهار التبويب المحدد
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadViolationsData() {
+            const tbody = document.getElementById('violationsTableBody');
+            tbody.innerHTML = '';
+
+            filteredViolations.forEach((violation, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${violation.id}</strong></td>
+                    <td><strong>${violation.plateNumber}</strong></td>
+                    <td>${violation.violatorName}</td>
+                    <td>${violation.violatorId}</td>
+                    <td>${violation.violationType}</td>
+                    <td>${violation.building}</td>
+                    <td>${violation.unit || '-'}</td>
+                    <td>${formatDateTime(violation.violationDate)}</td>
+                    <td>${violation.fineAmount} ريال</td>
+                    <td><span class="status-badge status-${getViolationStatusClass(violation.status)}">${violation.status}</span></td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewViolationDetails(${index})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick="editViolation(${index})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${violation.status === 'معلقة' ? 
+                            `<button class="btn btn-success" onclick="resolveViolation(${index})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                                <i class="fas fa-check"></i>
+                            </button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateViolationsStats() {
+            const totalViolations = violationsData.length;
+            const pendingViolations = violationsData.filter(v => v.status === 'معلقة').length;
+            const resolvedViolations = violationsData.filter(v => v.status === 'محلولة').length;
+            const criticalViolations = violationsData.filter(v => v.status === 'حرجة').length;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayViolations = violationsData.filter(v => v.violationDate.split('T')[0] === today).length;
+            
+            const totalFines = violationsData.reduce((sum, v) => sum + v.fineAmount, 0);
+
+            document.getElementById('totalViolations').textContent = totalViolations;
+            document.getElementById('pendingViolations').textContent = pendingViolations;
+            document.getElementById('resolvedViolations').textContent = resolvedViolations;
+            document.getElementById('criticalViolations').textContent = criticalViolations;
+            document.getElementById('todayViolations').textContent = todayViolations;
+            document.getElementById('totalFines').textContent = totalFines.toLocaleString();
+        }
+
+        function getViolationStatusClass(status) {
+            switch(status) {
+                case 'معلقة': return 'pending';
+                case 'محلولة': return 'resolved';
+                case 'حرجة': return 'critical';
+                case 'قيد التحقيق': return 'investigating';
+                default: return 'pending';
+            }
+        }
+
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '-';
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('ar-SA');
+        }
+
+        function createViolationsChart() {
+            const ctx = document.getElementById('violationsChart').getContext('2d');
+            
+            const pendingCount = violationsData.filter(v => v.status === 'معلقة').length;
+            const resolvedCount = violationsData.filter(v => v.status === 'محلولة').length;
+            const criticalCount = violationsData.filter(v => v.status === 'حرجة').length;
+            const investigatingCount = violationsData.filter(v => v.status === 'قيد التحقيق').length;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['معلقة', 'محلولة', 'حرجة', 'قيد التحقيق'],
+                    datasets: [{
+                        data: [pendingCount, resolvedCount, criticalCount, investigatingCount],
+                        backgroundColor: [
+                            '#ffd43b',
+                            '#51cf66',
+                            '#ff6b6b',
+                            '#74c0fc'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setCurrentDateTime() {
+            const now = new Date();
+            const currentDateTime = now.toISOString().slice(0, 16);
+            document.getElementById('violationDate').value = currentDateTime;
+        }
+
+        function showQuickViolationForm() {
+            document.getElementById('quickViolationModal').style.display = 'block';
+        }
+
+        function closeQuickViolationModal() {
+            document.getElementById('quickViolationModal').style.display = 'none';
+        }
+
+        function viewViolationDetails(index) {
+            const violation = filteredViolations[index];
+            const detailsHtml = `
+                <div class="form-grid">
+                    <div><strong>رقم المخالفة:</strong> ${violation.id}</div>
+                    <div><strong>رقم اللوحة:</strong> ${violation.plateNumber}</div>
+                    <div><strong>اسم المخالف:</strong> ${violation.violatorName}</div>
+                    <div><strong>رقم الهوية:</strong> ${violation.violatorId}</div>
+                    <div><strong>نوع المخالفة:</strong> ${violation.violationType}</div>
+                    <div><strong>المبنى:</strong> ${violation.building}</div>
+                    <div><strong>الوحدة:</strong> ${violation.unit || '-'}</div>
+                    <div><strong>تاريخ المخالفة:</strong> ${formatDateTime(violation.violationDate)}</div>
+                    <div><strong>مبلغ الغرامة:</strong> ${violation.fineAmount} ريال</div>
+                    <div><strong>الحالة:</strong> <span class="status-badge status-${getViolationStatusClass(violation.status)}">${violation.status}</span></div>
+                    <div><strong>موقع المخالفة:</strong> ${violation.location}</div>
+                    <div><strong>المسؤول:</strong> ${violation.officerName}</div>
+                </div>
+                ${violation.description ? `<div class="form-group"><strong>وصف المخالفة:</strong><p>${violation.description}</p></div>` : ''}
+            `;
+            document.getElementById('violationDetails').innerHTML = detailsHtml;
+            document.getElementById('violationModalTitle').textContent = `تفاصيل المخالفة ${violation.id}`;
+            document.getElementById('violationModal').style.display = 'block';
+        }
+
+        function closeViolationModal() {
+            document.getElementById('violationModal').style.display = 'none';
+        }
+
+        function editViolation(index) {
+            alert(`تعديل المخالفة: ${filteredViolations[index].id}`);
+        }
+
+        function resolveViolation(index) {
+            if (confirm('هل تريد حل هذه المخالفة؟')) {
+                violationsData[index].status = 'محلولة';
+                filteredViolations = [...violationsData];
+                loadViolationsData();
+                updateViolationsStats();
+                alert('تم حل المخالفة بنجاح');
+            }
+        }
+
+        function showViolationsFilters() {
+            const filtersSection = document.getElementById('violationsFiltersSection');
+            filtersSection.style.display = filtersSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function applyViolationsFilters() {
+            const status = document.getElementById('filterViolationStatus').value;
+            const type = document.getElementById('filterViolationType').value;
+            const building = document.getElementById('filterViolationBuilding').value;
+            const fromDate = document.getElementById('filterViolationFromDate').value;
+            const toDate = document.getElementById('filterViolationToDate').value;
+
+            filteredViolations = violationsData.filter(violation => {
+                let match = true;
+                
+                if (status && violation.status !== status) match = false;
+                if (type && violation.violationType !== type) match = false;
+                if (building && violation.building !== building) match = false;
+                if (fromDate && violation.violationDate.split('T')[0] < fromDate) match = false;
+                if (toDate && violation.violationDate.split('T')[0] > toDate) match = false;
+                
+                return match;
+            });
+
+            loadViolationsData();
+            alert(`تم تطبيق الفلاتر. عدد النتائج: ${filteredViolations.length}`);
+        }
+
+        function clearViolationsFilters() {
+            document.getElementById('filterViolationStatus').value = '';
+            document.getElementById('filterViolationType').value = '';
+            document.getElementById('filterViolationBuilding').value = '';
+            document.getElementById('filterViolationFromDate').value = '';
+            document.getElementById('filterViolationToDate').value = '';
+            
+            filteredViolations = [...violationsData];
+            loadViolationsData();
+            alert('تم مسح جميع الفلاتر');
+        }
+
+        function searchViolations() {
+            const searchTerm = document.getElementById('searchViolations').value.toLowerCase();
+            const rows = document.querySelectorAll('#violationsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function validateViolationData() {
+            const plateNumber = document.getElementById('violationPlateNumber').value;
+            if (!plateNumber) {
+                alert('يرجى إدخال رقم اللوحة أولاً');
+                return;
+            }
+            
+            const existing = violationsData.find(v => v.plateNumber === plateNumber);
+            if (existing) {
+                alert(`توجد مخالفات سابقة للسيارة ${plateNumber}`);
+            } else {
+                alert(`لا توجد مخالفات سابقة للسيارة ${plateNumber}`);
+            }
+        }
+
+        function loadViolationTypes() {
+            const container = document.getElementById('violationTypesContainer');
+            const types = [
+                { name: 'وقوف خاطئ', fine: 300, description: 'الوقوف في أماكن غير مخصصة' },
+                { name: 'تجاوز السرعة', fine: 500, description: 'تجاوز السرعة المحددة' },
+                { name: 'عدم الالتزام بالإشارة', fine: 800, description: 'عدم التوقف عند الإشارة الحمراء' },
+                { name: 'قيادة متهورة', fine: 1000, description: 'القيادة بطريقة خطيرة' }
+            ];
+
+            container.innerHTML = types.map(type => `
+                <div class="violation-card">
+                    <h4>${type.name}</h4>
+                    <p><strong>الغرامة:</strong> ${type.fine} ريال</p>
+                    <p>${type.description}</p>
+                </div>
+            `).join('');
+        }
+
+        // معالجات النماذج
+        document.getElementById('addViolationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const newViolation = {
+                id: `V${String(violationsData.length + 1).padStart(3, '0')}`,
+                plateNumber: formData.get('violationPlateNumber'),
+                violatorName: formData.get('violatorName'),
+                violatorId: formData.get('violatorId'),
+                violationType: formData.get('violationType'),
+                building: formData.get('violationBuilding'),
+                unit: formData.get('violationUnit') || '',
+                violationDate: formData.get('violationDate'),
+                fineAmount: parseFloat(formData.get('fineAmount')),
+                status: 'معلقة',
+                location: formData.get('violationLocation'),
+                officerName: formData.get('officerName'),
+                description: formData.get('violationDescription') || ''
+            };
+
+            violationsData.push(newViolation);
+            filteredViolations = [...violationsData];
+            loadViolationsData();
+            updateViolationsStats();
+            alert('تم تسجيل المخالفة بنجاح!');
+            document.getElementById('addViolationForm').reset();
+            setCurrentDateTime();
+        });
+
+        document.getElementById('quickViolationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const plateNumber = document.getElementById('quickPlateNumber').value;
+            const violationType = document.getElementById('quickViolationType').value;
+            const fineAmount = parseFloat(document.getElementById('quickFineAmount').value);
+            const location = document.getElementById('quickLocation').value;
+
+            const newViolation = {
+                id: `V${String(violationsData.length + 1).padStart(3, '0')}`,
+                plateNumber: plateNumber,
+                violatorName: 'غير محدد',
+                violatorId: 'غير محدد',
+                violationType: violationType,
+                building: 'غير محدد',
+                unit: '',
+                violationDate: new Date().toISOString(),
+                fineAmount: fineAmount,
+                status: 'معلقة',
+                location: location,
+                officerName: 'مسؤول الأمن',
+                description: 'تسجيل سريع'
+            };
+
+            violationsData.push(newViolation);
+            filteredViolations = [...violationsData];
+            loadViolationsData();
+            updateViolationsStats();
+            closeQuickViolationModal();
+            alert('تم تسجيل المخالفة بنجاح!');
+            document.getElementById('quickViolationForm').reset();
+        });
+
+        // وظائف أخرى
+        function refreshViolationsList() {
+            filteredViolations = [...violationsData];
+            loadViolationsData();
+            updateViolationsStats();
+            alert('تم تحديث قائمة المخالفات!');
+        }
+
+        function exportViolationsData() {
+            alert('سيتم تصدير بيانات المخالفات المرورية');
+        }
+
+        function printViolationsReport() {
+            window.print();
+        }
+
+        function addViolationType() {
+            alert('إضافة نوع مخالفة جديد');
+        }
+
+        function editViolationTypes() {
+            alert('تعديل أنواع المخالفات');
+        }
+
+        function generateMonthlyViolationsReport() {
+            alert('سيتم إنشاء التقرير الشهري للمخالفات');
+        }
+
+        function generateViolationTypesReport() {
+            alert('سيتم إنشاء تقرير أنواع المخالفات');
+        }
+
+        function generateFinancialViolationsReport() {
+            alert('سيتم إنشاء التقرير المالي للمخالفات');
+        }
+
+        function generateViolationsStatisticsReport() {
+            alert('سيتم إنشاء تقرير إحصائيات المخالفات');
+        }
+
+        function saveViolationsSettings() {
+            alert('تم حفظ إعدادات المخالفات المرورية');
+        }
+
+        function resetViolationsSettings() {
+            alert('تم إعادة تعيين إعدادات المخالفات المرورية');
+        }
+
+        // إغلاق النوافذ عند النقر خارجها
+        window.onclick = function(event) {
+            const violationModal = document.getElementById('violationModal');
+            const quickModal = document.getElementById('quickViolationModal');
+            
+            if (event.target === violationModal) {
+                closeViolationModal();
+            }
+            if (event.target === quickModal) {
+                closeQuickViolationModal();
+            }
+        }
+
+        // تحميل البيانات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadViolationsData();
+            updateViolationsStats();
+            createViolationsChart();
+            loadRealViolationsData();
+            
+            // إضافة أزرار التعديل والحذف للجدول
+            setTimeout(() => {
+                addEditDeleteToTable('violationsTable', 'violation');
+            }, 1000);
+        });
+    </script>
+
+    <!-- تضمين نظام الصلاحيات -->
+    <script src="admin_permissions.js"></script>
+</body>
+</html>
+

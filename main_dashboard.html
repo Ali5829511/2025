@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة إسكان أعضاء هيئة التدريس</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    html, body { direction: rtl !important; }
+    body { 
+      font-family: 'Tajawal', Arial, sans-serif; 
+      background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%); 
+      margin: 0;
+    }
+    
+    .header {
+      background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+      color: #fff;
+      padding: 26px 0 20px 0;
+      margin-bottom: 36px;
+      border-radius: 0 0 32px 32px;
+      box-shadow: 0 6px 16px #2e8bc055;
+      text-align: center;
+      position: relative;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .university-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      object-fit: contain;
+      background: white;
+      padding: 5px;
+    }
+    
+    .header-text {
+      text-align: center;
+    }
+    
+    .header-title { 
+      font-size: 2.4em; 
+      font-weight: bold; 
+      margin: 0; 
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header-subtitle { 
+      margin: 5px 0 0 0; 
+      font-size: 1.25em; 
+      font-weight: 400; 
+      color: #e2eaf3; 
+    }
+    
+    .user-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+    }
+    
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .main-container {
+      max-width: 1350px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .section {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 0 14px #123C6910;
+      padding: 18px 14px 22px 14px;
+      margin-bottom: 36px;
+      width: 87%;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .section-title {
+      font-size: 1.15em;
+      font-weight: bold;
+      color: #0f3d68;
+      margin-bottom: 16px;
+      border-right: 5px solid #2e8bc0;
+      padding-right: 12px;
+      text-align: center;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .section-title i {
+      color: #2e8bc0;
+      font-size: 1.2em;
+    }
+    
+    .group-grid {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 28px 34px;
+    }
+    
+    .main-card {
+      background: #f9fbfd;
+      border-radius: 16px;
+      box-shadow: 0 0 12px #2e8bc022;
+      padding: 18px 16px 13px 16px;
+      text-align: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+      border: 2px solid #e0e7ef;
+      min-height: 135px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      width: 255px;
+      max-width: 98vw;
+    }
+    
+    .main-card:hover { 
+      box-shadow: 0 12px 30px #0f3d6840; 
+      transform: translateY(-4px) scale(1.03); 
+      border-color: #2e8bc0;
+    }
+    
+    .main-card-icon { 
+      font-size: 2.2em; 
+      margin-bottom: 7px; 
+      color: #2e8bc0;
+    }
+    
+    .main-card-title { 
+      font-weight: bold; 
+      font-size: 1.08em; 
+      color: #0f3d68; 
+      margin-bottom: 8px;
+    }
+    
+    .main-card-link {
+      display: inline-block; 
+      background: linear-gradient(90deg, #2e8bc0 70%, #0f3d68 100%); 
+      color: #fff; 
+      padding: 7px 26px; 
+      border-radius: 8px; 
+      font-size: 1em; 
+      font-weight: 700; 
+      text-decoration: none; 
+      box-shadow: 0 2px 8px #2e8bc055; 
+      border: none; 
+      margin-top: 7px;
+      transition: all 0.3s ease;
+    }
+    
+    .main-card-link:hover { 
+      background: linear-gradient(90deg, #0f3d68 70%, #2e8bc0 100%);
+      transform: translateY(-2px);
+    }
+    
+    .main-card-desc { 
+      color: #456; 
+      font-size: 0.97em; 
+      min-height: 30px;
+    }
+    
+    .stats-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2eaf3 100%);
+      border: 2px solid #2e8bc0;
+      margin-bottom: 20px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    /* التصميم الجديد للإحصائيات */
+    .main-stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card-modern {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card-modern:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .buildings-stat::before {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .faculty-stat::before {
+      background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .parking-stat::before {
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .villas-stat::before {
+      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .buildings-stat .stat-icon {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .faculty-stat .stat-icon {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      box-shadow: 0 8px 20px rgba(240, 147, 251, 0.3);
+    }
+
+    .parking-stat .stat-icon {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+    }
+
+    .villas-stat .stat-icon {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      box-shadow: 0 8px 20px rgba(67, 233, 123, 0.3);
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 1.1em;
+      color: #4a5568;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .stat-trend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9em;
+      color: #38a169;
+      font-weight: 500;
+    }
+
+    .stat-trend i {
+      font-size: 12px;
+    }
+
+    .stat-progress {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+
+    .buildings-stat .progress-bar {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .faculty-stat .progress-bar {
+      background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .parking-stat .progress-bar {
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .villas-stat .progress-bar {
+      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    /* الإحصائيات الثانوية */
+    .secondary-stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .secondary-stat-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .secondary-stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .secondary-stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+
+    .violations-stat .secondary-stat-icon {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    }
+
+    .complaints-stat .secondary-stat-icon {
+      background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    }
+
+    .security-stat .secondary-stat-icon {
+      background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+    }
+
+    .maintenance-stat .secondary-stat-icon {
+      background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%);
+    }
+
+    .secondary-stat-content {
+      flex: 1;
+    }
+
+    .secondary-stat-number {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 4px;
+    }
+
+    .secondary-stat-label {
+      font-size: 0.9em;
+      color: #4a5568;
+      font-weight: 500;
+    }
+
+    .secondary-stat-chart {
+      width: 60px;
+      height: 40px;
+    }
+
+    /* الرسم البياني الرئيسي */
+    .main-chart-container {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-top: 30px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .chart-header h3 {
+      font-size: 1.5em;
+      color: #2d3748;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .chart-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chart-btn {
+      padding: 8px 16px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      color: #4a5568;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-size: 0.9em;
+    }
+
+    .chart-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .chart-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .chart-content {
+      width: 100%;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+      transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    
+    .footer { 
+      text-align: center; 
+      color: #8a8b95; 
+      font-size: 0.98em; 
+      margin-top: 38px; 
+      margin-bottom: 8px; 
+      padding-top: 14px; 
+      border-top: 1px solid #d7dbe4;
+    }
+    
+    @media (max-width:1200px){
+      .main-container {width:99vw;}
+      .section {width:98vw;}
+      .group-grid{gap:18px;}
+    }
+    
+    @media (max-width:900px){
+      .main-container {width:100vw;}
+      .section {width:100vw; padding:12px 3px 18px 3px; min-width: 0;}
+      .group-grid{gap:12px;}
+      .main-card{padding:12px 3px; max-width:99vw;}
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .university-logo {
+        width: 60px;
+        height: 60px;
+      }
+      .header-title {
+        font-size: 1.8em;
+      }
+      .header-subtitle {
+        font-size: 1.1em;
+      }
+      .user-info, .logout-btn {
+        position: static;
+        margin: 10px;
+        display: inline-block;
+      }
+    }
+    
+    @media (max-width:600px){
+      .main-container {width:100vw;}
+      .section{width:100vw;}
+      .group-grid{flex-direction:column; align-items:center;}
+      .main-card{margin-bottom:8px; width:97vw;}
+      .section-title{text-align:center; padding-right:0;}
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="user-info" id="userInfo">
+      <i class="fas fa-user"></i>
+      <span id="userName">مدير النظام</span>
+    </div>
+    <a href="index.html" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i>
+      تسجيل الخروج
+    </a>
+    
+    <div class="header-content">
+      <img src="university_logo.png" alt="شعار الجامعة" class="university-logo">
+      <div class="header-text">
+        <div class="header-title">نظام إدارة إسكان أعضاء هيئة التدريس</div>
+        <div class="header-subtitle">جامعة الإمام محمد بن سعود الإسلامية</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <!-- الإحصائيات العامة -->
+    <div class="section stats-section">
+      <div class="section-title">
+        <i class="fas fa-chart-bar"></i>
+        الإحصائيات العامة للنظام
+      </div>
+      
+      <!-- الإحصائيات الرئيسية -->
+      <div class="main-stats-container">
+        <div class="stat-card-modern buildings-stat">
+          <div class="stat-icon">
+            <i class="fas fa-building"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number" id="buildingsCount">165</div>
+            <div class="stat-label">المباني السكنية</div>
+            <div class="stat-trend">
+              <i class="fas fa-arrow-up"></i>
+              <span>+5 هذا الشهر</span>
+            </div>
+          </div>
+          <div class="stat-progress">
+            <div class="progress-bar" style="width: 85%"></div>
+          </div>
+        </div>
+
+        <div class="stat-card-modern faculty-stat">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number" id="facultyCount">1,136</div>
+            <div class="stat-label">أعضاء هيئة التدريس</div>
+            <div class="stat-trend">
+              <i class="fas fa-arrow-up"></i>
+              <span>+12 هذا الشهر</span>
+            </div>
+          </div>
+          <div class="stat-progress">
+            <div class="progress-bar" style="width: 92%"></div>
+          </div>
+        </div>
+
+        <div class="stat-card-modern parking-stat">
+          <div class="stat-icon">
+            <i class="fas fa-car"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number" id="parkingCount">1,133</div>
+            <div class="stat-label">المواقف المتاحة</div>
+            <div class="stat-trend">
+              <i class="fas fa-minus"></i>
+              <span>مستقر</span>
+            </div>
+          </div>
+          <div class="stat-progress">
+            <div class="progress-bar" style="width: 78%"></div>
+          </div>
+        </div>
+
+        <div class="stat-card-modern villas-stat">
+          <div class="stat-icon">
+            <i class="fas fa-home"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number" id="villasCount">114</div>
+            <div class="stat-label">الفلل السكنية</div>
+            <div class="stat-trend">
+              <i class="fas fa-arrow-up"></i>
+              <span>+2 هذا الشهر</span>
+            </div>
+          </div>
+          <div class="stat-progress">
+            <div class="progress-bar" style="width: 95%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- الإحصائيات الثانوية -->
+      <div class="secondary-stats-container">
+        <div class="secondary-stat-card violations-stat">
+          <div class="secondary-stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <div class="secondary-stat-number" id="violationsCount">15</div>
+            <div class="secondary-stat-label">المخالفات المرورية</div>
+          </div>
+          <div class="secondary-stat-chart">
+            <canvas id="violationsChart" width="60" height="40"></canvas>
+          </div>
+        </div>
+
+        <div class="secondary-stat-card complaints-stat">
+          <div class="secondary-stat-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <div class="secondary-stat-number" id="complaintsCount">8</div>
+            <div class="secondary-stat-label">الشكاوى المفتوحة</div>
+          </div>
+          <div class="secondary-stat-chart">
+            <canvas id="complaintsChart" width="60" height="40"></canvas>
+          </div>
+        </div>
+
+        <div class="secondary-stat-card security-stat">
+          <div class="secondary-stat-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <div class="secondary-stat-number" id="securityCount">3</div>
+            <div class="secondary-stat-label">الوقائع الأمنية</div>
+          </div>
+          <div class="secondary-stat-chart">
+            <canvas id="securityChart" width="60" height="40"></canvas>
+          </div>
+        </div>
+
+        <div class="secondary-stat-card maintenance-stat">
+          <div class="secondary-stat-icon">
+            <i class="fas fa-tools"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <div class="secondary-stat-number" id="maintenanceCount">12</div>
+            <div class="secondary-stat-label">طلبات الصيانة</div>
+          </div>
+          <div class="secondary-stat-chart">
+            <canvas id="maintenanceChart" width="60" height="40"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- الرسم البياني الرئيسي -->
+      <div class="main-chart-container">
+        <div class="chart-header">
+          <h3>نظرة عامة على النظام</h3>
+          <div class="chart-controls">
+            <button class="chart-btn active" data-period="week">أسبوعي</button>
+            <button class="chart-btn" data-period="month">شهري</button>
+            <button class="chart-btn" data-period="year">سنوي</button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <canvas id="mainChart" width="800" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- السكن والمباني -->
+    <div class="section">
+      <div class="section-title">
+        <i class="fas fa-building"></i>
+        السكن والمباني
+      </div>
+      <div class="group-grid">
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-building"></i></div>
+          <div class="main-card-title">إدارة المباني</div>
+          <div class="main-card-desc">إضافة وتعديل بيانات المباني السكنية</div>
+          <a href="buildings_management_updated.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-home"></i></div>
+          <div class="main-card-title">إدارة الشقق</div>
+          <div class="main-card-desc">إدارة الوحدات السكنية وحالاتها</div>
+          <a href="apartments_management.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-users"></i></div>
+          <div class="main-card-title">إدارة السكان</div>
+          <div class="main-card-desc">بيانات أعضاء هيئة التدريس المقيمين</div>
+          <a href="residents_management_updated.html" class="main-card-link">فتح</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- السيارات والمواقف -->
+    <div class="section">
+      <div class="section-title">
+        <i class="fas fa-car"></i>
+        السيارات والمواقف
+      </div>
+      <div class="group-grid">
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-id-card"></i></div>
+          <div class="main-card-title">ملصقات السيارات</div>
+          <div class="main-card-desc">إدارة تصاريح السيارات</div>
+          <a href="stickers_management.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-ban"></i></div>
+          <div class="main-card-title">السيارات المكبوحة</div>
+          <div class="main-card-desc">إدارة سيارات مكبوحة في الإسكان</div>
+          <a href="immobilized_cars_management.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="main-card-title">المخالفات المرورية</div>
+          <div class="main-card-desc">تسجيل ومتابعة المخالفات</div>
+          <a href="enhanced_traffic_violations.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-parking"></i></div>
+          <div class="main-card-title">المواقف</div>
+          <div class="main-card-desc">إدارة المواقف وشكاوي وتعهدات السكان</div>
+          <a href="parking_management_linked.html" class="main-card-link">فتح</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأمن والسلامة -->
+    <div class="section">
+      <div class="section-title">
+        <i class="fas fa-shield-alt"></i>
+        الأمن والسلامة
+      </div>
+      <div class="group-grid">
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-car-crash"></i></div>
+          <div class="main-card-title">الحوادث المرورية</div>
+          <div class="main-card-desc">تسجيل ومتابعة الحوادث المرورية والتقارير</div>
+          <a href="enhanced_traffic_accidents.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="main-card-title">الوقائع الأمنية</div>
+          <div class="main-card-desc">تسجيل ومتابعة الوقائع الأمنية والتحقيقات</div>
+          <a href="security_incidents.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-video"></i></div>
+          <div class="main-card-title">مراقبة الدخول والخروج</div>
+          <div class="main-card-desc">مراقبة الكاميرات وإدارة دخول وخروج الأشخاص</div>
+          <a href="access_monitoring.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-user-shield"></i></div>
+          <div class="main-card-title">الأمن الوقائي</div>
+          <div class="main-card-desc">إجراءات الأمان والوقاية والتوعية الأمنية</div>
+          <a href="preventive_security.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-phone-alt"></i></div>
+          <div class="main-card-title">أرقام الطوارئ</div>
+          <div class="main-card-desc">أرقام الاتصال الطارئة والخدمات الأمنية</div>
+          <a href="emergency_contacts.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="main-card-title">تقارير الأمن والسلامة</div>
+          <div class="main-card-desc">تقارير شاملة وإحصائيات الأمن والسلامة</div>
+          <a href="security_reports.html" class="main-card-link">فتح</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- الشكاوى والمتابعة والتراخيص -->
+    <div class="section">
+      <div class="section-title">
+        <i class="fas fa-clipboard-list"></i>
+        الشكاوى والمتابعة والتراخيص
+      </div>
+      <div class="group-grid">
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-comment-alt"></i></div>
+          <div class="main-card-title">الشكاوى والمتابعة</div>
+          <div class="main-card-desc">إدارة الشكاوى والمتابعة</div>
+          <a href="complaints_management.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-user-friends"></i></div>
+          <div class="main-card-title">سجل الزوار</div>
+          <div class="main-card-desc">إدارة سجل الزوار</div>
+          <a href="visitors_log.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-file-alt"></i></div>
+          <div class="main-card-title">التراخيص</div>
+          <div class="main-card-desc">إدارة التصاريح المختلفة</div>
+          <a href="licenses_management.html" class="main-card-link">فتح</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- الإدارة والتقارير -->
+    <div class="section">
+      <div class="section-title">
+        <i class="fas fa-cogs"></i>
+        الإدارة والتقارير
+      </div>
+      <div class="group-grid">
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-users-cog"></i></div>
+          <div class="main-card-title">إدارة المستخدمين</div>
+          <div class="main-card-desc">إدارة المستخدمين والصلاحيات</div>
+          <a href="advanced_users_management.html" class="main-card-link">فتح</a>
+        </div>
+        <div class="main-card">
+          <div class="main-card-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="main-card-title">التقارير والإحصاءات</div>
+          <div class="main-card-desc">عرض تقارير وإحصاءات شاملة للنظام</div>
+          <a href="reports_dashboard.html" class="main-card-link">فتح</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      جميع الحقوق محفوظة © جامعة الإمام محمد بن سعود الإسلامية 2025
+    </div>
+  </div>
+
+  <script>
+    // التحقق من تسجيل الدخول
+    window.addEventListener('load', function() {
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        window.location.href = 'index.html';
+        return;
+    </div>
+
+  <!-- مكتبة Chart.js للرسوم البيانية -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    // بيانات المستخدم الحالي
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
+      username: 'admin',
+      role: 'admin'
+    };
+    
+    // تحديث معلومات المستخدم
+    document.getElementById('userName').textContent = currentUser.username === 'admin' ? 'مدير النظام' : 
+                                                     currentUser.username === 'violations_officer' ? 'مسؤول المخالفات' : 
+                                                     'مسؤول الزوار';
+    
+    // إخفاء الأقسام حسب دور المستخدم
+    if (currentUser.role === 'violations_officer') {
+      hideNonViolationsSections();
+    } else if (currentUser.role === 'visitors_officer') {
+      hideNonVisitorsSections();
+    }
+    
+    function hideNonViolationsSections() {
+      // إخفاء الأقسام غير المتعلقة بالمخالفات
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(section => {
+        const title = section.querySelector('.section-title').textContent;
+        if (!title.includes('السيارات والمواقف') && 
+            !title.includes('الإحصائيات العامة') &&
+            !title.includes('الأمن والسلامة')) {
+          section.style.display = 'none';
+        }
+      });
+    }
+    
+    function hideNonVisitorsSections() {
+      // إخفاء الأقسام غير المتعلقة بالزوار
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(section => {
+        const title = section.querySelector('.section-title').textContent;
+        if (!title.includes('الشكاوى والمتابعة') && 
+            !title.includes('الإحصائيات العامة') &&
+            !title.includes('الأمن والسلامة')) {
+          section.style.display = 'none';
+        }
+      });
+    }
+    
+    // تسجيل الخروج
+    document.querySelector('.logout-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    });
+
+    // إنشاء الرسوم البيانية التفاعلية
+    document.addEventListener('DOMContentLoaded', function() {
+      // رسم بياني للمخالفات المرورية
+      const violationsCtx = document.getElementById('violationsChart');
+      if (violationsCtx) {
+        new Chart(violationsCtx, {
+          type: 'line',
+          data: {
+            labels: ['ج', 'ف', 'م', 'أ', 'م', 'ج', 'ج'],
+            datasets: [{
+              data: [2, 4, 3, 5, 2, 3, 1],
+              borderColor: '#ff6b6b',
+              backgroundColor: 'rgba(255, 107, 107, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      // رسم بياني للشكاوى
+      const complaintsCtx = document.getElementById('complaintsChart');
+      if (complaintsCtx) {
+        new Chart(complaintsCtx, {
+          type: 'bar',
+          data: {
+            labels: ['ج', 'ف', 'م', 'أ', 'م', 'ج', 'ج'],
+            datasets: [{
+              data: [1, 2, 1, 3, 2, 1, 2],
+              backgroundColor: ['#feca57', '#ff9ff3', '#feca57', '#ff9ff3', '#feca57', '#ff9ff3', '#feca57'],
+              borderRadius: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            }
+          }
+        });
+      }
+
+      // رسم بياني للوقائع الأمنية
+      const securityCtx = document.getElementById('securityChart');
+      if (securityCtx) {
+        new Chart(securityCtx, {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              data: [1, 1, 1],
+              backgroundColor: ['#48dbfb', '#0abde3', '#006ba6'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '60%'
+          }
+        });
+      }
+
+      // رسم بياني لطلبات الصيانة
+      const maintenanceCtx = document.getElementById('maintenanceChart');
+      if (maintenanceCtx) {
+        new Chart(maintenanceCtx, {
+          type: 'line',
+          data: {
+            labels: ['ج', 'ف', 'م', 'أ', 'م', 'ج', 'ج'],
+            datasets: [{
+              data: [3, 2, 4, 3, 2, 1, 2],
+              borderColor: '#1dd1a1',
+              backgroundColor: 'rgba(29, 209, 161, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      // الرسم البياني الرئيسي
+      const mainCtx = document.getElementById('mainChart');
+      if (mainCtx) {
+        const mainChart = new Chart(mainCtx, {
+          type: 'line',
+          data: {
+            labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+            datasets: [
+              {
+                label: 'أعضاء هيئة التدريس',
+                data: [1100, 1120, 1130, 1135, 1136, 1136, 1136],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+              },
+              {
+                label: 'المخالفات المرورية',
+                data: [20, 18, 22, 19, 17, 16, 15],
+                borderColor: '#ff6b6b',
+                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+              },
+              {
+                label: 'الشكاوى',
+                data: [12, 10, 15, 11, 9, 8, 8],
+                borderColor: '#feca57',
+                backgroundColor: 'rgba(254, 202, 87, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  usePointStyle: true,
+                  padding: 20,
+                  font: { size: 12 }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 } }
+              },
+              y: {
+                grid: { color: 'rgba(0,0,0,0.1)' },
+                ticks: { font: { size: 11 } }
+              }
+            },
+            elements: {
+              point: { radius: 4, hoverRadius: 6 }
+            }
+          }
+        });
+
+        // تحديث الرسم البياني حسب الفترة المختارة
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const period = this.dataset.period;
+            let newData, newLabels;
+            
+            if (period === 'week') {
+              newLabels = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+              newData = [
+                [1136, 1136, 1136, 1136, 1136, 1136, 1136],
+                [2, 1, 3, 2, 1, 2, 4],
+                [1, 2, 1, 1, 2, 1, 0]
+              ];
+            } else if (period === 'month') {
+              newLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'];
+              newData = [
+                [1130, 1133, 1135, 1136],
+                [18, 16, 17, 15],
+                [10, 9, 8, 8]
+              ];
+            } else {
+              newLabels = ['2020', '2021', '2022', '2023', '2024', '2025'];
+              newData = [
+                [950, 1000, 1050, 1100, 1120, 1136],
+                [45, 38, 32, 28, 22, 15],
+                [25, 20, 18, 15, 12, 8]
+              ];
+            }
+            
+            mainChart.data.labels = newLabels;
+            mainChart.data.datasets[0].data = newData[0];
+            mainChart.data.datasets[1].data = newData[1];
+            mainChart.data.datasets[2].data = newData[2];
+            mainChart.update();
+          });
+        });
+      }
+
+      // تأثيرات الحركة للإحصائيات
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            
+            // تحريك شريط التقدم
+            const progressBar = entry.target.querySelector('.progress-bar');
+            if (progressBar) {
+              setTimeout(() => {
+                progressBar.style.width = progressBar.style.width;
+              }, 300);
+            }
+          }
+        });
+      }, observerOptions);
+
+      // مراقبة بطاقات الإحصائيات
+      document.querySelectorAll('.stat-card-modern, .secondary-stat-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+      });
+    });
+  </script>

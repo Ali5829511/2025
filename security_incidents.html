@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الوقائع الأمنية - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+
+        .header-text h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+        }
+
+        .stat-card.purple {
+            background: linear-gradient(135deg, #9c36b5 0%, #7c2d12 100%);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+            opacity: 0.3;
+        }
+
+        .management-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #2e8bc0;
+            padding-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e7ef;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-family: 'Tajawal', Arial, sans-serif;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #2e8bc0;
+            border-bottom-color: #2e8bc0;
+        }
+
+        .tab:hover {
+            color: #2e8bc0;
+            background: rgba(46, 139, 192, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Tajawal', Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 139, 192, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 212, 59, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(116, 192, 252, 0.4);
+        }
+
+        .filters-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e7ef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .search-section {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .incidents-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .incidents-table th {
+            background: linear-gradient(135deg, #0f3d68 0%, #2e8bc0 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .incidents-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ef;
+            transition: background-color 0.3s ease;
+        }
+
+        .incidents-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .severity-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-low {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .severity-medium {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .severity-high {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .severity-critical {
+            background: linear-gradient(135deg, #9c36b5 0%, #7c2d12 100%);
+            color: white;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-reported {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .status-investigating {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .status-resolved {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .status-closed {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .type-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .type-theft {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .type-vandalism {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .type-assault {
+            background: linear-gradient(135deg, #9c36b5 0%, #7c2d12 100%);
+            color: white;
+        }
+
+        .type-harassment {
+            background: linear-gradient(135deg, #ff8cc8 0%, #ff6b9d 100%);
+            color: white;
+        }
+
+        .type-trespassing {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .type-suspicious {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .type-other {
+            background: linear-gradient(135deg, #868e96 0%, #495057 100%);
+            color: white;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.2em;
+            color: #0f3d68;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .export-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e7ef;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e7ef;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #fa5252;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ffe0e0 0%, #ffcccc 100%);
+            color: #d63384;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+            color: #0c5460;
+            border: 1px solid #b3d9ff;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .incidents-table {
+                font-size: 14px;
+            }
+
+            .incidents-table th,
+            .incidents-table td {
+                padding: 10px 5px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <img src="university_logo.png" alt="شعار الجامعة" class="university-logo">
+                <div class="header-text">
+                    <h1>إدارة الوقائع الأمنية</h1>
+                    <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                </div>
+            </div>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- الإحصائيات الأمنية -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-shield-alt stat-icon"></i>
+                    <div class="stat-number" id="totalIncidents">24</div>
+                    <div class="stat-label">إجمالي الوقائع</div>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-exclamation-triangle stat-icon"></i>
+                    <div class="stat-number" id="activeIncidents">8</div>
+                    <div class="stat-label">وقائع نشطة</div>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-search stat-icon"></i>
+                    <div class="stat-number" id="investigatingIncidents">5</div>
+                    <div class="stat-label">قيد التحقيق</div>
+                </div>
+                <div class="stat-card success">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                    <div class="stat-number" id="resolvedIncidents">11</div>
+                    <div class="stat-label">وقائع محلولة</div>
+                </div>
+                <div class="stat-card info">
+                    <i class="fas fa-calendar-week stat-icon"></i>
+                    <div class="stat-number" id="weeklyIncidents">6</div>
+                    <div class="stat-label">وقائع هذا الأسبوع</div>
+                </div>
+                <div class="stat-card purple">
+                    <i class="fas fa-fire stat-icon"></i>
+                    <div class="stat-number" id="criticalIncidents">3</div>
+                    <div class="stat-label">وقائع حرجة</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إدارة الوقائع الأمنية -->
+        <div class="management-section">
+            <div class="section-title">
+                <i class="fas fa-shield-alt"></i>
+                إدارة الوقائع الأمنية
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('incidents-list')">
+                    <i class="fas fa-list"></i>
+                    قائمة الوقائع
+                </button>
+                <button class="tab" onclick="showTab('add-incident')">
+                    <i class="fas fa-plus"></i>
+                    تسجيل واقعة جديدة
+                </button>
+                <button class="tab" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-bar"></i>
+                    التحليلات الأمنية
+                </button>
+                <button class="tab" onclick="showTab('reports')">
+                    <i class="fas fa-file-alt"></i>
+                    التقارير الأمنية
+                </button>
+                <button class="tab" onclick="showTab('prevention')">
+                    <i class="fas fa-shield-virus"></i>
+                    الوقاية والأمان
+                </button>
+            </div>
+
+            <!-- قائمة الوقائع -->
+            <div id="incidents-list" class="tab-content active">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="refreshIncidents()">
+                        <i class="fas fa-sync-alt"></i>
+                        تحديث القائمة
+                    </button>
+                    <button class="btn btn-success" onclick="exportIncidents()">
+                        <i class="fas fa-download"></i>
+                        تصدير البيانات
+                    </button>
+                    <button class="btn btn-info" onclick="showFilters()">
+                        <i class="fas fa-filter"></i>
+                        تصفية متقدمة
+                    </button>
+                    <button class="btn btn-warning" onclick="generateSecurityReport()">
+                        <i class="fas fa-chart-line"></i>
+                        تقرير أمني سريع
+                    </button>
+                    <button class="btn btn-danger" onclick="emergencyAlert()">
+                        <i class="fas fa-bell"></i>
+                        تنبيه طارئ
+                    </button>
+                </div>
+
+                <!-- فلاتر متقدمة -->
+                <div class="filters-section" id="filtersSection" style="display: none;">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label>من تاريخ:</label>
+                            <input type="date" id="filterFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label>إلى تاريخ:</label>
+                            <input type="date" id="filterToDate">
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الواقعة:</label>
+                            <select id="filterType">
+                                <option value="">جميع الأنواع</option>
+                                <option value="theft">سرقة</option>
+                                <option value="vandalism">تخريب</option>
+                                <option value="assault">اعتداء</option>
+                                <option value="harassment">تحرش</option>
+                                <option value="trespassing">تسلل</option>
+                                <option value="suspicious">نشاط مشبوه</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>درجة الخطورة:</label>
+                            <select id="filterSeverity">
+                                <option value="">جميع الدرجات</option>
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                                <option value="critical">حرجة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الحالة:</label>
+                            <select id="filterStatus">
+                                <option value="">جميع الحالات</option>
+                                <option value="reported">مبلغ عنها</option>
+                                <option value="investigating">قيد التحقيق</option>
+                                <option value="resolved">محلولة</option>
+                                <option value="closed">مغلقة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الموقع:</label>
+                            <input type="text" id="filterLocation" placeholder="البحث بالموقع">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-search"></i>
+                            تطبيق الفلاتر
+                        </button>
+                        <button class="btn btn-warning" onclick="clearFilters()">
+                            <i class="fas fa-times"></i>
+                            مسح الفلاتر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <input type="text" class="search-box" id="searchIncidents" placeholder="البحث في الوقائع الأمنية..." onkeyup="searchIncidents()">
+                </div>
+
+                <table class="incidents-table" id="incidentsTable">
+                    <thead>
+                        <tr>
+                            <th>رقم الواقعة</th>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>الموقع</th>
+                            <th>نوع الواقعة</th>
+                            <th>الخطورة</th>
+                            <th>الحالة</th>
+                            <th>المبلغ</th>
+                            <th>المسؤول</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidentsTableBody">
+                        <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- تسجيل واقعة جديدة -->
+            <div id="add-incident" class="tab-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    يرجى ملء جميع البيانات المطلوبة بدقة. في حالة الطوارئ، اتصل بالأمن على الرقم: 999
+                </div>
+
+                <form id="incidentForm">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label for="incidentDate">تاريخ الواقعة:</label>
+                            <input type="date" id="incidentDate" name="incidentDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="incidentTime">وقت الواقعة:</label>
+                            <input type="time" id="incidentTime" name="incidentTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">موقع الواقعة:</label>
+                            <input type="text" id="location" name="location" placeholder="مثال: مبنى 12 - الطابق الثاني" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="incidentType">نوع الواقعة:</label>
+                            <select id="incidentType" name="incidentType" required>
+                                <option value="">اختر نوع الواقعة</option>
+                                <option value="theft">سرقة</option>
+                                <option value="vandalism">تخريب</option>
+                                <option value="assault">اعتداء</option>
+                                <option value="harassment">تحرش</option>
+                                <option value="trespassing">تسلل</option>
+                                <option value="suspicious">نشاط مشبوه</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="severity">درجة الخطورة:</label>
+                            <select id="severity" name="severity" required>
+                                <option value="">اختر درجة الخطورة</option>
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                                <option value="critical">حرجة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporterName">اسم المبلغ:</label>
+                            <input type="text" id="reporterName" name="reporterName" placeholder="الاسم الكامل" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporterPhone">رقم هاتف المبلغ:</label>
+                            <input type="tel" id="reporterPhone" name="reporterPhone" placeholder="05xxxxxxxx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporterEmail">البريد الإلكتروني للمبلغ:</label>
+                            <input type="email" id="reporterEmail" name="reporterEmail" placeholder="example@iu.edu.sa">
+                        </div>
+                        <div class="form-group">
+                            <label for="suspectDescription">وصف المشتبه به:</label>
+                            <input type="text" id="suspectDescription" name="suspectDescription" placeholder="الوصف الجسدي والملابس">
+                        </div>
+                        <div class="form-group">
+                            <label for="witnesses">الشهود:</label>
+                            <input type="text" id="witnesses" name="witnesses" placeholder="أسماء وأرقام الشهود">
+                        </div>
+                        <div class="form-group">
+                            <label for="policeReported">هل تم إبلاغ الشرطة؟</label>
+                            <select id="policeReported" name="policeReported">
+                                <option value="no">لا</option>
+                                <option value="yes">نعم</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="policeReportNumber">رقم البلاغ للشرطة:</label>
+                            <input type="text" id="policeReportNumber" name="policeReportNumber" placeholder="رقم البلاغ (إن وجد)">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">وصف تفصيلي للواقعة:</label>
+                        <textarea id="description" name="description" placeholder="اكتب وصفاً مفصلاً لما حدث..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evidenceDescription">الأدلة المتوفرة:</label>
+                        <textarea id="evidenceDescription" name="evidenceDescription" placeholder="وصف الأدلة المتوفرة (صور، فيديو، أشياء مفقودة، إلخ)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="immediateActions">الإجراءات الفورية المتخذة:</label>
+                        <textarea id="immediateActions" name="immediateActions" placeholder="الإجراءات التي تم اتخاذها فور اكتشاف الواقعة"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recommendedActions">الإجراءات الموصى بها:</label>
+                        <textarea id="recommendedActions" name="recommendedActions" placeholder="الإجراءات المقترحة للمتابعة"></textarea>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            حفظ الواقعة
+                        </button>
+                        <button type="reset" class="btn btn-warning">
+                            <i class="fas fa-undo"></i>
+                            إعادة تعيين
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="reportUrgent()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            بلاغ عاجل
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- التحليلات الأمنية -->
+            <div id="analytics" class="tab-content">
+                <div class="chart-container">
+                    <div class="chart-title">توزيع الوقائع حسب النوع</div>
+                    <canvas id="incidentTypeChart" width="400" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">الوقائع الشهرية</div>
+                    <canvas id="monthlyIncidentsChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card info">
+                        <div class="stat-number">3.2</div>
+                        <div class="stat-label">متوسط الوقائع الأسبوعية</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number">18</div>
+                        <div class="stat-label">وقائع هذا الشهر</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number">75%</div>
+                        <div class="stat-label">معدل الحل</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number">2.8</div>
+                        <div class="stat-label">متوسط أيام الحل</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-number">12%</div>
+                        <div class="stat-label">وقائع حرجة</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number">95%</div>
+                        <div class="stat-label">رضا المبلغين</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- التقارير الأمنية -->
+            <div id="reports" class="tab-content">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="generateDailySecurityReport()">
+                        <i class="fas fa-calendar-day"></i>
+                        تقرير أمني يومي
+                    </button>
+                    <button class="btn btn-success" onclick="generateWeeklySecurityReport()">
+                        <i class="fas fa-calendar-week"></i>
+                        تقرير أمني أسبوعي
+                    </button>
+                    <button class="btn btn-warning" onclick="generateMonthlySecurityReport()">
+                        <i class="fas fa-calendar-alt"></i>
+                        تقرير أمني شهري
+                    </button>
+                    <button class="btn btn-info" onclick="generateThreatAssessment()">
+                        <i class="fas fa-shield-alt"></i>
+                        تقييم التهديدات
+                    </button>
+                    <button class="btn btn-danger" onclick="generateIncidentTrends()">
+                        <i class="fas fa-chart-line"></i>
+                        اتجاهات الوقائع
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">18</div>
+                        <div class="stat-label">وقائع هذا الشهر</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">وقائع هذا الأسبوع</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">وقائع اليوم</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">وقائع حرجة</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number">13</div>
+                        <div class="stat-label">وقائع تم حلها</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-number">72%</div>
+                        <div class="stat-label">معدل الحل الشهري</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الوقاية والأمان -->
+            <div id="prevention" class="tab-content">
+                <div class="alert alert-success">
+                    <i class="fas fa-shield-alt"></i>
+                    نصائح الأمان والوقاية من الجرائم في الإسكان الجامعي
+                </div>
+
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-lightbulb"></i>
+                        نصائح الأمان العامة
+                    </div>
+                    <div class="filters-grid">
+                        <div class="alert alert-info">
+                            <strong>أمان الممتلكات:</strong><br>
+                            • احرص على إغلاق الأبواب والنوافذ<br>
+                            • لا تترك الأشياء الثمينة ظاهرة<br>
+                            • استخدم خزائن آمنة للوثائق المهمة
+                        </div>
+                        <div class="alert alert-warning">
+                            <strong>الأمان الشخصي:</strong><br>
+                            • تجنب السير وحيداً في الأماكن المظلمة<br>
+                            • احتفظ بأرقام الطوارئ في هاتفك<br>
+                            • أبلغ عن أي نشاط مشبوه فوراً
+                        </div>
+                        <div class="alert alert-danger">
+                            <strong>في حالة الطوارئ:</strong><br>
+                            • اتصل بالأمن: 999<br>
+                            • لا تحاول التدخل بنفسك<br>
+                            • احتفظ بالهدوء واتبع التعليمات
+                        </div>
+                    </div>
+                </div>
+
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-phone"></i>
+                        أرقام الطوارئ والاتصال
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card danger">
+                            <div class="stat-number">999</div>
+                            <div class="stat-label">الشرطة</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-number">997</div>
+                            <div class="stat-label">الإسعاف</div>
+                        </div>
+                        <div class="stat-card info">
+                            <div class="stat-number">998</div>
+                            <div class="stat-label">الدفاع المدني</div>
+                        </div>
+                        <div class="stat-card success">
+                            <div class="stat-number">1919</div>
+                            <div class="stat-label">أمن الجامعة</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="downloadSecurityGuide()">
+                        <i class="fas fa-download"></i>
+                        تحميل دليل الأمان
+                    </button>
+                    <button class="btn btn-success" onclick="requestSecurityTraining()">
+                        <i class="fas fa-graduation-cap"></i>
+                        طلب تدريب أمني
+                    </button>
+                    <button class="btn btn-info" onclick="reportSecurityConcern()">
+                        <i class="fas fa-exclamation-circle"></i>
+                        إبلاغ عن مخاوف أمنية
+                    </button>
+                    <button class="btn btn-warning" onclick="requestSecurityEscort()">
+                        <i class="fas fa-user-shield"></i>
+                        طلب مرافقة أمنية
+                    </button>
+                </div>
+            </div>
+
+            <!-- قسم التصدير -->
+            <div class="export-section">
+                <div class="section-title">
+                    <i class="fas fa-file-export"></i>
+                    تصدير البيانات
+                </div>
+                <div class="export-buttons">
+                    <button class="btn btn-primary" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        تصدير PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i>
+                        تصدير Excel
+                    </button>
+                    <button class="btn btn-info" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv"></i>
+                        تصدير CSV
+                    </button>
+                    <button class="btn btn-warning" onclick="exportSecurityStatistics()">
+                        <i class="fas fa-chart-bar"></i>
+                        تصدير الإحصائيات الأمنية
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل الواقعة -->
+    <div id="incidentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">تفاصيل الواقعة الأمنية</h2>
+                <span class="close" onclick="closeIncidentModal()">&times;</span>
+            </div>
+            <div id="incidentDetails">
+                <!-- سيتم ملء التفاصيل بواسطة JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات الوقائع الأمنية
+        let incidents = [
+            {
+                id: 1,
+                incidentNumber: 'SEC-2025-001',
+                date: '2025-01-25',
+                time: '22:30',
+                location: 'مبنى 12 - الطابق الثاني',
+                type: 'theft',
+                severity: 'medium',
+                status: 'resolved',
+                reporterName: 'د. أحمد محمد',
+                reporterPhone: '0501234567',
+                reporterEmail: 'ahmed@iu.edu.sa',
+                suspectDescription: 'شخص متوسط الطول، يرتدي ملابس داكنة',
+                witnesses: 'د. سارة علي - 0509876543',
+                policeReported: 'yes',
+                policeReportNumber: 'PR-2025-001',
+                responsible: 'مسؤول الأمن',
+                description: 'سرقة جهاز كمبيوتر محمول من مكتب أحد الأساتذة',
+                evidenceDescription: 'كاميرات المراقبة، بصمات على النافذة',
+                immediateActions: 'إغلاق المنطقة، إبلاغ الشرطة، فحص الكاميرات',
+                recommendedActions: 'تعزيز الأمان، تركيب أقفال إضافية'
+            },
+            {
+                id: 2,
+                incidentNumber: 'SEC-2025-002',
+                date: '2025-01-26',
+                time: '15:45',
+                location: 'فلة رقم 25',
+                type: 'vandalism',
+                severity: 'low',
+                status: 'investigating',
+                reporterName: 'د. محمد أحمد',
+                reporterPhone: '0502345678',
+                reporterEmail: 'mohammed@iu.edu.sa',
+                suspectDescription: 'غير معروف',
+                witnesses: '',
+                policeReported: 'no',
+                policeReportNumber: '',
+                responsible: 'مسؤول الأمن',
+                description: 'تخريب في حديقة الفلة وكسر بعض النباتات',
+                evidenceDescription: 'صور للأضرار',
+                immediateActions: 'توثيق الأضرار، تنظيف المنطقة',
+                recommendedActions: 'زيادة دوريات الأمن، تركيب إضاءة إضافية'
+            },
+            {
+                id: 3,
+                incidentNumber: 'SEC-2025-003',
+                date: '2025-01-27',
+                time: '01:15',
+                location: 'موقف المبنى الرئيسي',
+                type: 'suspicious',
+                severity: 'high',
+                status: 'reported',
+                reporterName: 'حارس الأمن',
+                reporterPhone: '0503456789',
+                reporterEmail: 'security@iu.edu.sa',
+                suspectDescription: 'شخصان يتجولان بشكل مشبوه حول السيارات',
+                witnesses: 'حارس الأمن الليلي',
+                policeReported: 'yes',
+                policeReportNumber: 'PR-2025-003',
+                responsible: 'مسؤول الأمن',
+                description: 'رصد أشخاص مشبوهين يتجولون في موقف السيارات ليلاً',
+                evidenceDescription: 'تسجيلات كاميرات المراقبة',
+                immediateActions: 'تنبيه الدوريات، زيادة المراقبة',
+                recommendedActions: 'تحسين الإضاءة، زيادة دوريات الأمن الليلية'
+            }
+        ];
+
+        let filteredIncidents = [...incidents];
+
+        // تحميل البيانات عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            loadIncidents();
+            updateStats();
+            
+            // تعيين التاريخ الحالي
+            document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('filterFromDate').value = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+            document.getElementById('filterToDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function showTab(tabName) {
+            // إخفاء جميع التبويبات
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // إزالة الفئة النشطة من جميع الأزرار
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // إظهار التبويب المحدد
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadIncidents() {
+            const tbody = document.getElementById('incidentsTableBody');
+            tbody.innerHTML = '';
+
+            filteredIncidents.forEach(incident => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${incident.incidentNumber}</strong></td>
+                    <td>${incident.date}</td>
+                    <td>${incident.time}</td>
+                    <td>${incident.location}</td>
+                    <td><span class="type-badge type-${incident.type}">${getTypeText(incident.type)}</span></td>
+                    <td><span class="severity-badge severity-${incident.severity}">${getSeverityText(incident.severity)}</span></td>
+                    <td><span class="status-badge status-${incident.status}">${getStatusText(incident.status)}</span></td>
+                    <td>${incident.reporterName}</td>
+                    <td>${incident.responsible}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewIncidentDetails(${incident.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick="editIncident(${incident.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteIncident(${incident.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalIncidents').textContent = incidents.length;
+            document.getElementById('activeIncidents').textContent = incidents.filter(i => i.status === 'reported').length;
+            document.getElementById('investigatingIncidents').textContent = incidents.filter(i => i.status === 'investigating').length;
+            document.getElementById('resolvedIncidents').textContent = incidents.filter(i => i.status === 'resolved').length;
+            
+            // إحصائيات إضافية
+            const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
+            const weeklyIncidents = incidents.filter(i => new Date(i.date) >= weekAgo).length;
+            document.getElementById('weeklyIncidents').textContent = weeklyIncidents;
+            
+            const criticalIncidents = incidents.filter(i => i.severity === 'critical').length;
+            document.getElementById('criticalIncidents').textContent = criticalIncidents;
+        }
+
+        function getTypeText(type) {
+            const types = {
+                'theft': 'سرقة',
+                'vandalism': 'تخريب',
+                'assault': 'اعتداء',
+                'harassment': 'تحرش',
+                'trespassing': 'تسلل',
+                'suspicious': 'نشاط مشبوه',
+                'other': 'أخرى'
+            };
+            return types[type] || type;
+        }
+
+        function getSeverityText(severity) {
+            const severities = {
+                'low': 'منخفضة',
+                'medium': 'متوسطة',
+                'high': 'عالية',
+                'critical': 'حرجة'
+            };
+            return severities[severity] || severity;
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'reported': 'مبلغ عنها',
+                'investigating': 'قيد التحقيق',
+                'resolved': 'محلولة',
+                'closed': 'مغلقة'
+            };
+            return statuses[status] || status;
+        }
+
+        function showFilters() {
+            const filtersSection = document.getElementById('filtersSection');
+            filtersSection.style.display = filtersSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function applyFilters() {
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+            const type = document.getElementById('filterType').value;
+            const severity = document.getElementById('filterSeverity').value;
+            const status = document.getElementById('filterStatus').value;
+            const location = document.getElementById('filterLocation').value.toLowerCase();
+
+            filteredIncidents = incidents.filter(incident => {
+                let match = true;
+                
+                if (fromDate && incident.date < fromDate) match = false;
+                if (toDate && incident.date > toDate) match = false;
+                if (type && incident.type !== type) match = false;
+                if (severity && incident.severity !== severity) match = false;
+                if (status && incident.status !== status) match = false;
+                if (location && !incident.location.toLowerCase().includes(location)) match = false;
+                
+                return match;
+            });
+
+            loadIncidents();
+            alert(`تم تطبيق الفلاتر. عدد النتائج: ${filteredIncidents.length}`);
+        }
+
+        function clearFilters() {
+            document.getElementById('filterFromDate').value = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+            document.getElementById('filterToDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterSeverity').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterLocation').value = '';
+            
+            filteredIncidents = [...incidents];
+            loadIncidents();
+            alert('تم مسح جميع الفلاتر');
+        }
+
+        function searchIncidents() {
+            const searchTerm = document.getElementById('searchIncidents').value.toLowerCase();
+            const rows = document.querySelectorAll('#incidentsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function viewIncidentDetails(incidentId) {
+            const incident = incidents.find(i => i.id === incidentId);
+            if (incident) {
+                const detailsHtml = `
+                    <div class="filters-grid">
+                        <div><strong>رقم الواقعة:</strong> ${incident.incidentNumber}</div>
+                        <div><strong>التاريخ:</strong> ${incident.date}</div>
+                        <div><strong>الوقت:</strong> ${incident.time}</div>
+                        <div><strong>الموقع:</strong> ${incident.location}</div>
+                        <div><strong>النوع:</strong> ${getTypeText(incident.type)}</div>
+                        <div><strong>الخطورة:</strong> ${getSeverityText(incident.severity)}</div>
+                        <div><strong>الحالة:</strong> ${getStatusText(incident.status)}</div>
+                        <div><strong>المبلغ:</strong> ${incident.reporterName}</div>
+                        <div><strong>هاتف المبلغ:</strong> ${incident.reporterPhone}</div>
+                        <div><strong>بريد المبلغ:</strong> ${incident.reporterEmail || 'غير محدد'}</div>
+                        <div><strong>وصف المشتبه به:</strong> ${incident.suspectDescription || 'غير متوفر'}</div>
+                        <div><strong>الشهود:</strong> ${incident.witnesses || 'لا يوجد'}</div>
+                        <div><strong>إبلاغ الشرطة:</strong> ${incident.policeReported === 'yes' ? 'نعم' : 'لا'}</div>
+                        <div><strong>رقم البلاغ:</strong> ${incident.policeReportNumber || 'لا يوجد'}</div>
+                        <div><strong>المسؤول:</strong> ${incident.responsible}</div>
+                    </div>
+                    <div class="form-group">
+                        <strong>وصف الواقعة:</strong>
+                        <p>${incident.description}</p>
+                    </div>
+                    <div class="form-group">
+                        <strong>الأدلة المتوفرة:</strong>
+                        <p>${incident.evidenceDescription}</p>
+                    </div>
+                    <div class="form-group">
+                        <strong>الإجراءات الفورية:</strong>
+                        <p>${incident.immediateActions}</p>
+                    </div>
+                    <div class="form-group">
+                        <strong>الإجراءات الموصى بها:</strong>
+                        <p>${incident.recommendedActions}</p>
+                    </div>
+                `;
+                document.getElementById('incidentDetails').innerHTML = detailsHtml;
+                document.getElementById('incidentModal').style.display = 'block';
+            }
+        }
+
+        function closeIncidentModal() {
+            document.getElementById('incidentModal').style.display = 'none';
+        }
+
+        function refreshIncidents() {
+            filteredIncidents = [...incidents];
+            loadIncidents();
+            updateStats();
+            alert('تم تحديث قائمة الوقائع الأمنية!');
+        }
+
+        function editIncident(incidentId) {
+            alert(`تعديل الواقعة رقم: ${incidentId}`);
+        }
+
+        function deleteIncident(incidentId) {
+            if (confirm('هل أنت متأكد من حذف هذه الواقعة؟')) {
+                incidents = incidents.filter(i => i.id !== incidentId);
+                filteredIncidents = filteredIncidents.filter(i => i.id !== incidentId);
+                loadIncidents();
+                updateStats();
+                alert('تم حذف الواقعة بنجاح!');
+            }
+        }
+
+        // معالج نموذج الواقعة
+        document.getElementById('incidentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const newIncident = {
+                id: Math.max(...incidents.map(i => i.id)) + 1,
+                incidentNumber: `SEC-2025-${String(incidents.length + 1).padStart(3, '0')}`,
+                date: formData.get('incidentDate'),
+                time: formData.get('incidentTime'),
+                location: formData.get('location'),
+                type: formData.get('incidentType'),
+                severity: formData.get('severity'),
+                status: 'reported',
+                reporterName: formData.get('reporterName'),
+                reporterPhone: formData.get('reporterPhone'),
+                reporterEmail: formData.get('reporterEmail'),
+                suspectDescription: formData.get('suspectDescription'),
+                witnesses: formData.get('witnesses'),
+                policeReported: formData.get('policeReported'),
+                policeReportNumber: formData.get('policeReportNumber'),
+                responsible: 'مسؤول الأمن',
+                description: formData.get('description'),
+                evidenceDescription: formData.get('evidenceDescription'),
+                immediateActions: formData.get('immediateActions'),
+                recommendedActions: formData.get('recommendedActions')
+            };
+
+            incidents.push(newIncident);
+            filteredIncidents = [...incidents];
+            loadIncidents();
+            updateStats();
+            
+            alert('تم تسجيل الواقعة الأمنية بنجاح!');
+            e.target.reset();
+            document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function reportUrgent() {
+            if (confirm('هل تريد إرسال بلاغ عاجل؟ سيتم إشعار جميع المسؤولين فوراً.')) {
+                alert('تم إرسال البلاغ العاجل. سيتم التواصل معك خلال دقائق.');
+            }
+        }
+
+        function emergencyAlert() {
+            if (confirm('هل تريد إرسال تنبيه طارئ لجميع السكان؟')) {
+                alert('تم إرسال التنبيه الطارئ لجميع السكان.');
+            }
+        }
+
+        function generateSecurityReport() {
+            alert('سيتم إنشاء التقرير الأمني السريع');
+        }
+
+        function generateDailySecurityReport() {
+            alert('سيتم إنشاء التقرير الأمني اليومي');
+        }
+
+        function generateWeeklySecurityReport() {
+            alert('سيتم إنشاء التقرير الأمني الأسبوعي');
+        }
+
+        function generateMonthlySecurityReport() {
+            alert('سيتم إنشاء التقرير الأمني الشهري');
+        }
+
+        function generateThreatAssessment() {
+            alert('سيتم إنشاء تقييم التهديدات');
+        }
+
+        function generateIncidentTrends() {
+            alert('سيتم إنشاء تقرير اتجاهات الوقائع');
+        }
+
+        // وظائف الوقاية والأمان
+        function downloadSecurityGuide() {
+            alert('سيتم تحميل دليل الأمان');
+        }
+
+        function requestSecurityTraining() {
+            alert('تم تسجيل طلب التدريب الأمني');
+        }
+
+        function reportSecurityConcern() {
+            alert('سيتم فتح نموذج الإبلاغ عن المخاوف الأمنية');
+        }
+
+        function requestSecurityEscort() {
+            alert('تم تسجيل طلب المرافقة الأمنية');
+        }
+
+        // وظائف التصدير
+        function exportToPDF() {
+            alert('سيتم تصدير البيانات إلى ملف PDF');
+        }
+
+        function exportToExcel() {
+            alert('سيتم تصدير البيانات إلى ملف Excel');
+        }
+
+        function exportToCSV() {
+            alert('سيتم تصدير البيانات إلى ملف CSV');
+        }
+
+        function exportSecurityStatistics() {
+            alert('سيتم تصدير الإحصائيات الأمنية');
+        }
+
+        function exportIncidents() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "رقم الواقعة,التاريخ,الوقت,الموقع,نوع الواقعة,الخطورة,الحالة,المبلغ,المسؤول\n"
+                + filteredIncidents.map(i => `${i.incidentNumber},${i.date},${i.time},${i.location},${getTypeText(i.type)},${getSeverityText(i.severity)},${getStatusText(i.status)},${i.reporterName},${i.responsible}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "security_incidents_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // إغلاق النافذة عند النقر خارجها
+        window.onclick = function(event) {
+            const modal = document.getElementById('incidentModal');
+            if (event.target === modal) {
+                closeIncidentModal();
+            }
+        }
+
+        // تحميل البيانات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadIncidents();
+            updateIncidentStats();
+            createIncidentChart();
+            
+            // إضافة أزرار التعديل والحذف للجدول
+            setTimeout(() => {
+                addEditDeleteToTable('incidentsTable', 'security_event');
+            }, 1000);
+        });
+    </script>
+
+    <!-- تضمين نظام الصلاحيات -->
+    <script src="admin_permissions.js"></script>
+</body>
+</html>
+

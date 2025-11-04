@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراقبة الدخول والخروج - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+
+        .header-text h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+        }
+
+        .stat-card.purple {
+            background: linear-gradient(135deg, #9c36b5 0%, #7c2d12 100%);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+            opacity: 0.3;
+        }
+
+        .management-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #2e8bc0;
+            padding-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e7ef;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-family: 'Tajawal', Arial, sans-serif;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #2e8bc0;
+            border-bottom-color: #2e8bc0;
+        }
+
+        .tab:hover {
+            color: #2e8bc0;
+            background: rgba(46, 139, 192, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Tajawal', Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 139, 192, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 212, 59, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(116, 192, 252, 0.4);
+        }
+
+        .filters-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e7ef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .search-section {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .access-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .access-table th {
+            background: linear-gradient(135deg, #0f3d68 0%, #2e8bc0 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .access-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ef;
+            transition: background-color 0.3s ease;
+        }
+
+        .access-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-inside {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .status-outside {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .status-unknown {
+            background: linear-gradient(135deg, #868e96 0%, #495057 100%);
+            color: white;
+        }
+
+        .type-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .type-resident {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+        }
+
+        .type-visitor {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .type-staff {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .type-contractor {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .type-delivery {
+            background: linear-gradient(135deg, #ff8cc8 0%, #ff6b9d 100%);
+            color: white;
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
+            border-radius: 10px;
+            border: 1px solid #51cf66;
+        }
+
+        .live-indicator {
+            width: 12px;
+            height: 12px;
+            background: #51cf66;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.2em;
+            color: #0f3d68;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .export-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e7ef;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e7ef;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #fa5252;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+            color: #0c5460;
+            border: 1px solid #b3d9ff;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .camera-feed {
+            background: #000;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-feed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #333 25%, transparent 25%), 
+                        linear-gradient(-45deg, #333 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #333 75%), 
+                        linear-gradient(-45deg, transparent 75%, #333 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            opacity: 0.1;
+        }
+
+        .camera-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .camera-status {
+            font-size: 0.9em;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .camera-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .access-table {
+                font-size: 14px;
+            }
+
+            .access-table th,
+            .access-table td {
+                padding: 10px 5px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <img src="university_logo.png" alt="شعار الجامعة" class="university-logo">
+                <div class="header-text">
+                    <h1>مراقبة الدخول والخروج</h1>
+                    <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                </div>
+            </div>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- الحالة المباشرة -->
+        <div class="live-status">
+            <div class="live-indicator"></div>
+            <strong>الحالة المباشرة:</strong>
+            <span>النظام يعمل بشكل طبيعي - آخر تحديث: <span id="lastUpdate">الآن</span></span>
+        </div>
+
+        <!-- الإحصائيات -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card success">
+                    <i class="fas fa-sign-in-alt stat-icon"></i>
+                    <div class="stat-number" id="totalInside">142</div>
+                    <div class="stat-label">داخل الإسكان</div>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-sign-out-alt stat-icon"></i>
+                    <div class="stat-number" id="totalOutside">28</div>
+                    <div class="stat-label">خارج الإسكان</div>
+                </div>
+                <div class="stat-card info">
+                    <i class="fas fa-users stat-icon"></i>
+                    <div class="stat-number" id="todayVisitors">15</div>
+                    <div class="stat-label">زوار اليوم</div>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-clock stat-icon"></i>
+                    <div class="stat-number" id="todayEntries">89</div>
+                    <div class="stat-label">دخول اليوم</div>
+                </div>
+                <div class="stat-card purple">
+                    <i class="fas fa-door-open stat-icon"></i>
+                    <div class="stat-number" id="todayExits">76</div>
+                    <div class="stat-label">خروج اليوم</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-video stat-icon"></i>
+                    <div class="stat-number" id="activeCameras">8</div>
+                    <div class="stat-label">كاميرات نشطة</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إدارة الدخول والخروج -->
+        <div class="management-section">
+            <div class="section-title">
+                <i class="fas fa-video"></i>
+                مراقبة الدخول والخروج
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('live-monitoring')">
+                    <i class="fas fa-eye"></i>
+                    المراقبة المباشرة
+                </button>
+                <button class="tab" onclick="showTab('access-log')">
+                    <i class="fas fa-list"></i>
+                    سجل الدخول والخروج
+                </button>
+                <button class="tab" onclick="showTab('visitors-management')">
+                    <i class="fas fa-user-friends"></i>
+                    إدارة الزوار
+                </button>
+                <button class="tab" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-bar"></i>
+                    التحليلات والإحصائيات
+                </button>
+                <button class="tab" onclick="showTab('settings')">
+                    <i class="fas fa-cog"></i>
+                    إعدادات النظام
+                </button>
+            </div>
+
+            <!-- المراقبة المباشرة -->
+            <div id="live-monitoring" class="tab-content active">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="refreshCameras()">
+                        <i class="fas fa-sync-alt"></i>
+                        تحديث الكاميرات
+                    </button>
+                    <button class="btn btn-success" onclick="recordSnapshot()">
+                        <i class="fas fa-camera"></i>
+                        التقاط لقطة
+                    </button>
+                    <button class="btn btn-warning" onclick="toggleRecording()">
+                        <i class="fas fa-record-vinyl"></i>
+                        بدء التسجيل
+                    </button>
+                    <button class="btn btn-info" onclick="viewFullscreen()">
+                        <i class="fas fa-expand"></i>
+                        عرض كامل
+                    </button>
+                    <button class="btn btn-danger" onclick="emergencyLockdown()">
+                        <i class="fas fa-lock"></i>
+                        إغلاق طارئ
+                    </button>
+                </div>
+
+                <div class="camera-grid">
+                    <div class="camera-feed">
+                        <i class="fas fa-video camera-icon"></i>
+                        <div class="camera-title">البوابة الرئيسية</div>
+                        <div class="camera-status">متصلة - جودة عالية</div>
+                    </div>
+                    <div class="camera-feed">
+                        <i class="fas fa-video camera-icon"></i>
+                        <div class="camera-title">مدخل المباني السكنية</div>
+                        <div class="camera-status">متصلة - جودة عالية</div>
+                    </div>
+                    <div class="camera-feed">
+                        <i class="fas fa-video camera-icon"></i>
+                        <div class="camera-title">موقف السيارات الرئيسي</div>
+                        <div class="camera-status">متصلة - جودة متوسطة</div>
+                    </div>
+                    <div class="camera-feed">
+                        <i class="fas fa-video camera-icon"></i>
+                        <div class="camera-title">مدخل الفلل</div>
+                        <div class="camera-status">متصلة - جودة عالية</div>
+                    </div>
+                    <div class="camera-feed">
+                        <i class="fas fa-video camera-icon"></i>
+                        <div class="camera-title">المدخل الخلفي</div>
+                        <div class="camera-status">متصلة - جودة عالية</div>
+                    </div>
+                    <div class="camera-feed">
+                        <i class="fas fa-video camera-icon"></i>
+                        <div class="camera-title">مدخل الخدمات</div>
+                        <div class="camera-status">متصلة - جودة متوسطة</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    جميع الكاميرات تعمل بشكل طبيعي. آخر فحص: اليوم الساعة 14:30
+                </div>
+            </div>
+
+            <!-- سجل الدخول والخروج -->
+            <div id="access-log" class="tab-content">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="refreshAccessLog()">
+                        <i class="fas fa-sync-alt"></i>
+                        تحديث السجل
+                    </button>
+                    <button class="btn btn-success" onclick="exportAccessLog()">
+                        <i class="fas fa-download"></i>
+                        تصدير السجل
+                    </button>
+                    <button class="btn btn-info" onclick="showAccessFilters()">
+                        <i class="fas fa-filter"></i>
+                        تصفية متقدمة
+                    </button>
+                    <button class="btn btn-warning" onclick="generateAccessReport()">
+                        <i class="fas fa-chart-line"></i>
+                        تقرير الدخول والخروج
+                    </button>
+                </div>
+
+                <!-- فلاتر متقدمة -->
+                <div class="filters-section" id="accessFiltersSection" style="display: none;">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label>من تاريخ:</label>
+                            <input type="date" id="accessFilterFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label>إلى تاريخ:</label>
+                            <input type="date" id="accessFilterToDate">
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الشخص:</label>
+                            <select id="accessFilterType">
+                                <option value="">جميع الأنواع</option>
+                                <option value="resident">ساكن</option>
+                                <option value="visitor">زائر</option>
+                                <option value="staff">موظف</option>
+                                <option value="contractor">مقاول</option>
+                                <option value="delivery">توصيل</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الحركة:</label>
+                            <select id="accessFilterAction">
+                                <option value="">جميع الحركات</option>
+                                <option value="entry">دخول</option>
+                                <option value="exit">خروج</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>البوابة:</label>
+                            <select id="accessFilterGate">
+                                <option value="">جميع البوابات</option>
+                                <option value="main">البوابة الرئيسية</option>
+                                <option value="secondary">البوابة الثانوية</option>
+                                <option value="service">بوابة الخدمات</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>البحث بالاسم:</label>
+                            <input type="text" id="accessFilterName" placeholder="اسم الشخص">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="applyAccessFilters()">
+                            <i class="fas fa-search"></i>
+                            تطبيق الفلاتر
+                        </button>
+                        <button class="btn btn-warning" onclick="clearAccessFilters()">
+                            <i class="fas fa-times"></i>
+                            مسح الفلاتر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <input type="text" class="search-box" id="searchAccessLog" placeholder="البحث في سجل الدخول والخروج..." onkeyup="searchAccessLog()">
+                </div>
+
+                <table class="access-table" id="accessTable">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>الاسم</th>
+                            <th>النوع</th>
+                            <th>الحركة</th>
+                            <th>البوابة</th>
+                            <th>الحالة الحالية</th>
+                            <th>ملاحظات</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accessTableBody">
+                        <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- إدارة الزوار -->
+            <div id="visitors-management" class="tab-content">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="addNewVisitor()">
+                        <i class="fas fa-user-plus"></i>
+                        تسجيل زائر جديد
+                    </button>
+                    <button class="btn btn-success" onclick="approveVisitor()">
+                        <i class="fas fa-check"></i>
+                        الموافقة على زائر
+                    </button>
+                    <button class="btn btn-warning" onclick="extendVisit()">
+                        <i class="fas fa-clock"></i>
+                        تمديد الزيارة
+                    </button>
+                    <button class="btn btn-danger" onclick="revokeAccess()">
+                        <i class="fas fa-ban"></i>
+                        إلغاء الصلاحية
+                    </button>
+                    <button class="btn btn-info" onclick="printVisitorPass()">
+                        <i class="fas fa-print"></i>
+                        طباعة تصريح
+                    </button>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    يجب الحصول على موافقة مسبقة من الساكن قبل السماح للزائر بالدخول
+                </div>
+
+                <form id="visitorForm">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label for="visitorName">اسم الزائر:</label>
+                            <input type="text" id="visitorName" name="visitorName" placeholder="الاسم الكامل" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitorId">رقم الهوية:</label>
+                            <input type="text" id="visitorId" name="visitorId" placeholder="رقم الهوية الوطنية" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitorPhone">رقم الهاتف:</label>
+                            <input type="tel" id="visitorPhone" name="visitorPhone" placeholder="05xxxxxxxx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="hostName">اسم المضيف:</label>
+                            <input type="text" id="hostName" name="hostName" placeholder="اسم الساكن المضيف" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="hostUnit">وحدة المضيف:</label>
+                            <input type="text" id="hostUnit" name="hostUnit" placeholder="رقم الفلة أو الشقة" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitPurpose">غرض الزيارة:</label>
+                            <select id="visitPurpose" name="visitPurpose" required>
+                                <option value="">اختر الغرض</option>
+                                <option value="social">زيارة اجتماعية</option>
+                                <option value="business">عمل</option>
+                                <option value="maintenance">صيانة</option>
+                                <option value="delivery">توصيل</option>
+                                <option value="medical">طبية</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitDate">تاريخ الزيارة:</label>
+                            <input type="date" id="visitDate" name="visitDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitTime">وقت الزيارة:</label>
+                            <input type="time" id="visitTime" name="visitTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitDuration">مدة الزيارة (ساعات):</label>
+                            <input type="number" id="visitDuration" name="visitDuration" min="1" max="24" value="2" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleNumber">رقم المركبة:</label>
+                            <input type="text" id="vehicleNumber" name="vehicleNumber" placeholder="رقم اللوحة (اختياري)">
+                        </div>
+                        <div class="form-group">
+                            <label for="companionCount">عدد المرافقين:</label>
+                            <input type="number" id="companionCount" name="companionCount" min="0" max="10" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="specialRequests">طلبات خاصة:</label>
+                            <select id="specialRequests" name="specialRequests">
+                                <option value="">لا يوجد</option>
+                                <option value="wheelchair">كرسي متحرك</option>
+                                <option value="parking">موقف خاص</option>
+                                <option value="escort">مرافقة أمنية</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visitNotes">ملاحظات إضافية:</label>
+                        <textarea id="visitNotes" name="visitNotes" placeholder="أي ملاحظات أو تفاصيل إضافية..."></textarea>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            تسجيل الزائر
+                        </button>
+                        <button type="reset" class="btn btn-warning">
+                            <i class="fas fa-undo"></i>
+                            إعادة تعيين
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="sendApprovalRequest()">
+                            <i class="fas fa-paper-plane"></i>
+                            إرسال طلب موافقة
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- التحليلات والإحصائيات -->
+            <div id="analytics" class="tab-content">
+                <div class="chart-container">
+                    <div class="chart-title">حركة الدخول والخروج اليومية</div>
+                    <canvas id="dailyTrafficChart" width="400" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">توزيع الزوار حسب النوع</div>
+                    <canvas id="visitorTypeChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card info">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">متوسط الدخول اليومي</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number">89%</div>
+                        <div class="stat-label">معدل الحضور</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number">2.3</div>
+                        <div class="stat-label">متوسط ساعات الزيارة</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">تنبيهات أمنية</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-number">18:30</div>
+                        <div class="stat-label">ذروة الحركة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">95%</div>
+                        <div class="stat-label">كفاءة النظام</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إعدادات النظام -->
+            <div id="settings" class="tab-content">
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-video"></i>
+                        إعدادات الكاميرات
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="configureCameras()">
+                            <i class="fas fa-cog"></i>
+                            إعداد الكاميرات
+                        </button>
+                        <button class="btn btn-success" onclick="testCameras()">
+                            <i class="fas fa-check-circle"></i>
+                            اختبار الكاميرات
+                        </button>
+                        <button class="btn btn-warning" onclick="calibrateCameras()">
+                            <i class="fas fa-adjust"></i>
+                            معايرة الكاميرات
+                        </button>
+                        <button class="btn btn-info" onclick="updateFirmware()">
+                            <i class="fas fa-download"></i>
+                            تحديث البرامج الثابتة
+                        </button>
+                    </div>
+                </div>
+
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        إعدادات الأمان
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="configureAccess()">
+                            <i class="fas fa-key"></i>
+                            إعداد الصلاحيات
+                        </button>
+                        <button class="btn btn-warning" onclick="setAlerts()">
+                            <i class="fas fa-bell"></i>
+                            إعداد التنبيهات
+                        </button>
+                        <button class="btn btn-danger" onclick="emergencySettings()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            إعدادات الطوارئ
+                        </button>
+                        <button class="btn btn-info" onclick="backupSettings()">
+                            <i class="fas fa-save"></i>
+                            نسخ احتياطي للإعدادات
+                        </button>
+                    </div>
+                </div>
+
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-clock"></i>
+                        إعدادات الوقت والتوقيت
+                    </div>
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label>ساعات العمل - من:</label>
+                            <input type="time" value="06:00">
+                        </div>
+                        <div class="form-group">
+                            <label>ساعات العمل - إلى:</label>
+                            <input type="time" value="22:00">
+                        </div>
+                        <div class="form-group">
+                            <label>مدة الزيارة القصوى (ساعات):</label>
+                            <input type="number" value="8" min="1" max="24">
+                        </div>
+                        <div class="form-group">
+                            <label>تنبيه انتهاء الزيارة (دقائق):</label>
+                            <input type="number" value="30" min="5" max="120">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم التصدير -->
+            <div class="export-section">
+                <div class="section-title">
+                    <i class="fas fa-file-export"></i>
+                    تصدير البيانات والتقارير
+                </div>
+                <div class="export-buttons">
+                    <button class="btn btn-primary" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        تصدير PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i>
+                        تصدير Excel
+                    </button>
+                    <button class="btn btn-info" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv"></i>
+                        تصدير CSV
+                    </button>
+                    <button class="btn btn-warning" onclick="exportAccessStatistics()">
+                        <i class="fas fa-chart-bar"></i>
+                        تصدير إحصائيات الدخول
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل السجل -->
+    <div id="accessModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">تفاصيل سجل الدخول والخروج</h2>
+                <span class="close" onclick="closeAccessModal()">&times;</span>
+            </div>
+            <div id="accessDetails">
+                <!-- سيتم ملء التفاصيل بواسطة JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات سجل الدخول والخروج
+        let accessLog = [
+            {
+                id: 1,
+                date: '2025-01-27',
+                time: '08:15',
+                name: 'د. أحمد محمد',
+                type: 'resident',
+                action: 'entry',
+                gate: 'main',
+                currentStatus: 'inside',
+                notes: 'دخول طبيعي',
+                idNumber: '1234567890',
+                unit: 'فلة 25'
+            },
+            {
+                id: 2,
+                date: '2025-01-27',
+                time: '09:30',
+                name: 'سارة أحمد',
+                type: 'visitor',
+                action: 'entry',
+                gate: 'main',
+                currentStatus: 'inside',
+                notes: 'زيارة اجتماعية - د. محمد علي',
+                idNumber: '9876543210',
+                unit: 'فلة 12'
+            },
+            {
+                id: 3,
+                date: '2025-01-27',
+                time: '10:45',
+                name: 'عامل الصيانة',
+                type: 'contractor',
+                action: 'entry',
+                gate: 'service',
+                currentStatus: 'inside',
+                notes: 'صيانة مكيفات - مبنى 8',
+                idNumber: '5555555555',
+                unit: 'مبنى 8'
+            },
+            {
+                id: 4,
+                date: '2025-01-27',
+                time: '12:00',
+                name: 'د. فاطمة علي',
+                type: 'resident',
+                action: 'exit',
+                gate: 'main',
+                currentStatus: 'outside',
+                notes: 'خروج للعمل',
+                idNumber: '1111111111',
+                unit: 'شقة 45'
+            },
+            {
+                id: 5,
+                date: '2025-01-27',
+                time: '14:20',
+                name: 'مندوب توصيل',
+                type: 'delivery',
+                action: 'entry',
+                gate: 'main',
+                currentStatus: 'outside',
+                notes: 'توصيل طلبات - خرج بعد 15 دقيقة',
+                idNumber: '7777777777',
+                unit: 'متعدد'
+            }
+        ];
+
+        let filteredAccessLog = [...accessLog];
+
+        // تحميل البيانات عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            loadAccessLog();
+            updateStats();
+            updateLastUpdate();
+            
+            // تعيين التاريخ الحالي
+            document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('accessFilterFromDate').value = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+            document.getElementById('accessFilterToDate').value = new Date().toISOString().split('T')[0];
+            
+            // تحديث الوقت كل دقيقة
+            setInterval(updateLastUpdate, 60000);
+        });
+
+        function showTab(tabName) {
+            // إخفاء جميع التبويبات
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // إزالة الفئة النشطة من جميع الأزرار
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // إظهار التبويب المحدد
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function updateLastUpdate() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastUpdate').textContent = timeString;
+        }
+
+        function loadAccessLog() {
+            const tbody = document.getElementById('accessTableBody');
+            tbody.innerHTML = '';
+
+            filteredAccessLog.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.date}</td>
+                    <td>${entry.time}</td>
+                    <td><strong>${entry.name}</strong></td>
+                    <td><span class="type-badge type-${entry.type}">${getTypeText(entry.type)}</span></td>
+                    <td><span class="status-badge ${entry.action === 'entry' ? 'status-inside' : 'status-outside'}">${entry.action === 'entry' ? 'دخول' : 'خروج'}</span></td>
+                    <td>${getGateText(entry.gate)}</td>
+                    <td><span class="status-badge status-${entry.currentStatus}">${entry.currentStatus === 'inside' ? 'داخل' : 'خارج'}</span></td>
+                    <td>${entry.notes}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewAccessDetails(${entry.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick="editAccessEntry(${entry.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats() {
+            // حساب الإحصائيات من البيانات
+            const insideCount = accessLog.filter(entry => entry.currentStatus === 'inside').length;
+            const outsideCount = accessLog.filter(entry => entry.currentStatus === 'outside').length;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayEntries = accessLog.filter(entry => entry.date === today && entry.action === 'entry').length;
+            const todayExits = accessLog.filter(entry => entry.date === today && entry.action === 'exit').length;
+            const todayVisitors = accessLog.filter(entry => entry.date === today && entry.type === 'visitor').length;
+
+            document.getElementById('totalInside').textContent = insideCount;
+            document.getElementById('totalOutside').textContent = outsideCount;
+            document.getElementById('todayEntries').textContent = todayEntries;
+            document.getElementById('todayExits').textContent = todayExits;
+            document.getElementById('todayVisitors').textContent = todayVisitors;
+            document.getElementById('activeCameras').textContent = '8';
+        }
+
+        function getTypeText(type) {
+            const types = {
+                'resident': 'ساكن',
+                'visitor': 'زائر',
+                'staff': 'موظف',
+                'contractor': 'مقاول',
+                'delivery': 'توصيل'
+            };
+            return types[type] || type;
+        }
+
+        function getGateText(gate) {
+            const gates = {
+                'main': 'البوابة الرئيسية',
+                'secondary': 'البوابة الثانوية',
+                'service': 'بوابة الخدمات'
+            };
+            return gates[gate] || gate;
+        }
+
+        function showAccessFilters() {
+            const filtersSection = document.getElementById('accessFiltersSection');
+            filtersSection.style.display = filtersSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function applyAccessFilters() {
+            const fromDate = document.getElementById('accessFilterFromDate').value;
+            const toDate = document.getElementById('accessFilterToDate').value;
+            const type = document.getElementById('accessFilterType').value;
+            const action = document.getElementById('accessFilterAction').value;
+            const gate = document.getElementById('accessFilterGate').value;
+            const name = document.getElementById('accessFilterName').value.toLowerCase();
+
+            filteredAccessLog = accessLog.filter(entry => {
+                let match = true;
+                
+                if (fromDate && entry.date < fromDate) match = false;
+                if (toDate && entry.date > toDate) match = false;
+                if (type && entry.type !== type) match = false;
+                if (action && entry.action !== action) match = false;
+                if (gate && entry.gate !== gate) match = false;
+                if (name && !entry.name.toLowerCase().includes(name)) match = false;
+                
+                return match;
+            });
+
+            loadAccessLog();
+            alert(`تم تطبيق الفلاتر. عدد النتائج: ${filteredAccessLog.length}`);
+        }
+
+        function clearAccessFilters() {
+            document.getElementById('accessFilterFromDate').value = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+            document.getElementById('accessFilterToDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('accessFilterType').value = '';
+            document.getElementById('accessFilterAction').value = '';
+            document.getElementById('accessFilterGate').value = '';
+            document.getElementById('accessFilterName').value = '';
+            
+            filteredAccessLog = [...accessLog];
+            loadAccessLog();
+            alert('تم مسح جميع الفلاتر');
+        }
+
+        function searchAccessLog() {
+            const searchTerm = document.getElementById('searchAccessLog').value.toLowerCase();
+            const rows = document.querySelectorAll('#accessTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function viewAccessDetails(entryId) {
+            const entry = accessLog.find(e => e.id === entryId);
+            if (entry) {
+                const detailsHtml = `
+                    <div class="filters-grid">
+                        <div><strong>التاريخ:</strong> ${entry.date}</div>
+                        <div><strong>الوقت:</strong> ${entry.time}</div>
+                        <div><strong>الاسم:</strong> ${entry.name}</div>
+                        <div><strong>رقم الهوية:</strong> ${entry.idNumber}</div>
+                        <div><strong>النوع:</strong> ${getTypeText(entry.type)}</div>
+                        <div><strong>الحركة:</strong> ${entry.action === 'entry' ? 'دخول' : 'خروج'}</div>
+                        <div><strong>البوابة:</strong> ${getGateText(entry.gate)}</div>
+                        <div><strong>الوحدة:</strong> ${entry.unit}</div>
+                        <div><strong>الحالة الحالية:</strong> ${entry.currentStatus === 'inside' ? 'داخل' : 'خارج'}</div>
+                    </div>
+                    <div class="form-group">
+                        <strong>الملاحظات:</strong>
+                        <p>${entry.notes}</p>
+                    </div>
+                `;
+                document.getElementById('accessDetails').innerHTML = detailsHtml;
+                document.getElementById('accessModal').style.display = 'block';
+            }
+        }
+
+        function closeAccessModal() {
+            document.getElementById('accessModal').style.display = 'none';
+        }
+
+        function refreshAccessLog() {
+            filteredAccessLog = [...accessLog];
+            loadAccessLog();
+            updateStats();
+            updateLastUpdate();
+            alert('تم تحديث سجل الدخول والخروج!');
+        }
+
+        function editAccessEntry(entryId) {
+            alert(`تعديل سجل الدخول رقم: ${entryId}`);
+        }
+
+        // معالج نموذج الزائر
+        document.getElementById('visitorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const newVisitor = {
+                id: Math.max(...accessLog.map(e => e.id)) + 1,
+                date: formData.get('visitDate'),
+                time: formData.get('visitTime'),
+                name: formData.get('visitorName'),
+                type: 'visitor',
+                action: 'entry',
+                gate: 'main',
+                currentStatus: 'inside',
+                notes: `زيارة ${formData.get('visitPurpose')} - ${formData.get('hostName')}`,
+                idNumber: formData.get('visitorId'),
+                unit: formData.get('hostUnit')
+            };
+
+            accessLog.push(newVisitor);
+            filteredAccessLog = [...accessLog];
+            loadAccessLog();
+            updateStats();
+            
+            alert('تم تسجيل الزائر بنجاح!');
+            e.target.reset();
+            document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function sendApprovalRequest() {
+            alert('تم إرسال طلب الموافقة للمضيف');
+        }
+
+        // وظائف المراقبة المباشرة
+        function refreshCameras() {
+            alert('تم تحديث جميع الكاميرات');
+        }
+
+        function recordSnapshot() {
+            alert('تم التقاط لقطة من جميع الكاميرات');
+        }
+
+        function toggleRecording() {
+            alert('تم بدء التسجيل');
+        }
+
+        function viewFullscreen() {
+            alert('عرض الكاميرات في وضع الشاشة الكاملة');
+        }
+
+        function emergencyLockdown() {
+            if (confirm('هل تريد تفعيل الإغلاق الطارئ؟ سيتم إغلاق جميع البوابات.')) {
+                alert('تم تفعيل الإغلاق الطارئ');
+            }
+        }
+
+        // وظائف إدارة الزوار
+        function addNewVisitor() {
+            showTab('visitors-management');
+        }
+
+        function approveVisitor() {
+            alert('تم الموافقة على الزائر');
+        }
+
+        function extendVisit() {
+            alert('تم تمديد مدة الزيارة');
+        }
+
+        function revokeAccess() {
+            if (confirm('هل تريد إلغاء صلاحية الدخول؟')) {
+                alert('تم إلغاء صلاحية الدخول');
+            }
+        }
+
+        function printVisitorPass() {
+            alert('سيتم طباعة تصريح الزائر');
+        }
+
+        // وظائف التقارير
+        function generateAccessReport() {
+            alert('سيتم إنشاء تقرير الدخول والخروج');
+        }
+
+        // وظائف الإعدادات
+        function configureCameras() {
+            alert('فتح إعدادات الكاميرات');
+        }
+
+        function testCameras() {
+            alert('اختبار جميع الكاميرات');
+        }
+
+        function calibrateCameras() {
+            alert('معايرة الكاميرات');
+        }
+
+        function updateFirmware() {
+            alert('تحديث البرامج الثابتة');
+        }
+
+        function configureAccess() {
+            alert('إعداد صلاحيات الدخول');
+        }
+
+        function setAlerts() {
+            alert('إعداد التنبيهات');
+        }
+
+        function emergencySettings() {
+            alert('إعدادات الطوارئ');
+        }
+
+        function backupSettings() {
+            alert('نسخ احتياطي للإعدادات');
+        }
+
+        // وظائف التصدير
+        function exportToPDF() {
+            alert('سيتم تصدير البيانات إلى ملف PDF');
+        }
+
+        function exportToExcel() {
+            alert('سيتم تصدير البيانات إلى ملف Excel');
+        }
+
+        function exportToCSV() {
+            alert('سيتم تصدير البيانات إلى ملف CSV');
+        }
+
+        function exportAccessStatistics() {
+            alert('سيتم تصدير إحصائيات الدخول والخروج');
+        }
+
+        function exportAccessLog() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "التاريخ,الوقت,الاسم,النوع,الحركة,البوابة,الحالة الحالية,الملاحظات\n"
+                + filteredAccessLog.map(e => `${e.date},${e.time},${e.name},${getTypeText(e.type)},${e.action === 'entry' ? 'دخول' : 'خروج'},${getGateText(e.gate)},${e.currentStatus === 'inside' ? 'داخل' : 'خارج'},${e.notes}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "access_log_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // إغلاق النافذة عند النقر خارجها
+        window.onclick = function(event) {
+            const modal = document.getElementById('accessModal');
+            if (event.target === modal) {
+                closeAccessModal();
+            }
+        }
+
+        // تحميل البيانات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAccessLog();
+            updateAccessStats();
+            createAccessChart();
+            
+            // إضافة أزرار التعديل والحذف للجدول
+            setTimeout(() => {
+                addEditDeleteToTable('accessTable', 'access_log');
+            }, 1000);
+        });
+    </script>
+
+    <!-- تضمين نظام الصلاحيات -->
+    <script src="admin_permissions.js"></script>
+</body>
+</html>
+

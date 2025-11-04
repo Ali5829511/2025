@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الحوادث المرورية المتقدمة - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+
+        .header-text h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+            opacity: 0.3;
+        }
+
+        .management-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #2e8bc0;
+            padding-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e7ef;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-family: 'Tajawal', Arial, sans-serif;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #2e8bc0;
+            border-bottom-color: #2e8bc0;
+        }
+
+        .tab:hover {
+            color: #2e8bc0;
+            background: rgba(46, 139, 192, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Tajawal', Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 139, 192, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 212, 59, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(116, 192, 252, 0.4);
+        }
+
+        .filters-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e7ef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .search-section {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #2e8bc0;
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .accidents-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .accidents-table th {
+            background: linear-gradient(135deg, #0f3d68 0%, #2e8bc0 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .accidents-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ef;
+            transition: background-color 0.3s ease;
+        }
+
+        .accidents-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .severity-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-minor {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .severity-moderate {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .severity-severe {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .status-investigating {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .status-closed {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .priority-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+            color: white;
+        }
+
+        .priority-medium {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .priority-high {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        .priority-urgent {
+            background: linear-gradient(135deg, #9c36b5 0%, #7c2d12 100%);
+            color: white;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.2em;
+            color: #0f3d68;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .export-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e7ef;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e7ef;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #fa5252;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .accidents-table {
+                font-size: 14px;
+            }
+
+            .accidents-table th,
+            .accidents-table td {
+                padding: 10px 5px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <img src="university_logo.png" alt="شعار الجامعة" class="university-logo">
+                <div class="header-text">
+                    <h1>إدارة الحوادث المرورية المتقدمة</h1>
+                    <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                </div>
+            </div>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- الإحصائيات المتقدمة -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-car-crash stat-icon"></i>
+                    <div class="stat-number" id="totalAccidents">15</div>
+                    <div class="stat-label">إجمالي الحوادث</div>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-exclamation-triangle stat-icon"></i>
+                    <div class="stat-number" id="openAccidents">4</div>
+                    <div class="stat-label">حوادث مفتوحة</div>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-search stat-icon"></i>
+                    <div class="stat-number" id="investigatingAccidents">6</div>
+                    <div class="stat-label">قيد التحقيق</div>
+                </div>
+                <div class="stat-card success">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                    <div class="stat-number" id="closedAccidents">5</div>
+                    <div class="stat-label">حوادث مغلقة</div>
+                </div>
+                <div class="stat-card info">
+                    <i class="fas fa-calendar-week stat-icon"></i>
+                    <div class="stat-number" id="weeklyAccidents">3</div>
+                    <div class="stat-label">حوادث هذا الأسبوع</div>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-fire stat-icon"></i>
+                    <div class="stat-number" id="severeAccidents">2</div>
+                    <div class="stat-label">حوادث شديدة</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إدارة الحوادث -->
+        <div class="management-section">
+            <div class="section-title">
+                <i class="fas fa-car-crash"></i>
+                إدارة الحوادث المرورية المتقدمة
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('accidents-list')">
+                    <i class="fas fa-list"></i>
+                    قائمة الحوادث
+                </button>
+                <button class="tab" onclick="showTab('add-accident')">
+                    <i class="fas fa-plus"></i>
+                    تسجيل حادث جديد
+                </button>
+                <button class="tab" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-bar"></i>
+                    التحليلات والإحصائيات
+                </button>
+                <button class="tab" onclick="showTab('reports')">
+                    <i class="fas fa-file-alt"></i>
+                    التقارير المتقدمة
+                </button>
+                <button class="tab" onclick="showTab('emergency')">
+                    <i class="fas fa-ambulance"></i>
+                    الحالات الطارئة
+                </button>
+            </div>
+
+            <!-- قائمة الحوادث -->
+            <div id="accidents-list" class="tab-content active">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="refreshAccidents()">
+                        <i class="fas fa-sync-alt"></i>
+                        تحديث القائمة
+                    </button>
+                    <button class="btn btn-success" onclick="exportAccidents()">
+                        <i class="fas fa-download"></i>
+                        تصدير البيانات
+                    </button>
+                    <button class="btn btn-info" onclick="showFilters()">
+                        <i class="fas fa-filter"></i>
+                        تصفية متقدمة
+                    </button>
+                    <button class="btn btn-warning" onclick="generateQuickReport()">
+                        <i class="fas fa-chart-line"></i>
+                        تقرير سريع
+                    </button>
+                </div>
+
+                <!-- فلاتر متقدمة -->
+                <div class="filters-section" id="filtersSection" style="display: none;">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label>من تاريخ:</label>
+                            <input type="date" id="filterFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label>إلى تاريخ:</label>
+                            <input type="date" id="filterToDate">
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الحادث:</label>
+                            <select id="filterType">
+                                <option value="">جميع الأنواع</option>
+                                <option value="collision">تصادم</option>
+                                <option value="hit-run">دهس وهروب</option>
+                                <option value="property-damage">تلف ممتلكات</option>
+                                <option value="injury">إصابة شخصية</option>
+                                <option value="fire">حريق</option>
+                                <option value="theft">سرقة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>درجة الخطورة:</label>
+                            <select id="filterSeverity">
+                                <option value="">جميع الدرجات</option>
+                                <option value="minor">بسيط</option>
+                                <option value="moderate">متوسط</option>
+                                <option value="severe">شديد</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الحالة:</label>
+                            <select id="filterStatus">
+                                <option value="">جميع الحالات</option>
+                                <option value="open">مفتوح</option>
+                                <option value="investigating">قيد التحقيق</option>
+                                <option value="closed">مغلق</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الأولوية:</label>
+                            <select id="filterPriority">
+                                <option value="">جميع الأولويات</option>
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                                <option value="urgent">عاجلة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-search"></i>
+                            تطبيق الفلاتر
+                        </button>
+                        <button class="btn btn-warning" onclick="clearFilters()">
+                            <i class="fas fa-times"></i>
+                            مسح الفلاتر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <input type="text" class="search-box" id="searchAccidents" placeholder="البحث في الحوادث..." onkeyup="searchAccidents()">
+                </div>
+
+                <table class="accidents-table" id="accidentsTable">
+                    <thead>
+                        <tr>
+                            <th>رقم الحادث</th>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>الموقع</th>
+                            <th>نوع الحادث</th>
+                            <th>الخطورة</th>
+                            <th>الأولوية</th>
+                            <th>الحالة</th>
+                            <th>المسؤول</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accidentsTableBody">
+                        <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- تسجيل حادث جديد -->
+            <div id="add-accident" class="tab-content">
+                <form id="accidentForm">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label for="accidentDate">تاريخ الحادث:</label>
+                            <input type="date" id="accidentDate" name="accidentDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="accidentTime">وقت الحادث:</label>
+                            <input type="time" id="accidentTime" name="accidentTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">موقع الحادث:</label>
+                            <input type="text" id="location" name="location" placeholder="مثال: مبنى 15 - موقف رقم 25" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="accidentType">نوع الحادث:</label>
+                            <select id="accidentType" name="accidentType" required>
+                                <option value="">اختر نوع الحادث</option>
+                                <option value="collision">تصادم</option>
+                                <option value="hit-run">دهس وهروب</option>
+                                <option value="property-damage">تلف ممتلكات</option>
+                                <option value="injury">إصابة شخصية</option>
+                                <option value="fire">حريق</option>
+                                <option value="theft">سرقة</option>
+                                <option value="vandalism">تخريب</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="severity">درجة الخطورة:</label>
+                            <select id="severity" name="severity" required>
+                                <option value="">اختر درجة الخطورة</option>
+                                <option value="minor">بسيط</option>
+                                <option value="moderate">متوسط</option>
+                                <option value="severe">شديد</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">الأولوية:</label>
+                            <select id="priority" name="priority" required>
+                                <option value="">اختر الأولوية</option>
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                                <option value="urgent">عاجلة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="involvedParties">الأطراف المتورطة:</label>
+                            <input type="text" id="involvedParties" name="involvedParties" placeholder="أسماء الأشخاص المتورطين" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="witnesses">الشهود:</label>
+                            <input type="text" id="witnesses" name="witnesses" placeholder="أسماء الشهود (إن وجدوا)">
+                        </div>
+                        <div class="form-group">
+                            <label for="policeReport">رقم محضر الشرطة:</label>
+                            <input type="text" id="policeReport" name="policeReport" placeholder="رقم المحضر (إن وجد)">
+                        </div>
+                        <div class="form-group">
+                            <label for="insuranceCompany">شركة التأمين:</label>
+                            <input type="text" id="insuranceCompany" name="insuranceCompany" placeholder="اسم شركة التأمين">
+                        </div>
+                        <div class="form-group">
+                            <label for="estimatedDamage">تقدير الأضرار (ريال):</label>
+                            <input type="number" id="estimatedDamage" name="estimatedDamage" placeholder="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="weatherConditions">الأحوال الجوية:</label>
+                            <select id="weatherConditions" name="weatherConditions">
+                                <option value="clear">صافي</option>
+                                <option value="rainy">ممطر</option>
+                                <option value="foggy">ضبابي</option>
+                                <option value="windy">عاصف</option>
+                                <option value="dusty">مغبر</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">وصف الحادث:</label>
+                        <textarea id="description" name="description" placeholder="وصف تفصيلي للحادث..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="initialActions">الإجراءات الأولية المتخذة:</label>
+                        <textarea id="initialActions" name="initialActions" placeholder="الإجراءات التي تم اتخاذها فور وقوع الحادث..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="followUpActions">إجراءات المتابعة المطلوبة:</label>
+                        <textarea id="followUpActions" name="followUpActions" placeholder="الإجراءات المطلوب اتخاذها للمتابعة..."></textarea>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            حفظ الحادث
+                        </button>
+                        <button type="reset" class="btn btn-warning">
+                            <i class="fas fa-undo"></i>
+                            إعادة تعيين
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="saveDraft()">
+                            <i class="fas fa-file-alt"></i>
+                            حفظ كمسودة
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- التحليلات والإحصائيات -->
+            <div id="analytics" class="tab-content">
+                <div class="chart-container">
+                    <div class="chart-title">توزيع الحوادث حسب النوع</div>
+                    <canvas id="accidentTypeChart" width="400" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">الحوادث الشهرية</div>
+                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card info">
+                        <div class="stat-number">2.3</div>
+                        <div class="stat-label">متوسط الحوادث الأسبوعية</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number">15,750</div>
+                        <div class="stat-label">إجمالي الأضرار (ريال)</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number">85%</div>
+                        <div class="stat-label">معدل الحل</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number">4.2</div>
+                        <div class="stat-label">متوسط أيام الحل</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- التقارير المتقدمة -->
+            <div id="reports" class="tab-content">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="generateDailyReport()">
+                        <i class="fas fa-calendar-day"></i>
+                        تقرير يومي
+                    </button>
+                    <button class="btn btn-success" onclick="generateWeeklyReport()">
+                        <i class="fas fa-calendar-week"></i>
+                        تقرير أسبوعي
+                    </button>
+                    <button class="btn btn-warning" onclick="generateMonthlyReport()">
+                        <i class="fas fa-calendar-alt"></i>
+                        تقرير شهري
+                    </button>
+                    <button class="btn btn-info" onclick="generateCustomReport()">
+                        <i class="fas fa-cog"></i>
+                        تقرير مخصص
+                    </button>
+                    <button class="btn btn-danger" onclick="generateIncidentReport()">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        تقرير الحوادث الخطيرة
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">حوادث هذا الشهر</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">حوادث هذا الأسبوع</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">حوادث اليوم</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">حوادث شديدة</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">حوادث تم حلها</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number">67%</div>
+                        <div class="stat-label">معدل الحل الشهري</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الحالات الطارئة -->
+            <div id="emergency" class="tab-content">
+                <div class="action-buttons">
+                    <button class="btn btn-danger" onclick="reportEmergency()">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        إبلاغ عن حالة طارئة
+                    </button>
+                    <button class="btn btn-warning" onclick="activateEmergencyProtocol()">
+                        <i class="fas fa-shield-alt"></i>
+                        تفعيل بروتوكول الطوارئ
+                    </button>
+                    <button class="btn btn-info" onclick="contactEmergencyServices()">
+                        <i class="fas fa-phone"></i>
+                        الاتصال بالخدمات الطارئة
+                    </button>
+                    <button class="btn btn-success" onclick="viewEmergencyContacts()">
+                        <i class="fas fa-address-book"></i>
+                        جهات الاتصال الطارئة
+                    </button>
+                </div>
+
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-ambulance"></i>
+                        أرقام الطوارئ
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card danger">
+                            <div class="stat-number">997</div>
+                            <div class="stat-label">الإسعاف</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-number">998</div>
+                            <div class="stat-label">الدفاع المدني</div>
+                        </div>
+                        <div class="stat-card info">
+                            <div class="stat-number">999</div>
+                            <div class="stat-label">الشرطة</div>
+                        </div>
+                        <div class="stat-card success">
+                            <div class="stat-number">996</div>
+                            <div class="stat-label">المرور</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="management-section">
+                    <div class="section-title">
+                        <i class="fas fa-list-alt"></i>
+                        بروتوكولات الطوارئ
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="viewFireProtocol()">
+                            <i class="fas fa-fire"></i>
+                            بروتوكول الحريق
+                        </button>
+                        <button class="btn btn-warning" onclick="viewAccidentProtocol()">
+                            <i class="fas fa-car-crash"></i>
+                            بروتوكول الحوادث
+                        </button>
+                        <button class="btn btn-danger" onclick="viewMedicalProtocol()">
+                            <i class="fas fa-heartbeat"></i>
+                            بروتوكول الطوارئ الطبية
+                        </button>
+                        <button class="btn btn-info" onclick="viewSecurityProtocol()">
+                            <i class="fas fa-shield-alt"></i>
+                            بروتوكول الأمن
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم التصدير -->
+            <div class="export-section">
+                <div class="section-title">
+                    <i class="fas fa-file-export"></i>
+                    تصدير البيانات
+                </div>
+                <div class="export-buttons">
+                    <button class="btn btn-primary" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        تصدير PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i>
+                        تصدير Excel
+                    </button>
+                    <button class="btn btn-info" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv"></i>
+                        تصدير CSV
+                    </button>
+                    <button class="btn btn-warning" onclick="exportStatistics()">
+                        <i class="fas fa-chart-bar"></i>
+                        تصدير الإحصائيات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل الحادث -->
+    <div id="accidentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">تفاصيل الحادث</h2>
+                <span class="close" onclick="closeAccidentModal()">&times;</span>
+            </div>
+            <div id="accidentDetails">
+                <!-- سيتم ملء التفاصيل بواسطة JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات الحوادث المتقدمة
+        let accidents = [
+            {
+                id: 1,
+                accidentNumber: 'ACC-2025-001',
+                date: '2025-01-25',
+                time: '14:30',
+                location: 'مبنى 15 - موقف رقم 25',
+                type: 'collision',
+                severity: 'minor',
+                priority: 'medium',
+                status: 'closed',
+                involvedParties: 'د. أحمد محمد، د. سارة علي',
+                witnesses: 'د. محمد أحمد',
+                policeReport: 'PR-2025-001',
+                insuranceCompany: 'شركة التأمين الوطنية',
+                estimatedDamage: 5000,
+                weatherConditions: 'clear',
+                responsible: 'مسؤول الأمن',
+                description: 'تصادم بسيط بين سيارتين في موقف المبنى 15',
+                initialActions: 'تم استدعاء الشرطة والتأمين',
+                followUpActions: 'متابعة مع شركة التأمين'
+            },
+            {
+                id: 2,
+                accidentNumber: 'ACC-2025-002',
+                date: '2025-01-26',
+                time: '09:15',
+                location: 'مبنى 8 - مدخل المواقف',
+                type: 'property-damage',
+                severity: 'moderate',
+                priority: 'high',
+                status: 'investigating',
+                involvedParties: 'د. محمد أحمد',
+                witnesses: '',
+                policeReport: '',
+                insuranceCompany: 'شركة سلامة للتأمين',
+                estimatedDamage: 8500,
+                weatherConditions: 'rainy',
+                responsible: 'مسؤول المخالفات',
+                description: 'تلف في ممتلكات الجامعة نتيجة حادث',
+                initialActions: 'توثيق الأضرار وتقدير التكلفة',
+                followUpActions: 'انتظار تقرير التأمين'
+            },
+            {
+                id: 3,
+                accidentNumber: 'ACC-2025-003',
+                date: '2025-01-27',
+                time: '16:45',
+                location: 'فلة رقم 45',
+                type: 'hit-run',
+                severity: 'severe',
+                priority: 'urgent',
+                status: 'open',
+                involvedParties: 'غير معروف',
+                witnesses: 'د. علي محمد',
+                policeReport: 'PR-2025-003',
+                insuranceCompany: '',
+                estimatedDamage: 15000,
+                weatherConditions: 'clear',
+                responsible: 'مسؤول الأمن',
+                description: 'حادث دهس وهروب أمام الفلة رقم 45',
+                initialActions: 'إبلاغ الشرطة فوراً',
+                followUpActions: 'متابعة التحقيق مع الشرطة'
+            }
+        ];
+
+        let filteredAccidents = [...accidents];
+
+        // تحميل البيانات عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            loadAccidents();
+            updateStats();
+            
+            // تعيين التاريخ الحالي
+            document.getElementById('accidentDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('filterFromDate').value = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+            document.getElementById('filterToDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function showTab(tabName) {
+            // إخفاء جميع التبويبات
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // إزالة الفئة النشطة من جميع الأزرار
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // إظهار التبويب المحدد
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadAccidents() {
+            const tbody = document.getElementById('accidentsTableBody');
+            tbody.innerHTML = '';
+
+            filteredAccidents.forEach(accident => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${accident.accidentNumber}</strong></td>
+                    <td>${accident.date}</td>
+                    <td>${accident.time}</td>
+                    <td>${accident.location}</td>
+                    <td>${getTypeText(accident.type)}</td>
+                    <td><span class="severity-badge severity-${accident.severity}">${getSeverityText(accident.severity)}</span></td>
+                    <td><span class="priority-badge priority-${accident.priority}">${getPriorityText(accident.priority)}</span></td>
+                    <td><span class="status-badge status-${accident.status}">${getStatusText(accident.status)}</span></td>
+                    <td>${accident.responsible}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewAccidentDetails(${accident.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick="editAccident(${accident.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteAccident(${accident.id})" style="margin: 2px; padding: 5px 10px; font-size: 12px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalAccidents').textContent = accidents.length;
+            document.getElementById('openAccidents').textContent = accidents.filter(a => a.status === 'open').length;
+            document.getElementById('investigatingAccidents').textContent = accidents.filter(a => a.status === 'investigating').length;
+            document.getElementById('closedAccidents').textContent = accidents.filter(a => a.status === 'closed').length;
+            
+            // إحصائيات إضافية
+            const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
+            const weeklyAccidents = accidents.filter(a => new Date(a.date) >= weekAgo).length;
+            document.getElementById('weeklyAccidents').textContent = weeklyAccidents;
+            
+            const severeAccidents = accidents.filter(a => a.severity === 'severe').length;
+            document.getElementById('severeAccidents').textContent = severeAccidents;
+        }
+
+        function getTypeText(type) {
+            const types = {
+                'collision': 'تصادم',
+                'hit-run': 'دهس وهروب',
+                'property-damage': 'تلف ممتلكات',
+                'injury': 'إصابة شخصية',
+                'fire': 'حريق',
+                'theft': 'سرقة',
+                'vandalism': 'تخريب',
+                'other': 'أخرى'
+            };
+            return types[type] || type;
+        }
+
+        function getSeverityText(severity) {
+            const severities = {
+                'minor': 'بسيط',
+                'moderate': 'متوسط',
+                'severe': 'شديد'
+            };
+            return severities[severity] || severity;
+        }
+
+        function getPriorityText(priority) {
+            const priorities = {
+                'low': 'منخفضة',
+                'medium': 'متوسطة',
+                'high': 'عالية',
+                'urgent': 'عاجلة'
+            };
+            return priorities[priority] || priority;
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'open': 'مفتوح',
+                'investigating': 'قيد التحقيق',
+                'closed': 'مغلق'
+            };
+            return statuses[status] || status;
+        }
+
+        function showFilters() {
+            const filtersSection = document.getElementById('filtersSection');
+            filtersSection.style.display = filtersSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function applyFilters() {
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+            const type = document.getElementById('filterType').value;
+            const severity = document.getElementById('filterSeverity').value;
+            const status = document.getElementById('filterStatus').value;
+            const priority = document.getElementById('filterPriority').value;
+
+            filteredAccidents = accidents.filter(accident => {
+                let match = true;
+                
+                if (fromDate && accident.date < fromDate) match = false;
+                if (toDate && accident.date > toDate) match = false;
+                if (type && accident.type !== type) match = false;
+                if (severity && accident.severity !== severity) match = false;
+                if (status && accident.status !== status) match = false;
+                if (priority && accident.priority !== priority) match = false;
+                
+                return match;
+            });
+
+            loadAccidents();
+            alert(`تم تطبيق الفلاتر. عدد النتائج: ${filteredAccidents.length}`);
+        }
+
+        function clearFilters() {
+            document.getElementById('filterFromDate').value = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+            document.getElementById('filterToDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterSeverity').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterPriority').value = '';
+            
+            filteredAccidents = [...accidents];
+            loadAccidents();
+            alert('تم مسح جميع الفلاتر');
+        }
+
+        function searchAccidents() {
+            const searchTerm = document.getElementById('searchAccidents').value.toLowerCase();
+            const rows = document.querySelectorAll('#accidentsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function viewAccidentDetails(accidentId) {
+            const accident = accidents.find(a => a.id === accidentId);
+            if (accident) {
+                const detailsHtml = `
+                    <div class="filters-grid">
+                        <div><strong>رقم الحادث:</strong> ${accident.accidentNumber}</div>
+                        <div><strong>التاريخ:</strong> ${accident.date}</div>
+                        <div><strong>الوقت:</strong> ${accident.time}</div>
+                        <div><strong>الموقع:</strong> ${accident.location}</div>
+                        <div><strong>النوع:</strong> ${getTypeText(accident.type)}</div>
+                        <div><strong>الخطورة:</strong> ${getSeverityText(accident.severity)}</div>
+                        <div><strong>الأولوية:</strong> ${getPriorityText(accident.priority)}</div>
+                        <div><strong>الحالة:</strong> ${getStatusText(accident.status)}</div>
+                        <div><strong>الأطراف المتورطة:</strong> ${accident.involvedParties}</div>
+                        <div><strong>الشهود:</strong> ${accident.witnesses || 'لا يوجد'}</div>
+                        <div><strong>رقم محضر الشرطة:</strong> ${accident.policeReport || 'لا يوجد'}</div>
+                        <div><strong>شركة التأمين:</strong> ${accident.insuranceCompany || 'غير محدد'}</div>
+                        <div><strong>تقدير الأضرار:</strong> ${accident.estimatedDamage} ريال</div>
+                        <div><strong>الأحوال الجوية:</strong> ${accident.weatherConditions}</div>
+                        <div><strong>المسؤول:</strong> ${accident.responsible}</div>
+                    </div>
+                    <div class="form-group">
+                        <strong>وصف الحادث:</strong>
+                        <p>${accident.description}</p>
+                    </div>
+                    <div class="form-group">
+                        <strong>الإجراءات الأولية:</strong>
+                        <p>${accident.initialActions}</p>
+                    </div>
+                    <div class="form-group">
+                        <strong>إجراءات المتابعة:</strong>
+                        <p>${accident.followUpActions}</p>
+                    </div>
+                `;
+                document.getElementById('accidentDetails').innerHTML = detailsHtml;
+                document.getElementById('accidentModal').style.display = 'block';
+            }
+        }
+
+        function closeAccidentModal() {
+            document.getElementById('accidentModal').style.display = 'none';
+        }
+
+        function refreshAccidents() {
+            filteredAccidents = [...accidents];
+            loadAccidents();
+            updateStats();
+            alert('تم تحديث قائمة الحوادث!');
+        }
+
+        function editAccident(accidentId) {
+            alert(`تعديل الحادث رقم: ${accidentId}`);
+            // هنا يمكن إضافة كود تعديل الحادث
+        }
+
+        function deleteAccident(accidentId) {
+            if (confirm('هل أنت متأكد من حذف هذا الحادث؟')) {
+                accidents = accidents.filter(a => a.id !== accidentId);
+                filteredAccidents = filteredAccidents.filter(a => a.id !== accidentId);
+                loadAccidents();
+                updateStats();
+                alert('تم حذف الحادث بنجاح!');
+            }
+        }
+
+        // معالج نموذج الحادث
+        document.getElementById('accidentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const newAccident = {
+                id: Math.max(...accidents.map(a => a.id)) + 1,
+                accidentNumber: `ACC-2025-${String(accidents.length + 1).padStart(3, '0')}`,
+                date: formData.get('accidentDate'),
+                time: formData.get('accidentTime'),
+                location: formData.get('location'),
+                type: formData.get('accidentType'),
+                severity: formData.get('severity'),
+                priority: formData.get('priority'),
+                status: 'open',
+                involvedParties: formData.get('involvedParties'),
+                witnesses: formData.get('witnesses'),
+                policeReport: formData.get('policeReport'),
+                insuranceCompany: formData.get('insuranceCompany'),
+                estimatedDamage: parseInt(formData.get('estimatedDamage')) || 0,
+                weatherConditions: formData.get('weatherConditions'),
+                responsible: 'مسؤول الأمن',
+                description: formData.get('description'),
+                initialActions: formData.get('initialActions'),
+                followUpActions: formData.get('followUpActions')
+            };
+
+            accidents.push(newAccident);
+            filteredAccidents = [...accidents];
+            loadAccidents();
+            updateStats();
+            
+            alert('تم تسجيل الحادث بنجاح!');
+            e.target.reset();
+            document.getElementById('accidentDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function saveDraft() {
+            alert('تم حفظ المسودة بنجاح!');
+        }
+
+        function generateQuickReport() {
+            alert('سيتم إنشاء التقرير السريع');
+        }
+
+        function generateDailyReport() {
+            alert('سيتم إنشاء التقرير اليومي');
+        }
+
+        function generateWeeklyReport() {
+            alert('سيتم إنشاء التقرير الأسبوعي');
+        }
+
+        function generateMonthlyReport() {
+            alert('سيتم إنشاء التقرير الشهري');
+        }
+
+        function generateCustomReport() {
+            alert('سيتم إنشاء التقرير المخصص');
+        }
+
+        function generateIncidentReport() {
+            alert('سيتم إنشاء تقرير الحوادث الخطيرة');
+        }
+
+        // وظائف الطوارئ
+        function reportEmergency() {
+            if (confirm('هل تريد الإبلاغ عن حالة طارئة؟')) {
+                alert('تم الإبلاغ عن الحالة الطارئة. سيتم التواصل معك قريباً.');
+            }
+        }
+
+        function activateEmergencyProtocol() {
+            if (confirm('هل تريد تفعيل بروتوكول الطوارئ؟')) {
+                alert('تم تفعيل بروتوكول الطوارئ. تم إشعار جميع الجهات المعنية.');
+            }
+        }
+
+        function contactEmergencyServices() {
+            alert('سيتم الاتصال بالخدمات الطارئة');
+        }
+
+        function viewEmergencyContacts() {
+            alert('عرض جهات الاتصال الطارئة');
+        }
+
+        function viewFireProtocol() {
+            alert('عرض بروتوكول الحريق');
+        }
+
+        function viewAccidentProtocol() {
+            alert('عرض بروتوكول الحوادث');
+        }
+
+        function viewMedicalProtocol() {
+            alert('عرض بروتوكول الطوارئ الطبية');
+        }
+
+        function viewSecurityProtocol() {
+            alert('عرض بروتوكول الأمن');
+        }
+
+        // وظائف التصدير
+        function exportToPDF() {
+            alert('سيتم تصدير البيانات إلى ملف PDF');
+        }
+
+        function exportToExcel() {
+            alert('سيتم تصدير البيانات إلى ملف Excel');
+        }
+
+        function exportToCSV() {
+            alert('سيتم تصدير البيانات إلى ملف CSV');
+        }
+
+        function exportStatistics() {
+            alert('سيتم تصدير الإحصائيات');
+        }
+
+        function exportAccidents() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "رقم الحادث,التاريخ,الوقت,الموقع,نوع الحادث,الخطورة,الأولوية,الحالة,المسؤول\n"
+                + filteredAccidents.map(a => `${a.accidentNumber},${a.date},${a.time},${a.location},${getTypeText(a.type)},${getSeverityText(a.severity)},${getPriorityText(a.priority)},${getStatusText(a.status)},${a.responsible}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "accidents_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // إغلاق النافذة عند النقر خارجها
+        window.onclick = function(event) {
+            const modal = document.getElementById('accidentModal');
+            if (event.target === modal) {
+                closeAccidentModal();
+            }
+        }
+
+        // تحميل البيانات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAccidents();
+            updateAccidentStats();
+            createAccidentChart();
+            
+            // إضافة أزرار التعديل والحذف للجدول
+            setTimeout(() => {
+                addEditDeleteToTable('accidentsTable', 'incident');
+            }, 1000);
+        });
+    </script>
+
+    <!-- تضمين نظام الصلاحيات -->
+    <script src="admin_permissions.js"></script>
+</body>
+</html>
+
