@@ -56,13 +56,37 @@ This will create an SQLite database with default users.
 
 ## التشغيل / Running
 
-### الخادم الجديد مع قاعدة البيانات / New Server with Database (Recommended)
+### 🚀 التشغيل السريع / Quick Start
+
+**على Linux/Mac:**
+```bash
+./run.sh
+```
+
+**على Windows:**
+```cmd
+run.bat
+```
+
+السكريبت سيقوم تلقائياً بـ:
+- فحص وتثبيت المتطلبات
+- إنشاء قاعدة البيانات إذا لم تكن موجودة
+- تشغيل الخادم
+
+The script will automatically:
+- Check and install dependencies
+- Create database if not exists
+- Start the server
+
+### التشغيل اليدوي / Manual Start
+
+**الخادم الجديد مع قاعدة البيانات / New Server with Database (Recommended):**
 
 ```bash
 python3 server.py
 ```
 
-### الخادم القديم (بدون قاعدة بيانات) / Legacy Server (No Database)
+**الخادم القديم (بدون قاعدة بيانات) / Legacy Server (No Database):**
 
 ```bash
 python3 main.py
