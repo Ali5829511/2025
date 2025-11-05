@@ -30,8 +30,8 @@ def get_report_data(report_type='all', from_date=None, to_date=None, building=No
             'from_date': from_date,
             'to_date': to_date,
             'building': building,
-            'title': 'تقرير متقدم جداً - نظام إدارة إسكان أعضاء هيئة التدريس',
-            'title_en': 'Very Advanced Report - Faculty Housing Management System',
+            'title': 'تقرير احترافي ورسمي - نظام إدارة إسكان أعضاء هيئة التدريس',
+            'title_en': 'Professional and Official Report - Faculty Housing Management System',
             'university': 'جامعة الإمام محمد بن سعود الإسلامية',
             'university_en': 'Imam Mohammad Ibn Saud Islamic University'
         },
