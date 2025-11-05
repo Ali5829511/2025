@@ -55,11 +55,19 @@ function setSafeText(element, text) {
  * تعيين محتوى HTML بشكل آمن في عنصر (استخدم بحذر)
  * 
  * @param {HTMLElement} element - The element to set HTML in
- * @param {string} html - The HTML to set (should already be sanitized)
+ * @param {string} html - The HTML to set (must be pre-sanitized and trusted)
+ * @param {boolean} escape - If true, escape the HTML (default: false for pre-sanitized content)
  */
-function setSafeHtml(element, html) {
+function setSafeHtml(element, html, escape = false) {
     if (!element) return;
-    element.innerHTML = escapeHtml(html);
+    
+    if (escape) {
+        // Escape and set as text if escape is true
+        element.textContent = html;
+    } else {
+        // Set as HTML directly (use only with trusted, pre-sanitized content)
+        element.innerHTML = html;
+    }
 }
 
 /**
@@ -179,7 +187,7 @@ function validateLicensePlate(plate) {
     // Saudi format: 3-4 digits followed by 1-3 Arabic letters
     // التنسيق السعودي: 3-4 أرقام متبوعة بـ 1-3 حروف عربية
     // Example: 1234 أ ب ج or 123 أ ب
-    const plateRegex = /^[\u0600-\u06FF\s]*\d{3,4}[\u0600-\u06FF\s]+$/;
+    const plateRegex = /^\d{3,4}[\s]*[\u0600-\u06FF\s]{1,3}$/;
     return plateRegex.test(plate) || /^\d{1,4}\s*[A-Z]{1,3}$/.test(plate);
 }
 
@@ -264,63 +272,9 @@ function showSafeAlert(message, type = 'info') {
     }, 5000);
 }
 
-// Add CSS for animations
-// إضافة CSS للحركات
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .alert {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        direction: rtl;
-        text-align: right;
-    }
-    
-    .alert-success {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-    }
-    
-    .alert-error, .alert-danger {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-    }
-    
-    .alert-warning {
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-    }
-    
-    .alert-info {
-        background-color: #d1ecf1;
-        border: 1px solid #bee5eb;
-        color: #0c5460;
-    }
-`;
-document.head.appendChild(style);
+// Note: Include security-utils.css in your HTML for alert styles
+// ملاحظة: قم بتضمين security-utils.css في HTML الخاص بك لأنماط التنبيهات
+// <link rel="stylesheet" href="security-utils.css">
 
 // Export functions for use in other scripts
 // تصدير الدوال للاستخدام في سكريبتات أخرى
