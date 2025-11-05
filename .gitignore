@@ -53,8 +53,3 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
-
-# Test files
-cookies.txt
-*.cookie
-test_*.html
