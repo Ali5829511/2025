@@ -9,6 +9,7 @@ from werkzeug.security import safe_join
 import os
 import database
 import auth
+import plate_recognizer
 from datetime import datetime
 
 # Initialize Flask app
@@ -257,6 +258,157 @@ def change_password():
             'success': False,
             'error': 'Internal server error',
             'error_ar': 'خطأ في الخادم'
+        }), 500
+
+# ==================== Plate Recognition API ====================
+
+@app.route('/api/plate-recognizer/status', methods=['GET'])
+@auth.require_auth
+def plate_recognizer_status():
+    """Get Plate Recognizer API status"""
+    try:
+        status = plate_recognizer.get_api_status()
+        return jsonify(status)
+    except Exception as e:
+        app.logger.error(f'Plate recognizer status error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في التحقق من حالة الخدمة'
+        }), 500
+
+@app.route('/api/plate-recognizer/recognize', methods=['POST'])
+@auth.require_auth
+def recognize_plate():
+    """Recognize license plate from uploaded image"""
+    try:
+        # Check if image is provided
+        if 'image' not in request.files and 'base64_image' not in request.json:
+            return jsonify({
+                'success': False,
+                'error': 'No image provided',
+                'error_ar': 'لم يتم تقديم صورة'
+            }), 400
+        
+        regions = request.form.get('regions', 'sa').split(',') if 'image' in request.files else None
+        if request.json and 'regions' in request.json:
+            regions = request.json['regions']
+        
+        # Handle file upload
+        if 'image' in request.files:
+            image_file = request.files['image']
+            
+            # Read image bytes
+            image_bytes = image_file.read()
+            
+            # Recognize plate
+            result = plate_recognizer.recognize_plate_from_bytes(image_bytes, regions)
+        
+        # Handle base64 image
+        elif request.json and 'base64_image' in request.json:
+            base64_image = request.json['base64_image']
+            result = plate_recognizer.recognize_plate_from_base64(base64_image, regions)
+        
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid request',
+                'error_ar': 'طلب غير صالح'
+            }), 400
+        
+        # If recognition was successful, log it and check against database
+        if result.get('success') and result.get('results'):
+            for plate_data in result['results']:
+                plate_number = plate_data['plate']
+                confidence = plate_data['confidence']
+                
+                # Find vehicle in database
+                vehicle = plate_recognizer.find_vehicle_by_plate(plate_number)
+                
+                # Log recognition
+                vehicle_id = vehicle['id'] if vehicle else None
+                plate_recognizer.log_plate_recognition(
+                    request.user['id'],
+                    plate_number,
+                    confidence,
+                    vehicle_id
+                )
+                
+                # Add vehicle info to result
+                plate_data['vehicle_info'] = vehicle
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            'Plate recognition performed',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'Plate recognition error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تمييز اللوحة'
+        }), 500
+
+@app.route('/api/plate-recognizer/history', methods=['GET'])
+@auth.require_auth
+def plate_recognition_history():
+    """Get plate recognition history"""
+    try:
+        # Get query parameters
+        limit = request.args.get('limit', 50, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get recognition history with user and vehicle info
+        cursor.execute('''
+            SELECT 
+                p.*,
+                u.username,
+                u.name as user_name,
+                v.plate_number as registered_plate,
+                v.make,
+                v.model,
+                r.name as owner_name,
+                r.unit_number
+            FROM plate_recognition_log p
+            LEFT JOIN users u ON p.user_id = u.id
+            LEFT JOIN vehicles v ON p.vehicle_id = v.id
+            LEFT JOIN residents r ON v.owner_id = r.id
+            ORDER BY p.recognized_at DESC
+            LIMIT ? OFFSET ?
+        ''', (limit, offset))
+        
+        rows = cursor.fetchall()
+        
+        # Get total count
+        cursor.execute('SELECT COUNT(*) FROM plate_recognition_log')
+        total = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        history = [dict(row) for row in rows]
+        
+        return jsonify({
+            'success': True,
+            'history': history,
+            'total': total,
+            'limit': limit,
+            'offset': offset
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Plate recognition history error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في جلب سجل التمييز'
         }), 500
 
 # ==================== Static File Serving ====================
