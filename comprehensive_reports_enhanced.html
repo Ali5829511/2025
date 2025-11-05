@@ -1192,15 +1192,115 @@
         }
 
         function exportToPDF() {
-            alert('تصدير التقرير إلى PDF');
+            alert('تصدير PDF سيكون متاحاً قريباً. يرجى استخدام زر الطباعة.');
         }
 
         function exportToExcel() {
-            alert('تصدير التقرير إلى Excel');
+            // Get filter values
+            const reportType = document.getElementById('reportType')?.value || 'all';
+            const fromDate = document.getElementById('fromDate')?.value || '';
+            const toDate = document.getElementById('toDate')?.value || '';
+            const building = document.getElementById('buildingFilter')?.value || '';
+            
+            // Build URL with parameters
+            const params = new URLSearchParams({
+                type: reportType,
+                from_date: fromDate,
+                to_date: toDate,
+                building: building
+            });
+            
+            // Show loading message
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+            btn.disabled = true;
+            
+            // Download file
+            fetch(`/api/reports/export/excel?${params}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('فشل في تصدير التقرير');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `تقرير_شامل_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    // Show success message
+                    alert('تم تصدير التقرير إلى Excel بنجاح');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء تصدير التقرير: ' + error.message);
+                })
+                .finally(() => {
+                    // Restore button
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
         }
 
         function exportToWord() {
-            alert('تصدير التقرير إلى Word');
+            // Get filter values
+            const reportType = document.getElementById('reportType')?.value || 'all';
+            const fromDate = document.getElementById('fromDate')?.value || '';
+            const toDate = document.getElementById('toDate')?.value || '';
+            const building = document.getElementById('buildingFilter')?.value || '';
+            
+            // Build URL with parameters
+            const params = new URLSearchParams({
+                type: reportType,
+                from_date: fromDate,
+                to_date: toDate,
+                building: building
+            });
+            
+            // Show loading message
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+            btn.disabled = true;
+            
+            // Download file
+            fetch(`/api/reports/export/word?${params}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('فشل في تصدير التقرير');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `تقرير_شامل_${new Date().toISOString().slice(0, 10)}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    // Show success message
+                    alert('تم تصدير التقرير إلى Word بنجاح');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء تصدير التقرير: ' + error.message);
+                })
+                .finally(() => {
+                    // Restore button
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
         }
 
         // تهيئة الصفحة

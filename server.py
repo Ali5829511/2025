@@ -3,12 +3,13 @@ Main Flask server for Faculty Housing Management System
 خادم Flask الرئيسي لنظام إدارة إسكان أعضاء هيئة التدريس
 """
 
-from flask import Flask, request, jsonify, send_from_directory, make_response, abort
+from flask import Flask, request, jsonify, send_from_directory, make_response, abort, send_file
 from flask_cors import CORS
 from werkzeug.security import safe_join
 import os
 import database
 import auth
+import reports_generator
 from datetime import datetime
 
 # Initialize Flask app
@@ -277,6 +278,80 @@ def serve_static(filename):
         abort(404)
     
     return send_from_directory('.', filename)
+
+# ==================== Report Export Routes ====================
+
+@app.route('/api/reports/export/excel', methods=['GET'])
+def export_excel():
+    """Export report to Excel"""
+    try:
+        report_type = request.args.get('type', 'all')
+        from_date = request.args.get('from_date')
+        to_date = request.args.get('to_date')
+        building = request.args.get('building')
+        
+        # Generate report
+        output = reports_generator.generate_excel_report(
+            report_type=report_type,
+            from_date=from_date,
+            to_date=to_date,
+            building=building
+        )
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'تقرير_شامل_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        app.logger.error(f'Excel export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to generate Excel report',
+            'error_ar': 'فشل في إنشاء تقرير Excel'
+        }), 500
+
+@app.route('/api/reports/export/word', methods=['GET'])
+def export_word():
+    """Export report to Word"""
+    try:
+        report_type = request.args.get('type', 'all')
+        from_date = request.args.get('from_date')
+        to_date = request.args.get('to_date')
+        building = request.args.get('building')
+        
+        # Generate report
+        output = reports_generator.generate_word_report(
+            report_type=report_type,
+            from_date=from_date,
+            to_date=to_date,
+            building=building
+        )
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'تقرير_شامل_{timestamp}.docx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        app.logger.error(f'Word export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to generate Word report',
+            'error_ar': 'فشل في إنشاء تقرير Word'
+        }), 500
 
 # ==================== Health Check ====================
 
