@@ -14,6 +14,7 @@ A comprehensive system for managing faculty housing at Imam Mohammad Ibn Saud Is
 - 🔒 إدارة الأمن والوقائع الأمنية / Security Incidents Management
 - 📝 إدارة الشكاوى والزوار / Complaints and Visitors Management
 - 📊 تقارير شاملة وإحصائيات / Comprehensive Reports and Statistics
+- ✅ **تقرير التحقق الشامل من النظام** - مراجعة جميع الصفحات والبيانات مع علامات ⚠️ للصفحات الفارغة / **Comprehensive System Validation Report** - Review all pages and data with ⚠️ markers for empty pages
 - 👮 صلاحيات متعددة للمستخدمين / Multi-level User Permissions
 - 📷 **تمييز لوحات السيارات تلقائياً / Automatic License Plate Recognition** (NEW!)
 
@@ -58,6 +59,9 @@ This will create an SQLite database with default users.
 ## التشغيل / Running
 
 ### 🚀 التشغيل السريع / Quick Start
+
+> **⚠️ مهم:** إذا واجهت خطأ 500، راجع [دليل البدء السريع](QUICK_START.md) لحل المشكلة  
+> **⚠️ Important:** If you encounter error 500, check the [Quick Start Guide](QUICK_START.md) for troubleshooting
 
 **على Linux/Mac:**
 ```bash
@@ -169,11 +173,23 @@ http://localhost:5000
 
 ## الوثائق / Documentation
 
+### وثائق النظام / System Documentation
 - [الدليل التشغيلي الشامل](الدليل%20التشغيلي%20الشامل%20لنظام%20إدارة%20الإسكان%20الجامعي.md)
 - [دليل تشغيل النظام](دليل%20تشغيل%20نظام%20إدارة%20إسكان%20أعضاء%20هيئة%20التدريس.md)
 - [مخطط الدليل التشغيلي](user_manual_outline.md)
 - [دليل المستخدم (PDF)](user_manual_with_images.pdf)
 - [**دليل استخدام نظام تمييز لوحات السيارات**](PLATE_RECOGNIZER_GUIDE.md) ⭐ NEW!
+
+### التقارير والمراجعة / Reports & Review
+- [تقرير المراجعة الشاملة](تقرير_المراجعة_الشاملة.md) - تقرير كامل عن حالة النظام والبيانات
+- [System Validation Report Documentation](SYSTEM_VALIDATION_REPORT.md) - Technical documentation for validation report
+- [تقرير التحقق من النظام (صفحة ويب)](system_validation_report.html) - أداة تفاعلية لمراجعة البيانات
+
+### النشر والتثبيت / Deployment & Installation
+- 🚀 **[دليل النشر الكامل](دليل_النشر_الكامل.md)** - دليل شامل للنشر الاحترافي مع Nginx وPostgreSQL
+- 🐳 **[النشر باستخدام Docker](النشر_باستخدام_Docker.md)** - الطريقة الأسرع للنشر (5 دقائق فقط!)
+- ⚡ [QUICK_START.md](QUICK_START.md) - البدء السريع للتطوير المحلي
+- 🔧 [حل_خطأ_500.md](حل_خطأ_500.md) - استكشاف الأخطاء وإصلاحها
 
 ## الأمان / Security
 
