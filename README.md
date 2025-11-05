@@ -59,6 +59,9 @@ This will create an SQLite database with default users.
 
 ### 🚀 التشغيل السريع / Quick Start
 
+> **⚠️ مهم:** إذا واجهت خطأ 500، راجع [دليل البدء السريع](QUICK_START.md) لحل المشكلة  
+> **⚠️ Important:** If you encounter error 500, check the [Quick Start Guide](QUICK_START.md) for troubleshooting
+
 **على Linux/Mac:**
 ```bash
 ./run.sh
