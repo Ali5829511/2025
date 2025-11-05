@@ -203,6 +203,21 @@ def init_database():
     )
     ''')
     
+    # Plate recognition log table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS plate_recognition_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        plate_number TEXT NOT NULL,
+        confidence REAL,
+        vehicle_id INTEGER,
+        image_path TEXT,
+        recognized_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id),
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
+    )
+    ''')
+    
     conn.commit()
     
     # Check if default users exist

@@ -15,6 +15,7 @@ A comprehensive system for managing faculty housing at Imam Mohammad Ibn Saud Is
 - 📝 إدارة الشكاوى والزوار / Complaints and Visitors Management
 - 📊 تقارير شاملة وإحصائيات / Comprehensive Reports and Statistics
 - 👮 صلاحيات متعددة للمستخدمين / Multi-level User Permissions
+- 📷 **تمييز لوحات السيارات تلقائياً / Automatic License Plate Recognition** (NEW!)
 
 ## المتطلبات / Requirements
 
@@ -172,6 +173,7 @@ http://localhost:5000
 - [دليل تشغيل النظام](دليل%20تشغيل%20نظام%20إدارة%20إسكان%20أعضاء%20هيئة%20التدريس.md)
 - [مخطط الدليل التشغيلي](user_manual_outline.md)
 - [دليل المستخدم (PDF)](user_manual_with_images.pdf)
+- [**دليل استخدام نظام تمييز لوحات السيارات**](PLATE_RECOGNIZER_GUIDE.md) ⭐ NEW!
 
 ## الأمان / Security
 
