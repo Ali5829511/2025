@@ -278,6 +278,77 @@ def serve_static(filename):
     
     return send_from_directory('.', filename)
 
+# ==================== System Statistics ====================
+
+@app.route('/api/system/stats')
+def system_stats():
+    """Get system statistics for validation report"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get counts for each table
+        stats = {}
+        
+        # Buildings
+        cursor.execute('SELECT COUNT(*) FROM buildings')
+        stats['buildings'] = cursor.fetchone()[0]
+        
+        # Residents
+        cursor.execute('SELECT COUNT(*) FROM residents')
+        stats['residents'] = cursor.fetchone()[0]
+        cursor.execute('SELECT COUNT(*) FROM residents WHERE is_active = 1')
+        stats['activeResidents'] = cursor.fetchone()[0]
+        
+        # Vehicles
+        cursor.execute('SELECT COUNT(*) FROM vehicles')
+        stats['vehicles'] = cursor.fetchone()[0]
+        cursor.execute('SELECT COUNT(*) FROM vehicles WHERE is_active = 1')
+        stats['activeVehicles'] = cursor.fetchone()[0]
+        
+        # Traffic violations
+        cursor.execute('SELECT COUNT(*) FROM traffic_violations')
+        stats['violations'] = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM traffic_violations WHERE status = 'مفتوحة' OR status = 'open'")
+        stats['openViolations'] = cursor.fetchone()[0]
+        
+        # Security incidents
+        cursor.execute('SELECT COUNT(*) FROM security_incidents')
+        stats['securityIncidents'] = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM security_incidents WHERE status = 'مفتوحة' OR status = 'open'")
+        stats['openIncidents'] = cursor.fetchone()[0]
+        
+        # Visitors
+        cursor.execute('SELECT COUNT(*) FROM visitors')
+        stats['visitors'] = cursor.fetchone()[0]
+        
+        # Complaints
+        cursor.execute('SELECT COUNT(*) FROM complaints')
+        stats['complaints'] = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM complaints WHERE status = 'مفتوحة' OR status = 'open'")
+        stats['openComplaints'] = cursor.fetchone()[0]
+        
+        # Users
+        cursor.execute('SELECT COUNT(*) FROM users')
+        stats['users'] = cursor.fetchone()[0]
+        cursor.execute('SELECT COUNT(*) FROM users WHERE is_active = 1')
+        stats['activeUsers'] = cursor.fetchone()[0]
+        
+        # Active sessions
+        cursor.execute('SELECT COUNT(*) FROM sessions WHERE expires_at > datetime("now")')
+        stats['activeSessions'] = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify(stats)
+        
+    except Exception as e:
+        app.logger.error(f'System stats error: {str(e)}')
+        return jsonify({
+            'error': 'Failed to get system statistics',
+            'error_ar': 'فشل في الحصول على إحصائيات النظام'
+        }), 500
+
 # ==================== Health Check ====================
 
 @app.route('/api/health')
