@@ -2,247 +2,511 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>تسجيل الدخول - نظام إدارة إسكان أعضاء هيئة التدريس</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #0f3d68;
+            --secondary-color: #2e8bc0;
+            --accent-color: #4a9fd8;
+            --light-bg: #f7fcff;
+            --success-color: #51cf66;
+            --error-color: #ff6b6b;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --border-radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(15, 61, 104, 0.08);
+            --shadow-md: 0 8px 24px rgba(15, 61, 104, 0.12);
+            --shadow-lg: 0 16px 48px rgba(15, 61, 104, 0.16);
         }
 
         body {
-            font-family: 'Tajawal', Arial, sans-serif;
-            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
             direction: rtl;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* خلفية متحركة */
+        /* خلفية متحركة محسنة للجوال */
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(15,61,104,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            animation: moveGrid 20s linear infinite;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 30s linear infinite;
+            pointer-events: none;
         }
 
-        @keyframes moveGrid {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(10px, 10px); }
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
+        }
+
+        /* حاوية رئيسية محسنة */
+        .main-wrapper {
+            width: 100%;
+            max-width: 480px;
+            padding: 16px;
+            position: relative;
+            z-index: 1;
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(15, 61, 104, 0.15);
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 32px 24px;
             width: 100%;
-            max-width: 500px;
             position: relative;
-            z-index: 1;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* شعار محسن للجوال */
         .logo-container {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
         .university-logo {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(15, 61, 104, 0.2);
-            transition: transform 0.3s ease;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 16px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
             object-fit: contain;
+            background: white;
+            padding: 8px;
         }
 
-        .university-logo:hover {
-            transform: scale(1.05);
+        .university-logo:active {
+            transform: scale(0.95);
         }
 
         .university-name {
-            font-size: 26px;
-            font-weight: bold;
-            color: #0f3d68;
-            margin-bottom: 10px;
+            font-size: clamp(18px, 5vw, 22px);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
             line-height: 1.4;
         }
 
         .system-title {
-            font-size: 20px;
-            color: #2e8bc0;
-            font-weight: 600;
-            margin-bottom: 30px;
+            font-size: clamp(14px, 4vw, 16px);
+            color: var(--secondary-color);
+            font-weight: 500;
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
 
+        /* نموذج محسن للجوال */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             position: relative;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #0f3d68;
-            font-weight: 600;
-            font-size: 16px;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            font-size: 20px;
+            pointer-events: none;
+            transition: all 0.3s ease;
         }
 
         .form-group input {
             width: 100%;
-            padding: 15px 20px;
-            border: 2px solid #e0e7ef;
+            padding: 16px 20px 16px 52px;
+            border: 2px solid #e8ecf1;
             border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
-            font-family: 'Tajawal', Arial, sans-serif;
+            background: white;
+            font-family: 'Tajawal', sans-serif;
+            color: var(--text-dark);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #2e8bc0;
-            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
-            transform: translateY(-2px);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 4px rgba(46, 139, 192, 0.1);
+            background: white;
         }
 
-        .form-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #2e8bc0;
-            font-size: 18px;
+        .form-group input:focus + .input-icon {
+            color: var(--primary-color);
+            transform: translateY(-50%) scale(1.1);
         }
 
-        .form-group input {
-            padding-left: 50px;
-        }
-
+        /* زر تسجيل الدخول محسن */
         .login-btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            font-family: 'Tajawal', Arial, sans-serif;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(15, 61, 104, 0.3);
-            background: linear-gradient(90deg, #2e8bc0 60%, #0f3d68 100%);
+            font-family: 'Tajawal', sans-serif;
+            box-shadow: var(--shadow-md);
+            touch-action: manipulation;
         }
 
         .login-btn:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
-        .login-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
-        .login-btn:hover::before {
-            left: 100%;
+        @media (hover: hover) {
+            .login-btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+                background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+            }
         }
 
+        .login-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .login-btn .btn-icon {
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .login-btn:active .btn-icon {
+            transform: translateX(-4px);
+        }
+
+        /* رسائل محسنة */
+        .message {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            font-weight: 500;
+            font-size: 15px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3);
+        }
+
+        .message i {
+            margin-left: 8px;
+        }
+
+        /* إجراءات سريعة محسنة للجوال */
         .quick-actions {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e7ef;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid #f0f3f7;
         }
 
         .quick-actions h3 {
-            color: #0f3d68;
-            margin-bottom: 15px;
-            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            font-size: clamp(16px, 4vw, 18px);
             text-align: center;
+            font-weight: 600;
         }
 
         .action-buttons {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
 
         .action-btn {
-            padding: 12px 15px;
-            background: rgba(46, 139, 192, 0.1);
-            color: #2e8bc0;
+            padding: 12px 10px;
+            background: linear-gradient(135deg, rgba(46, 139, 192, 0.08) 0%, rgba(46, 139, 192, 0.12) 100%);
+            color: var(--secondary-color);
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
-            font-size: 14px;
+            font-size: clamp(12px, 3.5vw, 14px);
             font-weight: 600;
             transition: all 0.3s ease;
-            border: 1px solid rgba(46, 139, 192, 0.2);
-            font-family: 'Tajawal', Arial, sans-serif;
+            border: 1.5px solid rgba(46, 139, 192, 0.2);
+            font-family: 'Tajawal', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            touch-action: manipulation;
         }
 
-        .action-btn:hover {
-            background: #2e8bc0;
-            color: white;
-            transform: translateY(-2px);
+        .action-btn i {
+            font-size: 20px;
         }
 
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (hover: hover) {
+            .action-btn:hover {
+                background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-md);
+                border-color: transparent;
+            }
+        }
+
+        /* تذييل محسن */
         .footer {
             text-align: center;
-            margin-top: 30px;
-            color: #8a8b95;
-            font-size: 14px;
+            margin-top: 24px;
+            padding: 16px 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: clamp(11px, 3vw, 13px);
+            font-weight: 500;
         }
 
-        .error-message {
-            background: #ff6b6b;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-            font-weight: 600;
+        /* تأثيرات الرجّة */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
         }
 
-        .success-message {
-            background: #51cf66;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-            font-weight: 600;
+        .shake {
+            animation: shake 0.6s ease-in-out;
         }
 
-        /* تأثيرات متحركة */
+        /* تحسينات للشاشات الصغيرة */
+        @media (max-width: 600px) {
+            .main-wrapper {
+                padding: 12px;
+            }
+
+            .login-container {
+                padding: 24px 20px;
+                border-radius: 20px;
+            }
+
+            .university-logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .university-name {
+                font-size: 18px;
+            }
+
+            .system-title {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .form-group input {
+                padding: 14px 18px 14px 48px;
+                font-size: 15px;
+            }
+
+            .input-icon {
+                left: 14px;
+                font-size: 18px;
+            }
+
+            .login-btn {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .action-buttons {
+                gap: 8px;
+            }
+
+            .action-btn {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .action-btn i {
+                font-size: 18px;
+            }
+        }
+
+        /* للشاشات الكبيرة جداً */
+        @media (min-width: 768px) {
+            .main-wrapper {
+                max-width: 500px;
+            }
+
+            .login-container {
+                padding: 40px 32px;
+            }
+        }
+
+        /* تحسينات للأجهزة اللمسية */
+        @media (hover: none) and (pointer: coarse) {
+            .form-group input {
+                font-size: 16px; /* منع التكبير التلقائي في iOS */
+            }
+        }
+
+        /* وضع المناظر الأفقية للجوال */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                display: block;
+                padding: 20px 0;
+            }
+
+            .main-wrapper {
+                padding: 10px;
+            }
+
+            .login-container {
+                padding: 20px;
+            }
+
+            .university-logo {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 10px;
+            }
+
+            .university-name {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+
+            .system-title {
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .quick-actions {
+                margin-top: 16px;
+                padding-top: 16px;
+            }
+
+            .footer {
+                margin-top: 16px;
+                padding: 12px 0;
+            }
+        }
+
+        /* إمكانية الوصول */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* تحميل */
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* تحسينات accessibility */
+        *:focus-visible {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
         .login-container {
             animation: slideUp 0.6s ease-out;
         }
@@ -311,128 +575,237 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo-container">
-            <img src="university_logo.png" alt="شعار الجامعة" class="university-logo">
-            <h1 class="university-name">جامعة الإمام محمد بن سعود الإسلامية</h1>
-            <p class="system-title">نظام إدارة إسكان أعضاء هيئة التدريس</p>
-        </div>
-
-        <div class="error-message" id="errorMessage"></div>
-        <div class="success-message" id="successMessage"></div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">اسم المستخدم:</label>
-                <i class="fas fa-user"></i>
-                <input type="text" id="username" name="username" placeholder="أدخل اسم المستخدم" required>
+    <div class="main-wrapper">
+        <div class="login-container">
+            <div class="logo-container">
+                <img src="university_logo.png" alt="شعار جامعة الإمام محمد بن سعود الإسلامية" class="university-logo" loading="lazy">
+                <h1 class="university-name">جامعة الإمام محمد بن سعود الإسلامية</h1>
+                <p class="system-title">نظام إدارة إسكان أعضاء هيئة التدريس</p>
             </div>
 
-            <div class="form-group">
-                <label for="password">كلمة المرور:</label>
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" name="password" placeholder="أدخل كلمة المرور" required>
+            <div class="error-message message" id="errorMessage" role="alert" aria-live="polite"></div>
+            <div class="success-message message" id="successMessage" role="status" aria-live="polite"></div>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="username">اسم المستخدم</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="أدخل اسم المستخدم" 
+                            required 
+                            autocomplete="username"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                            aria-required="true">
+                        <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="أدخل كلمة المرور" 
+                            required
+                            autocomplete="current-password"
+                            aria-required="true">
+                        <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn" aria-label="تسجيل الدخول">
+                    <span class="btn-content">
+                        <i class="fas fa-sign-in-alt btn-icon" aria-hidden="true"></i>
+                        <span class="btn-text">تسجيل الدخول</span>
+                    </span>
+                </button>
+            </form>
+
+            <div class="quick-actions">
+                <h3>الإجراءات السريعة</h3>
+                <div class="action-buttons">
+                    <a href="enhanced_traffic_violations_updated.html" class="action-btn" aria-label="تسجيل مخالفة مرورية">
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                        <span>تسجيل مخالفة</span>
+                    </a>
+                    <a href="complaints_management.html" class="action-btn" aria-label="تسجيل شكوى جديدة">
+                        <i class="fas fa-comment-alt" aria-hidden="true"></i>
+                        <span>تسجيل شكوى</span>
+                    </a>
+                    <a href="residents_management_updated.html" class="action-btn" aria-label="إضافة ساكن جديد">
+                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                        <span>إضافة ساكن</span>
+                    </a>
+                    <a href="main_dashboard.html" class="action-btn" aria-label="عرض لوحة التحكم والتقارير">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>عرض التقارير</span>
+                    </a>
+                </div>
             </div>
 
-            <button type="submit" class="login-btn">
-                <i class="fas fa-sign-in-alt"></i>
-                تسجيل الدخول
-            </button>
-        </form>
-
-        <div class="quick-actions">
-            <h3>الإجراءات السريعة</h3>
-            <div class="action-buttons">
-                <a href="enhanced_traffic_violations.html" class="action-btn">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    تسجيل مخالفة
-                </a>
-                <a href="complaints_management.html" class="action-btn">
-                    <i class="fas fa-comment-alt"></i>
-                    تسجيل شكوى
-                </a>
-                <a href="residents_management_updated.html" class="action-btn">
-                    <i class="fas fa-user-plus"></i>
-                    إضافة ساكن
-                </a>
-                <a href="dashboard.html" class="action-btn">
-                    <i class="fas fa-chart-bar"></i>
-                    عرض التقارير
-                </a>
+            <div class="footer">
+                <p>جميع الحقوق محفوظة © جامعة الإمام محمد بن سعود الإسلامية 2025</p>
             </div>
-        </div>
-
-        <div class="footer">
-            <p>جميع الحقوق محفوظة © جامعة الإمام محمد بن سعود الإسلامية 2025</p>
         </div>
     </div>
 
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
-            // إخفاء الرسائل السابقة
+        'use strict';
+        
+        // عناصر DOM / DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loginContainer = document.querySelector('.login-container');
+
+        // دوال مساعدة / Helper functions
+        function showMessage(element, message, icon = '') {
+            element.innerHTML = icon ? `<i class="${icon}"></i> ${message}` : message;
+            element.style.display = 'block';
+            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideMessages() {
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
-            
-            // التحقق من بيانات الدخول
-            const users = {
-                'admin': { password: 'admin123', role: 'admin', name: 'مدير النظام' },
-                'violations_officer': { password: 'violations123', role: 'violations', name: 'مسؤول المخالفات' },
-                'visitors_officer': { password: 'visitors123', role: 'visitors', name: 'مسؤول الزوار' }
-            };
-            
-            if (users[username] && users[username].password === password) {
-                // حفظ بيانات المستخدم
-                localStorage.setItem('currentUser', JSON.stringify({
-                    username: username,
-                    role: users[username].role,
-                    name: users[username].name,
-                    loginTime: new Date().toISOString()
-                }));
-                
-                successMessage.textContent = 'تم تسجيل الدخول بنجاح! جاري التحويل...';
-                successMessage.style.display = 'block';
-                
-                // التحويل إلى لوحة التحكم
-                setTimeout(() => {
-                    window.location.href = 'main_dashboard.html';
-                }, 1500);
+        }
+
+        function setButtonLoading(loading) {
+            loginBtn.disabled = loading;
+            if (loading) {
+                loginBtn.innerHTML = '<span class="loading-spinner"></span><span style="margin-right: 8px;">جاري التسجيل...</span>';
             } else {
-                errorMessage.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة';
-                errorMessage.style.display = 'block';
+                loginBtn.innerHTML = '<span class="btn-content"><i class="fas fa-sign-in-alt btn-icon"></i><span class="btn-text">تسجيل الدخول</span></span>';
+            }
+        }
+
+        function shakeContainer() {
+            loginContainer.classList.add('shake');
+            setTimeout(() => loginContainer.classList.remove('shake'), 600);
+        }
+
+        // التحقق من الجلسة الحالية عند تحميل الصفحة
+        // Check current session on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/auth/validate', {
+                    credentials: 'include'
+                });
                 
-                // هز النموذج عند الخطأ
-                document.querySelector('.login-container').style.animation = 'shake 0.5s ease-in-out';
-                setTimeout(() => {
-                    document.querySelector('.login-container').style.animation = 'slideUp 0.6s ease-out';
-                }, 500);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authenticated) {
+                        const redirectMessage = data.user.role === 'violation_entry' 
+                            ? 'جاري التحويل إلى نموذج المخالفة...' 
+                            : 'جاري التحويل إلى لوحة التحكم...';
+                        showMessage(successMessage, `مرحباً ${data.user.name}! ${redirectMessage}`, 'fas fa-check-circle');
+                        
+                        setTimeout(() => {
+                            if (data.user.role === 'violation_entry') {
+                                window.location.href = 'enhanced_traffic_violations_updated.html';
+                            } else {
+                                window.location.href = 'main_dashboard.html';
+                            }
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                console.log('No active session');
             }
         });
 
-        // التحقق من تسجيل الدخول السابق
-        window.addEventListener('load', function() {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                const user = JSON.parse(currentUser);
-                const loginTime = new Date(user.loginTime);
-                const now = new Date();
-                const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+        // معالج نموذج تسجيل الدخول / Login form handler
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            // التحقق من البيانات / Validate input
+            if (!username || !password) {
+                showMessage(errorMessage, 'الرجاء إدخال اسم المستخدم وكلمة المرور', 'fas fa-exclamation-circle');
+                shakeContainer();
+                return;
+            }
+            
+            hideMessages();
+            setButtonLoading(true);
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
                 
-                // إذا كان المستخدم مسجل دخول خلال آخر 24 ساعة
-                if (hoursDiff < 24) {
-                    successMessage.textContent = `مرحباً ${user.name}! جاري التحويل إلى لوحة التحكم...`;
-                    successMessage.style.display = 'block';
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage(successMessage, `مرحباً ${data.user.name}! ${data.message_ar}`, 'fas fa-check-circle');
                     
+                    // حفظ معلومات المستخدم
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: data.user.id,
+                        username: data.user.username,
+                        name: data.user.name,
+                        role: data.user.role,
+                        email: data.user.email
+                    }));
+                    
+                    // توجيه المستخدم حسب دوره / Redirect user based on role
                     setTimeout(() => {
-                        window.location.href = 'main_dashboard.html';
-                    }, 2000);
+                        if (data.user.role === 'violation_entry') {
+                            // مستخدم تسجيل المخالفات يذهب مباشرة لنموذج المخالفة
+                            window.location.href = 'enhanced_traffic_violations_updated.html';
+                        } else {
+                            // باقي المستخدمين يذهبون للوحة التحكم
+                            window.location.href = 'main_dashboard.html';
+                        }
+                    }, 1500);
+                } else {
+                    showMessage(errorMessage, data.error_ar || data.error || 'فشل تسجيل الدخول', 'fas fa-exclamation-circle');
+                    shakeContainer();
+                    setButtonLoading(false);
                 }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(errorMessage, 'خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.', 'fas fa-times-circle');
+                shakeContainer();
+                setButtonLoading(false);
+            }
+        });
+
+        // منع الإرسال المزدوج / Prevent double submission
+        loginForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && loginBtn.disabled) {
+                e.preventDefault();
+            }
+        });
+
+        // تحسين التركيز على الحقول / Improve field focus
+        usernameInput.addEventListener('input', () => {
+            if (errorMessage.style.display === 'block') {
+                hideMessages();
+            }
+        });
+
+        passwordInput.addEventListener('input', () => {
+            if (errorMessage.style.display === 'block') {
+                hideMessages();
             }
         });
     </script>
