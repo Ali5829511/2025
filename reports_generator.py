@@ -12,11 +12,16 @@ from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
-import database
+# import database  # TODO: Integrate with actual database when needed
 
 
 def get_report_data(report_type='all', from_date=None, to_date=None, building=None):
-    """Get report data from database based on filters"""
+    """Get report data for export. Currently returns mock data for demonstration.
+    
+    TODO: Integrate with actual database queries based on filter parameters.
+    The filters (report_type, from_date, to_date, building) will be used to 
+    filter actual data from the database in a future update.
+    """
     data = {
         'metadata': {
             'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),

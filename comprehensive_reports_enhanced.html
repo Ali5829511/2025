@@ -1225,11 +1225,11 @@
                     return response.blob();
                 })
                 .then(blob => {
-                    // Create download link
+                    // Create download link (using English filename for compatibility)
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `تقرير_شامل_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                    a.download = `comprehensive_report_${new Date().toISOString().slice(0, 10)}.xlsx`;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
@@ -1279,11 +1279,11 @@
                     return response.blob();
                 })
                 .then(blob => {
-                    // Create download link
+                    // Create download link (using English filename for compatibility)
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `تقرير_شامل_${new Date().toISOString().slice(0, 10)}.docx`;
+                    a.download = `comprehensive_report_${new Date().toISOString().slice(0, 10)}.docx`;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);

@@ -298,9 +298,9 @@ def export_excel():
             building=building
         )
         
-        # Generate filename
+        # Generate filename (using English for cross-platform compatibility)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'تقرير_شامل_{timestamp}.xlsx'
+        filename = f'comprehensive_report_{timestamp}.xlsx'
         
         return send_file(
             output,
@@ -334,9 +334,9 @@ def export_word():
             building=building
         )
         
-        # Generate filename
+        # Generate filename (using English for cross-platform compatibility)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'تقرير_شامل_{timestamp}.docx'
+        filename = f'comprehensive_report_{timestamp}.docx'
         
         return send_file(
             output,
