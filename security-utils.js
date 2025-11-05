@@ -148,10 +148,12 @@ function sanitizeUrl(url) {
 function validatePhone(phone) {
     if (!phone) return false;
     
-    // Saudi phone format: 05XXXXXXXX or +9665XXXXXXXX
+    // Saudi phone format: 05XXXXXXXX or +9665XXXXXXXX or 9665XXXXXXXX
     // تنسيق الهاتف السعودي
-    const phoneRegex = /^(05\d{8}|(\+?966)?5\d{8})$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
+    // Must start with 05, +9665, or 9665 followed by 8 digits
+    const cleanPhone = phone.replace(/\s/g, '');
+    const phoneRegex = /^(05\d{8}|(\+966|966)5\d{8})$/;
+    return phoneRegex.test(cleanPhone);
 }
 
 /**
@@ -194,11 +196,14 @@ function validateNationalId(nationalId) {
 function validateLicensePlate(plate) {
     if (!plate) return false;
     
-    // Saudi format: 3-4 digits followed by 1-3 Arabic letters
-    // التنسيق السعودي: 3-4 أرقام متبوعة بـ 1-3 حروف عربية
-    // Example: 1234 أ ب ج or 123 أ ب
-    const plateRegex = /^\d{3,4}[\s]*[\u0600-\u06FF\s]{1,3}$/;
-    return plateRegex.test(plate) || /^\d{1,4}\s*[A-Z]{1,3}$/.test(plate);
+    // Saudi license plate formats:
+    // التنسيق السعودي للوحات السيارات:
+    // Format 1: 3-4 digits followed by 1-3 Arabic letters (e.g., "1234 أ ب ج")
+    // Format 2: 3-4 digits followed by 1-3 English letters (e.g., "1234 ABC")
+    const arabicFormat = /^\d{3,4}[\s]*[\u0600-\u06FF\s]{1,3}$/;
+    const englishFormat = /^\d{3,4}\s*[A-Z]{1,3}$/;
+    
+    return arabicFormat.test(plate) || englishFormat.test(plate);
 }
 
 /**
