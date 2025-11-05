@@ -706,9 +706,17 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (data.authenticated) {
-                        showMessage(successMessage, `مرحباً ${data.user.name}! جاري التحويل إلى لوحة التحكم...`, 'fas fa-check-circle');
+                        const redirectMessage = data.user.role === 'violation_entry' 
+                            ? 'جاري التحويل إلى نموذج المخالفة...' 
+                            : 'جاري التحويل إلى لوحة التحكم...';
+                        showMessage(successMessage, `مرحباً ${data.user.name}! ${redirectMessage}`, 'fas fa-check-circle');
+                        
                         setTimeout(() => {
-                            window.location.href = 'main_dashboard.html';
+                            if (data.user.role === 'violation_entry') {
+                                window.location.href = 'enhanced_traffic_violations_updated.html';
+                            } else {
+                                window.location.href = 'main_dashboard.html';
+                            }
                         }, 1500);
                     }
                 }
@@ -758,8 +766,15 @@
                         email: data.user.email
                     }));
                     
+                    // توجيه المستخدم حسب دوره / Redirect user based on role
                     setTimeout(() => {
-                        window.location.href = 'main_dashboard.html';
+                        if (data.user.role === 'violation_entry') {
+                            // مستخدم تسجيل المخالفات يذهب مباشرة لنموذج المخالفة
+                            window.location.href = 'enhanced_traffic_violations_updated.html';
+                        } else {
+                            // باقي المستخدمين يذهبون للوحة التحكم
+                            window.location.href = 'main_dashboard.html';
+                        }
                     }, 1500);
                 } else {
                     showMessage(errorMessage, data.error_ar || data.error || 'فشل تسجيل الدخول', 'fas fa-exclamation-circle');

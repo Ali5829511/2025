@@ -232,6 +232,20 @@ def init_database():
                 'name': 'مسؤول الزوار',
                 'role': 'visitors',
                 'email': 'visitors@university.edu.sa'
+            },
+            {
+                'username': 'viewer',
+                'password': 'Viewer@2025',
+                'name': 'مستخدم استعلام فقط',
+                'role': 'viewer',
+                'email': 'viewer@university.edu.sa'
+            },
+            {
+                'username': 'violation_entry',
+                'password': 'Violation@2025',
+                'name': 'مسجل المخالفات',
+                'role': 'violation_entry',
+                'email': 'violation.entry@university.edu.sa'
             }
         ]
         

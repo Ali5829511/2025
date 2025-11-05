@@ -222,6 +222,15 @@ CREATE TABLE audit_log (
 - تسجيل المحاولات الفاشلة / Log failed attempts
 - حفظ عنوان IP للعمليات / Store IP address for operations
 
+### أدوار المستخدمين / User Roles
+
+| الدور / Role | الصلاحيات / Permissions |
+|-------------|------------------------|
+| **admin** | صلاحيات كاملة - إضافة، تعديل، حذف، عرض / Full access - Create, Update, Delete, View |
+| **violations** | المخالفات المرورية والحوادث / Traffic violations and accidents |
+| **visitors** | الزوار والشكاوى / Visitors and complaints |
+| **viewer** | ✅ **استعلام فقط** - عرض البيانات بدون تعديل / **View Only** - Read data without modifications |
+
 ## استخدام واجهة برمجة التطبيقات / API Usage
 
 ### تسجيل الدخول / Login

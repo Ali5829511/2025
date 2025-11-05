@@ -125,3 +125,29 @@ def require_role(*roles):
         
         return decorated_function
     return decorator
+
+def require_write_permission(f):
+    """Decorator to prevent viewer role from modifying data"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        session_token = request.cookies.get('session_token')
+        
+        if not session_token:
+            return jsonify({'error': 'Authentication required', 'error_ar': 'المصادقة مطلوبة'}), 401
+        
+        user = validate_session(session_token)
+        if not user:
+            return jsonify({'error': 'Invalid or expired session', 'error_ar': 'جلسة غير صالحة أو منتهية'}), 401
+        
+        # Check if user is viewer (read-only)
+        if user['role'] == 'viewer':
+            return jsonify({
+                'error': 'Read-only access. Cannot modify data.',
+                'error_ar': 'صلاحية استعلام فقط. لا يمكن تعديل البيانات.'
+            }), 403
+        
+        # Add user to request context
+        request.user = user
+        return f(*args, **kwargs)
+    
+    return decorated_function

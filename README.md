@@ -109,14 +109,28 @@ http://localhost:5000
 ### مدير النظام / System Administrator
 - اسم المستخدم / Username: `admin`
 - كلمة المرور / Password: `Admin@2025`
+- الصلاحيات / Permissions: **كاملة** (إضافة، تعديل، حذف، عرض)
 
 ### مسؤول المخالفات / Violations Officer
 - اسم المستخدم / Username: `violations_officer`
 - كلمة المرور / Password: `Violations@2025`
+- الصلاحيات / Permissions: **محدودة** (المخالفات والحوادث المرورية)
 
 ### مسؤول الزوار / Visitors Officer
 - اسم المستخدم / Username: `visitors_officer`
 - كلمة المرور / Password: `Visitors@2025`
+- الصلاحيات / Permissions: **محدودة** (الزوار والشكاوى)
+
+### مستخدم استعلام فقط / View-Only User
+- اسم المستخدم / Username: `viewer`
+- كلمة المرور / Password: `Viewer@2025`
+- الصلاحيات / Permissions: **استعلام فقط** (عرض البيانات بدون تعديل)
+
+### مسجل المخالفات / Violation Entry User
+- اسم المستخدم / Username: `violation_entry`
+- كلمة المرور / Password: `Violation@2025`
+- الصلاحيات / Permissions: **تسجيل المخالفات المرورية فقط**
+- التوجيه / Redirect: يتم توجيهه مباشرة إلى نموذج تسجيل المخالفة عند تسجيل الدخول
 
 **⚠️ يرجى تغيير كلمات المرور بعد أول تسجيل دخول**  
 **⚠️ Please change passwords after first login**
