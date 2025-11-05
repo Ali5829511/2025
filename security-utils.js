@@ -33,9 +33,19 @@ function escapeHtml(text) {
 function sanitizeInput(input) {
     if (!input) return '';
     
-    // Remove any HTML tags
-    // إزالة أي وسوم HTML
-    return input.replace(/<[^>]*>/g, '');
+    // Remove any HTML tags using multiple passes to handle nested/incomplete tags
+    // إزالة أي وسوم HTML باستخدام تمريرات متعددة للتعامل مع الوسوم المتداخلة/غير المكتملة
+    let sanitized = input;
+    let previousLength;
+    
+    // Keep removing until no more tags are found (handles nested/incomplete tags)
+    // استمر في الإزالة حتى لا يتم العثور على المزيد من الوسوم
+    do {
+        previousLength = sanitized.length;
+        sanitized = sanitized.replace(/<[^>]*>/g, '');
+    } while (sanitized.length !== previousLength);
+    
+    return sanitized;
 }
 
 /**
