@@ -483,8 +483,8 @@
             const totalApartments = apartmentsData.length;
             const occupiedApartments = apartmentsData.filter(apt => apt['حالة الشقة'] === 'مشغولة').length;
             const vacantApartments = apartmentsData.filter(apt => apt['حالة الشقة'] === 'شاغرة').length;
-            const oldBuildings = apartmentsData.filter(apt => apt['وصف المبنى'] === 'المباني القديمة').length;
-            const newBuildings = apartmentsData.filter(apt => apt['وصف المبنى'] === 'المباني الجديدة').length;
+            const oldBuildings = apartmentsData.filter(apt => apt['وصف المبنى'].includes('المباني القديمة')).length;
+            const newBuildings = apartmentsData.filter(apt => apt['وصف المبنى'].includes('المباني الجديدة')).length;
 
             document.getElementById('total-apartments').textContent = totalApartments.toLocaleString();
             document.getElementById('occupied-apartments').textContent = occupiedApartments.toLocaleString();
@@ -502,11 +502,11 @@
             filteredData = apartmentsData.filter(apartment => {
                 const matchesSearch = !searchTerm || 
                     apartment['نوع الوحدة'].toLowerCase().includes(searchTerm) ||
-                    apartment['رقم المبنى'].includes(searchTerm) ||
-                    apartment['رقم الشقة'].includes(searchTerm);
+                    apartment['رقم المبنى'].toString().includes(searchTerm) ||
+                    apartment['رقم الشقة'].toString().includes(searchTerm);
                 
                 const matchesStatus = !statusFilter || apartment['حالة الشقة'] === statusFilter;
-                const matchesBuilding = !buildingFilter || apartment['وصف المبنى'] === buildingFilter;
+                const matchesBuilding = !buildingFilter || apartment['وصف المبنى'].includes(buildingFilter);
                 
                 return matchesSearch && matchesStatus && matchesBuilding;
             });
@@ -525,7 +525,8 @@
 
             const rows = filteredData.map(apartment => {
                 const statusClass = apartment['حالة الشقة'] === 'مشغولة' ? 'status-occupied' : 'status-vacant';
-                const buildingClass = apartment['وصف المبنى'] === 'المباني القديمة' ? 'building-old' : 'building-new';
+                const buildingClass = apartment['وصف المبنى'].includes('المباني القديمة') ? 'building-old' : 
+                                     apartment['وصف المبنى'].includes('المباني الجديدة') ? 'building-new' : '';
                 return `
                     <tr>
                         <td>${apartment['نوع الوحدة']}</td>
