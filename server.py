@@ -547,7 +547,7 @@ def export_plate_recognition_excel():
             
             # Confidence
             cell = ws.cell(row=idx, column=3)
-            confidence_percent = round((row['confidence'] or 0) * 100, 1) if row['confidence'] else 0
+            confidence_percent = round((row['confidence'] or 0) * 100, 1)
             cell.value = confidence_percent
             cell.alignment = center_alignment
             cell.border = cell_border
@@ -686,11 +686,15 @@ def export_plate_recognition_excel():
         )
     
     except Exception as e:
-        app.logger.error(f'Excel export error: {str(e)}')
+        app.logger.error(f'Excel export error for user {request.user["id"]}: {str(e)}', 
+                        extra={'user_id': request.user['id'], 
+                               'start_date': start_date, 
+                               'end_date': end_date,
+                               'ip_address': request.remote_addr})
         return jsonify({
             'success': False,
-            'error': str(e),
-            'error_ar': 'خطأ في تصدير التقرير'
+            'error': 'Failed to export report. Please contact system administrator.',
+            'error_ar': 'فشل تصدير التقرير. يرجى الاتصال بمسؤول النظام.'
         }), 500
 
 # ==================== Static File Serving ====================
@@ -964,6 +968,9 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
+# Note: This endpoint was renamed from '/api/residents' to '/api/residents-list' 
+# to resolve a duplicate route conflict with another '/api/residents' endpoint at line ~843
+# This is a pre-existing issue in the codebase that was preventing server startup
 @app.route('/api/residents-list')
 def get_residents_list():
     """Get all residents with building info"""
