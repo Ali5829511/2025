@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, send_from_directory, make_response, a
 from flask_cors import CORS
 from werkzeug.security import safe_join
 import os
+from dotenv import load_dotenv
 import database
 import auth
 import plate_recognizer
@@ -14,6 +15,9 @@ from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from io import BytesIO
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
