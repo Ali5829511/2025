@@ -3,7 +3,7 @@ Main Flask server for Faculty Housing Management System
 خادم Flask الرئيسي لنظام إدارة إسكان أعضاء هيئة التدريس
 """
 
-from flask import Flask, request, jsonify, send_from_directory, make_response, abort
+from flask import Flask, request, jsonify, send_from_directory, make_response, abort, send_file
 from flask_cors import CORS
 from werkzeug.security import safe_join
 import os
@@ -11,6 +11,9 @@ import database
 import auth
 import plate_recognizer
 from datetime import datetime
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from io import BytesIO
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -411,6 +414,281 @@ def plate_recognition_history():
             'error_ar': 'خطأ في جلب سجل التمييز'
         }), 500
 
+@app.route('/api/plate-recognizer/export-excel', methods=['GET'])
+@auth.require_auth
+def export_plate_recognition_excel():
+    """Export plate recognition history to Excel"""
+    try:
+        # Get query parameters
+        start_date = request.args.get('start_date', '')
+        end_date = request.args.get('end_date', '')
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Build query with optional date filters
+        query = '''
+            SELECT 
+                p.id,
+                p.plate_number,
+                p.confidence,
+                p.recognized_at,
+                u.name as user_name,
+                v.plate_number as registered_plate,
+                v.vehicle_type,
+                v.make,
+                v.model,
+                v.year,
+                v.color,
+                v.sticker_number,
+                r.name as owner_name,
+                r.national_id,
+                r.phone as owner_phone,
+                r.department,
+                r.job_title,
+                r.unit_number,
+                b.name as building_name
+            FROM plate_recognition_log p
+            LEFT JOIN users u ON p.user_id = u.id
+            LEFT JOIN vehicles v ON p.vehicle_id = v.id
+            LEFT JOIN residents r ON v.owner_id = r.id
+            LEFT JOIN buildings b ON r.building_id = b.id
+        '''
+        
+        params = []
+        if start_date and end_date:
+            query += ' WHERE DATE(p.recognized_at) BETWEEN ? AND ?'
+            params.extend([start_date, end_date])
+        elif start_date:
+            query += ' WHERE DATE(p.recognized_at) >= ?'
+            params.append(start_date)
+        elif end_date:
+            query += ' WHERE DATE(p.recognized_at) <= ?'
+            params.append(end_date)
+        
+        query += ' ORDER BY p.recognized_at DESC'
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # Create Excel workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "تقرير تمييز اللوحات"
+        
+        # Define styles
+        header_fill = PatternFill(start_color="0F3D68", end_color="0F3D68", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12, name="Arial")
+        cell_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        right_alignment = Alignment(horizontal='right', vertical='center', wrap_text=True)
+        
+        # Headers in Arabic
+        headers = [
+            'م',  # Number
+            'رقم اللوحة',  # Plate Number
+            'نسبة الدقة %',  # Confidence
+            'التاريخ والوقت',  # Date/Time
+            'المستخدم',  # User
+            'اسم المالك',  # Owner Name
+            'الرقم الوطني',  # National ID
+            'الهاتف',  # Phone
+            'القسم',  # Department
+            'المسمى الوظيفي',  # Job Title
+            'رقم الوحدة',  # Unit Number
+            'اسم المبنى',  # Building Name
+            'نوع المركبة',  # Vehicle Type
+            'الماركة',  # Make
+            'الموديل',  # Model
+            'السنة',  # Year
+            'اللون',  # Color
+            'رقم الملصق',  # Sticker Number
+            'حالة التسجيل'  # Registration Status
+        ]
+        
+        # Write headers
+        for col, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = cell_border
+            cell.alignment = center_alignment
+        
+        # Set column widths
+        column_widths = [5, 15, 12, 18, 15, 20, 15, 15, 20, 20, 12, 15, 15, 12, 12, 8, 10, 15, 15]
+        for col, width in enumerate(column_widths, start=1):
+            ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = width
+        
+        # Write data
+        for idx, row in enumerate(rows, start=2):
+            # Row number
+            cell = ws.cell(row=idx, column=1)
+            cell.value = idx - 1
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # Plate number
+            cell = ws.cell(row=idx, column=2)
+            cell.value = row['plate_number']
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            cell.font = Font(bold=True, size=11)
+            
+            # Confidence
+            cell = ws.cell(row=idx, column=3)
+            confidence_percent = round((row['confidence'] or 0) * 100, 1) if row['confidence'] else 0
+            cell.value = confidence_percent
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # DateTime
+            cell = ws.cell(row=idx, column=4)
+            if row['recognized_at']:
+                dt = datetime.fromisoformat(row['recognized_at'])
+                cell.value = dt.strftime('%Y-%m-%d %H:%M:%S')
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # User
+            cell = ws.cell(row=idx, column=5)
+            cell.value = row['user_name'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Owner Name
+            cell = ws.cell(row=idx, column=6)
+            cell.value = row['owner_name'] or 'غير مسجل'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            if not row['owner_name']:
+                cell.font = Font(color="FF0000")
+            
+            # National ID
+            cell = ws.cell(row=idx, column=7)
+            cell.value = row['national_id'] or '-'
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # Phone
+            cell = ws.cell(row=idx, column=8)
+            cell.value = row['owner_phone'] or '-'
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # Department
+            cell = ws.cell(row=idx, column=9)
+            cell.value = row['department'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Job Title
+            cell = ws.cell(row=idx, column=10)
+            cell.value = row['job_title'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Unit Number
+            cell = ws.cell(row=idx, column=11)
+            cell.value = row['unit_number'] or '-'
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # Building Name
+            cell = ws.cell(row=idx, column=12)
+            cell.value = row['building_name'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Vehicle Type
+            cell = ws.cell(row=idx, column=13)
+            cell.value = row['vehicle_type'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Make
+            cell = ws.cell(row=idx, column=14)
+            cell.value = row['make'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Model
+            cell = ws.cell(row=idx, column=15)
+            cell.value = row['model'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Year
+            cell = ws.cell(row=idx, column=16)
+            cell.value = row['year'] or '-'
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # Color
+            cell = ws.cell(row=idx, column=17)
+            cell.value = row['color'] or '-'
+            cell.alignment = right_alignment
+            cell.border = cell_border
+            
+            # Sticker Number
+            cell = ws.cell(row=idx, column=18)
+            cell.value = row['sticker_number'] or '-'
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            
+            # Registration Status
+            cell = ws.cell(row=idx, column=19)
+            status = 'مسجلة' if row['owner_name'] else 'غير مسجلة'
+            cell.value = status
+            cell.alignment = center_alignment
+            cell.border = cell_border
+            if row['owner_name']:
+                cell.fill = PatternFill(start_color="D4EDDA", end_color="D4EDDA", fill_type="solid")
+                cell.font = Font(color="155724", bold=True)
+            else:
+                cell.fill = PatternFill(start_color="F8D7DA", end_color="F8D7DA", fill_type="solid")
+                cell.font = Font(color="721C24", bold=True)
+        
+        # Freeze first row
+        ws.freeze_panes = 'A2'
+        
+        # Save to BytesIO
+        excel_file = BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'تقرير_تمييز_اللوحات_{timestamp}.xlsx'
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f'Exported plate recognition report ({len(rows)} records)',
+            ip_address=request.remote_addr
+        )
+        
+        return send_file(
+            excel_file,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+    
+    except Exception as e:
+        app.logger.error(f'Excel export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تصدير التقرير'
+        }), 500
+
 # ==================== Static File Serving ====================
 
 @app.route('/')
@@ -682,8 +960,8 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
-@app.route('/api/residents')
-def get_residents():
+@app.route('/api/residents-list')
+def get_residents_list():
     """Get all residents with building info"""
     try:
         conn = database.get_db_connection()
