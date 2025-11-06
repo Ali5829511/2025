@@ -15,15 +15,29 @@ The frontend was experiencing connection issues with the backend during login at
 
 ### 1. تحديث إعدادات CORS / CORS Configuration Update
 
-تم تحديث ملف `server.py` لإضافة إعدادات CORS صريحة:
+تم تحديث ملف `server.py` لإضافة إعدادات CORS صريحة مع التحقق من صحة النطاقات:
 
 ```python
 # CORS Configuration for production deployment
+# Get deployment URL from environment or use default
+DEPLOYMENT_URL = os.environ.get('DEPLOYMENT_URL', 'https://housing-management-system-83yt.onrender.com')
+
+# Default allowed origins
 ALLOWED_ORIGINS = [
-    'https://housing-management-system-83yt.onrender.com',
+    DEPLOYMENT_URL,
     'http://localhost:5000',
     'http://127.0.0.1:5000'
 ]
+
+# Validate and add additional origins from environment variable
+def validate_origin(origin):
+    """Validate that an origin is a properly formatted URL"""
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(origin)
+        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
+    except Exception:
+        return False
 
 # Configure CORS with proper settings for production
 CORS(app, 
@@ -37,6 +51,8 @@ CORS(app,
 - ✅ يسمح للواجهة الأمامية بالاتصال بالخلفية على Render
 - ✅ يدعم الاتصال من localhost للتطوير المحلي
 - ✅ يتيح إضافة نطاقات إضافية عبر متغير البيئة `ALLOWED_ORIGINS`
+- ✅ يتحقق من صحة النطاقات ويمنع حقن النطاقات الضارة
+- ✅ يدعم بيئات نشر متعددة عبر متغير `DEPLOYMENT_URL`
 
 ### 2. تحديث ملف المتطلبات / Requirements Update
 
@@ -65,14 +81,22 @@ Pillow==10.1.0
 
 ### 3. دعم متغيرات البيئة / Environment Variables Support
 
-تم إضافة دعم لمتغير البيئة `ALLOWED_ORIGINS` في `.env.example`:
+تم إضافة دعم لمتغيرات البيئة `DEPLOYMENT_URL` و `ALLOWED_ORIGINS` في `.env.example`:
 
 ```bash
 # CORS Configuration (Production)
-# Add comma-separated list of allowed origins for CORS
+# Deployment URL (set to your Render/production URL)
+DEPLOYMENT_URL=https://housing-management-system-83yt.onrender.com
+
+# Add comma-separated list of additional allowed origins for CORS
 # Example: ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 ALLOWED_ORIGINS=
 ```
+
+**ملاحظة أمنية / Security Note:**
+يتم التحقق من صحة جميع النطاقات المضافة عبر `ALLOWED_ORIGINS` تلقائياً. النطاقات غير الصالحة أو التي لا تستخدم HTTP/HTTPS يتم رفضها وتسجيلها في السجلات.
+
+All origins added via `ALLOWED_ORIGINS` are automatically validated. Invalid origins or those not using HTTP/HTTPS are rejected and logged.
 
 ## التحقق من النشر / Deployment Verification
 
@@ -82,6 +106,8 @@ ALLOWED_ORIGINS=
    - انتقل إلى لوحة تحكم Render
    - تأكد من أن `FLASK_ENV=production`
    - تأكد من أن `SECRET_KEY` مُعين
+   - (اختياري) أضف `DEPLOYMENT_URL` إذا كنت تستخدم نطاق مخصص
+   - (اختياري) أضف `ALLOWED_ORIGINS` للنطاقات الإضافية
 
 2. **أعد نشر التطبيق / Redeploy the Application:**
    - اضغط "Manual Deploy" من لوحة التحكم
