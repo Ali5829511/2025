@@ -617,6 +617,49 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
+@app.route('/api/buildings')
+def get_buildings():
+    """Get all buildings data"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, name, building_number, address, total_units, total_floors, 
+                   created_at, updated_at
+            FROM buildings
+            ORDER BY building_number
+        ''')
+        
+        buildings = []
+        for row in cursor.fetchall():
+            buildings.append({
+                'id': row[0],
+                'name': row[1],
+                'building_number': row[2],
+                'address': row[3],
+                'total_units': row[4],
+                'total_floors': row[5],
+                'created_at': row[6],
+                'updated_at': row[7]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': buildings,
+            'total': len(buildings)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Buildings API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load buildings data',
+            'error_ar': 'فشل في تحميل بيانات المباني'
+        }), 500
+
 @app.route('/api/comprehensive-reports')
 def get_comprehensive_reports():
     """Get comprehensive system reports data"""
