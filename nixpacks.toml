@@ -9,10 +9,8 @@ cmds = [
     "pip install -r requirements.txt"
 ]
 
-[phases.build]
-cmds = [
-    "python database.py"
-]
+# Note: Database initialization is handled in the start command
+# Database may not be available during build phase
 
 [start]
-cmd = "gunicorn --config gunicorn_config.py server:app"
+cmd = "python init_db.py && gunicorn --config gunicorn_config.py server:app"

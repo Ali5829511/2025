@@ -10,7 +10,9 @@ bind = "0.0.0.0:" + str(os.environ.get("PORT", "10000"))
 backlog = 2048
 
 # Worker processes
-# For free tier, limit to 1 worker to stay within memory limits
+# Default to 1 worker for free tier (512MB RAM) to stay within memory limits
+# Can be overridden by setting WEB_CONCURRENCY environment variable
+# For production with more memory, consider: workers = (2 * cpu_count) + 1
 workers = int(os.environ.get("WEB_CONCURRENCY", 1))
 worker_class = "sync"
 worker_connections = 1000

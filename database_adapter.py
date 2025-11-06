@@ -33,7 +33,8 @@ def get_connection_params():
         
         # Parse the database URL
         if database_url:
-            # Render uses postgres:// but psycopg2 needs postgresql://
+            # Many platforms (Render, Heroku, etc.) use postgres:// but psycopg2 requires postgresql://
+            # This is a common compatibility fix across multiple cloud platforms
             if database_url.startswith('postgres://'):
                 database_url = database_url.replace('postgres://', 'postgresql://', 1)
             
@@ -128,8 +129,15 @@ def print_database_info():
     
     if db_type == 'postgresql':
         print("✅ Database Type: PostgreSQL")
-        print("🌐 Environment: Production (Render.com)")
-        print(f"🔗 Connection: {params['url'][:30]}...")
+        print("🌐 Environment: Production")
+        # Safely display connection info without exposing credentials
+        from urllib.parse import urlparse
+        try:
+            parsed = urlparse(params['url'])
+            safe_url = f"{parsed.scheme}://*****:*****@{parsed.hostname}:{parsed.port or 5432}/{parsed.path.lstrip('/')}"
+            print(f"🔗 Connection: {safe_url}")
+        except:
+            print("🔗 Connection: [secured]")
     else:
         print("✅ Database Type: SQLite")
         print("💻 Environment: Development (Local)")
