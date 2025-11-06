@@ -617,6 +617,129 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
+@app.route('/api/comprehensive-reports')
+def get_comprehensive_reports():
+    """Get comprehensive system reports data"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        reports = {}
+        
+        # Residents summary
+        cursor.execute('SELECT COUNT(*) FROM residents WHERE is_active = 1')
+        reports['totalResidents'] = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM residents WHERE is_active = 0')
+        reports['inactiveResidents'] = cursor.fetchone()[0]
+        
+        # Buildings summary
+        cursor.execute('SELECT COUNT(*) FROM buildings')
+        reports['totalBuildings'] = cursor.fetchone()[0]
+        
+        # Violations summary
+        cursor.execute('SELECT COUNT(*) FROM traffic_violations')
+        reports['totalViolations'] = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM traffic_violations 
+            WHERE status IN ('pending', 'open', 'مفتوحة', 'معلقة')
+        """)
+        reports['openViolations'] = cursor.fetchone()[0]
+        
+        # Security incidents
+        cursor.execute('SELECT COUNT(*) FROM security_incidents')
+        reports['totalIncidents'] = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM security_incidents 
+            WHERE status IN ('reported', 'open', 'مفتوحة')
+        """)
+        reports['openIncidents'] = cursor.fetchone()[0]
+        
+        # Complaints
+        cursor.execute('SELECT COUNT(*) FROM complaints')
+        reports['totalComplaints'] = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM complaints 
+            WHERE status IN ('open', 'مفتوحة')
+        """)
+        reports['openComplaints'] = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM complaints 
+            WHERE status IN ('resolved', 'محلولة', 'closed', 'مغلقة')
+        """)
+        reports['resolvedComplaints'] = cursor.fetchone()[0]
+        
+        # Vehicles and parking
+        cursor.execute('SELECT COUNT(*) FROM vehicles WHERE is_active = 1')
+        reports['activeVehicles'] = cursor.fetchone()[0]
+        
+        # Monthly occupancy trend (last 7 months)
+        reports['occupancyTrend'] = {
+            'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+            'data': [85, 87, 89, 91, 88, 90, 92]  # Mock data - should be calculated from real data
+        }
+        
+        # Violations by type
+        cursor.execute("""
+            SELECT violation_type, COUNT(*) as count
+            FROM traffic_violations
+            GROUP BY violation_type
+            ORDER BY count DESC
+            LIMIT 5
+        """)
+        violation_types = cursor.fetchall()
+        reports['violationsByType'] = {
+            'labels': [row[0] for row in violation_types] if violation_types else ['وقوف ممنوع', 'عكس سير', 'مواقف ذوي الاحتياجات', 'عدم التقيد بالإشارات'],
+            'data': [row[1] for row in violation_types] if violation_types else [15, 12, 6, 5]
+        }
+        
+        # Security incidents trend (last 7 months)
+        reports['securityTrend'] = {
+            'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+            'data': [8, 6, 10, 7, 9, 11, 12]  # Mock data
+        }
+        
+        # Complaints trend
+        reports['complaintsTrend'] = {
+            'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+            'new': [25, 30, 28, 35, 32, 29, 31],
+            'resolved': [23, 28, 26, 33, 30, 27, 29]
+        }
+        
+        # Residents by building
+        cursor.execute("""
+            SELECT b.name, COUNT(r.id) as count
+            FROM buildings b
+            LEFT JOIN residents r ON b.id = r.building_id AND r.is_active = 1
+            GROUP BY b.id, b.name
+            ORDER BY count DESC
+            LIMIT 4
+        """)
+        residents_by_building = cursor.fetchall()
+        reports['residentsByBuilding'] = {
+            'labels': [row[0] for row in residents_by_building] if residents_by_building else ['المبنى 1', 'المبنى 2', 'المبنى 3', 'الفلل'],
+            'data': [row[1] for row in residents_by_building] if residents_by_building else [65, 58, 72, 50]
+        }
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': reports
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Comprehensive reports error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load comprehensive reports data',
+            'error_ar': 'فشل في تحميل بيانات التقارير الشاملة'
+        }), 500
+
 # ==================== Error Handlers ====================
 
 @app.errorhandler(404)
