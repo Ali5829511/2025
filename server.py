@@ -29,16 +29,36 @@ app = Flask(__name__)
 
 # CORS Configuration for production deployment
 # إعدادات CORS للنشر على الإنتاج
+
+# Get deployment URL from environment or use default
+DEPLOYMENT_URL = os.environ.get('DEPLOYMENT_URL', 'https://housing-management-system-83yt.onrender.com')
+
+# Default allowed origins
 ALLOWED_ORIGINS = [
-    'https://housing-management-system-83yt.onrender.com',
+    DEPLOYMENT_URL,
     'http://localhost:5000',
     'http://127.0.0.1:5000'
 ]
 
-# Get additional origins from environment variable if specified
+# Validate and add additional origins from environment variable if specified
+def validate_origin(origin):
+    """Validate that an origin is a properly formatted URL"""
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(origin)
+        # Must have scheme (http/https) and netloc (domain)
+        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
+    except Exception:
+        return False
+
 env_origins = os.environ.get('ALLOWED_ORIGINS', '')
 if env_origins:
-    ALLOWED_ORIGINS.extend([origin.strip() for origin in env_origins.split(',') if origin.strip()])
+    for origin in env_origins.split(','):
+        origin = origin.strip()
+        if origin and validate_origin(origin):
+            ALLOWED_ORIGINS.append(origin)
+        elif origin:
+            app.logger.warning(f'Ignored invalid origin from ALLOWED_ORIGINS: {origin}')
 
 # Configure CORS with proper settings for production
 CORS(app, 
