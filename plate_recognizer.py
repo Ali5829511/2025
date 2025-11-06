@@ -11,7 +11,15 @@ import requests
 import base64
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
+from io import BytesIO
 import database
+
+try:
+    from PIL import Image, ImageEnhance, ImageFilter
+    PILLOW_AVAILABLE = True
+except ImportError:
+    PILLOW_AVAILABLE = False
+    print("Warning: Pillow not installed. Image preprocessing will be disabled.")
 
 # API Configuration
 API_TOKEN = os.environ.get('PLATE_RECOGNIZER_API_TOKEN', '')
@@ -29,7 +37,121 @@ def is_configured() -> bool:
     return bool(API_TOKEN and API_TOKEN != 'your-api-token-here')
 
 
-def recognize_plate_from_file(image_path: str, regions: Optional[List[str]] = None) -> Dict:
+def preprocess_image(image_bytes: bytes, enhance: bool = True) -> bytes:
+    """
+    Preprocess image to improve plate recognition accuracy
+    معالجة الصورة مسبقاً لتحسين دقة تمييز اللوحات
+    
+    Args:
+        image_bytes: Original image bytes
+        enhance: Whether to apply image enhancements
+    
+    Returns:
+        bytes: Preprocessed image bytes
+    """
+    if not PILLOW_AVAILABLE or not enhance:
+        return image_bytes
+    
+    try:
+        # Open image
+        image = Image.open(BytesIO(image_bytes))
+        
+        # Convert to RGB if needed
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Apply enhancements for better plate detection
+        # 1. Increase contrast
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(1.3)
+        
+        # 2. Increase sharpness
+        enhancer = ImageEnhance.Sharpness(image)
+        image = enhancer.enhance(1.5)
+        
+        # 3. Adjust brightness slightly
+        enhancer = ImageEnhance.Brightness(image)
+        image = enhancer.enhance(1.1)
+        
+        # 4. Apply slight sharpening filter
+        image = image.filter(ImageFilter.SHARPEN)
+        
+        # Convert back to bytes
+        output = BytesIO()
+        image.save(output, format='JPEG', quality=95, optimize=True)
+        return output.getvalue()
+    
+    except Exception as e:
+        print(f"Error preprocessing image: {str(e)}")
+        return image_bytes
+
+
+def validate_image_quality(image_bytes: bytes) -> Dict:
+    """
+    Validate image quality for plate recognition
+    التحقق من جودة الصورة لتمييز اللوحات
+    
+    Args:
+        image_bytes: Image bytes to validate
+    
+    Returns:
+        Dict with validation results:
+        {
+            'valid': bool,
+            'issues': List[str],
+            'warnings': List[str],
+            'resolution': Tuple[int, int],
+            'file_size': int
+        }
+    """
+    result = {
+        'valid': True,
+        'issues': [],
+        'warnings': [],
+        'resolution': None,
+        'file_size': len(image_bytes)
+    }
+    
+    if not PILLOW_AVAILABLE:
+        return result
+    
+    try:
+        image = Image.open(BytesIO(image_bytes))
+        result['resolution'] = image.size
+        width, height = image.size
+        
+        # Check minimum resolution
+        if width < 400 or height < 300:
+            result['issues'].append('Image resolution too low (minimum 400x300 recommended)')
+            result['issues'].append('دقة الصورة منخفضة جداً (ينصح بـ 400×300 كحد أدنى)')
+            result['valid'] = False
+        
+        # Check if image is too small
+        elif width < 800 or height < 600:
+            result['warnings'].append('Image resolution is low. Higher resolution recommended for better accuracy.')
+            result['warnings'].append('دقة الصورة منخفضة. يُنصح بدقة أعلى لنتائج أفضل.')
+        
+        # Check file size
+        if len(image_bytes) > 10 * 1024 * 1024:  # 10MB
+            result['warnings'].append('Image file size is very large. This may slow down processing.')
+            result['warnings'].append('حجم الصورة كبير جداً. قد يؤدي ذلك إلى بطء المعالجة.')
+        
+        # Check aspect ratio (should be reasonable for car plates)
+        aspect_ratio = width / height
+        if aspect_ratio < 0.5 or aspect_ratio > 3.0:
+            result['warnings'].append('Unusual image aspect ratio. Ensure the plate is clearly visible.')
+            result['warnings'].append('نسبة أبعاد الصورة غير عادية. تأكد من وضوح اللوحة.')
+    
+    except Exception as e:
+        result['valid'] = False
+        result['issues'].append(f'Error validating image: {str(e)}')
+        result['issues'].append(f'خطأ في التحقق من الصورة: {str(e)}')
+    
+    return result
+
+
+def recognize_plate_from_file(image_path: str, regions: Optional[List[str]] = None,
+                             enhance: bool = True, min_confidence: float = 0.0) -> Dict:
     """
     Recognize license plate from an image file
     تمييز لوحة السيارة من ملف صورة
@@ -37,6 +159,8 @@ def recognize_plate_from_file(image_path: str, regions: Optional[List[str]] = No
     Args:
         image_path: Path to the image file
         regions: Optional list of region codes to improve accuracy (e.g., ['sa'] for Saudi Arabia)
+        enhance: Whether to preprocess and enhance the image
+        min_confidence: Minimum confidence threshold (0.0-1.0)
     
     Returns:
         Dict containing recognition results with the following structure:
@@ -47,10 +171,13 @@ def recognize_plate_from_file(image_path: str, regions: Optional[List[str]] = No
                     'plate': str,          # Detected plate number
                     'confidence': float,   # Confidence score (0-1)
                     'region': str,        # Detected region
-                    'vehicle_type': str   # Type of vehicle
+                    'vehicle_type': str,  # Type of vehicle
+                    'candidates': list    # Alternative plate readings
                 }
             ],
-            'error': str (if success=False)
+            'error': str (if success=False),
+            'enhanced': bool,     # Whether image was enhanced
+            'validation': dict    # Image quality validation results
         }
     """
     if not is_configured():
@@ -62,7 +189,7 @@ def recognize_plate_from_file(image_path: str, regions: Optional[List[str]] = No
     
     try:
         with open(image_path, 'rb') as image_file:
-            return recognize_plate_from_bytes(image_file.read(), regions)
+            return recognize_plate_from_bytes(image_file.read(), regions, enhance, min_confidence)
     except FileNotFoundError:
         return {
             'success': False,
@@ -77,7 +204,8 @@ def recognize_plate_from_file(image_path: str, regions: Optional[List[str]] = No
         }
 
 
-def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] = None) -> Dict:
+def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] = None, 
+                              enhance: bool = True, min_confidence: float = 0.0) -> Dict:
     """
     Recognize license plate from image bytes
     تمييز لوحة السيارة من بيانات الصورة
@@ -85,6 +213,8 @@ def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] 
     Args:
         image_bytes: Image data as bytes
         regions: Optional list of region codes (e.g., ['sa'] for Saudi Arabia)
+        enhance: Whether to preprocess and enhance the image (default: True)
+        min_confidence: Minimum confidence threshold (0.0-1.0, default: 0.0)
     
     Returns:
         Dict containing recognition results
@@ -97,12 +227,25 @@ def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] 
         }
     
     try:
+        # Validate image quality
+        validation = validate_image_quality(image_bytes)
+        if not validation['valid']:
+            return {
+                'success': False,
+                'error': 'Image quality validation failed: ' + '; '.join(validation['issues']),
+                'error_ar': 'فشل التحقق من جودة الصورة: ' + '; '.join(validation['issues']),
+                'validation': validation
+            }
+        
+        # Preprocess image if enhancement is enabled
+        processed_bytes = preprocess_image(image_bytes, enhance) if enhance else image_bytes
+        
         headers = {
             'Authorization': f'Token {API_TOKEN}'
         }
         
         files = {
-            'upload': image_bytes
+            'upload': processed_bytes
         }
         
         data = {}
@@ -124,13 +267,28 @@ def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] 
             results = []
             if 'results' in api_response:
                 for result in api_response['results']:
+                    confidence = result.get('score', 0.0)
+                    
+                    # Filter by minimum confidence
+                    if confidence < min_confidence:
+                        continue
+                    
+                    # Extract candidate plates for verification
+                    candidates = []
+                    for candidate in result.get('candidates', []):
+                        if candidate.get('score', 0.0) >= min_confidence:
+                            candidates.append({
+                                'plate': candidate.get('plate', '').upper(),
+                                'confidence': candidate.get('score', 0.0)
+                            })
+                    
                     plate_data = {
                         'plate': result.get('plate', '').upper(),
-                        'confidence': result.get('score', 0.0),
+                        'confidence': confidence,
                         'region': result.get('region', {}).get('code', ''),
                         'vehicle_type': result.get('vehicle', {}).get('type', ''),
                         'box': result.get('box', {}),
-                        'candidates': result.get('candidates', [])
+                        'candidates': candidates[:5]  # Limit to top 5 candidates
                     }
                     results.append(plate_data)
             
@@ -138,7 +296,9 @@ def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] 
                 'success': True,
                 'results': results,
                 'processing_time': api_response.get('processing_time', 0),
-                'timestamp': datetime.now().isoformat()
+                'timestamp': datetime.now().isoformat(),
+                'enhanced': enhance,
+                'validation': validation if validation.get('warnings') else None
             }
         
         elif response.status_code == 401:
@@ -184,7 +344,8 @@ def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] 
         }
 
 
-def recognize_plate_from_base64(base64_image: str, regions: Optional[List[str]] = None) -> Dict:
+def recognize_plate_from_base64(base64_image: str, regions: Optional[List[str]] = None,
+                               enhance: bool = True, min_confidence: float = 0.0) -> Dict:
     """
     Recognize license plate from base64 encoded image
     تمييز لوحة السيارة من صورة مشفرة base64
@@ -192,6 +353,8 @@ def recognize_plate_from_base64(base64_image: str, regions: Optional[List[str]] 
     Args:
         base64_image: Base64 encoded image string
         regions: Optional list of region codes
+        enhance: Whether to preprocess and enhance the image
+        min_confidence: Minimum confidence threshold (0.0-1.0)
     
     Returns:
         Dict containing recognition results
@@ -204,7 +367,7 @@ def recognize_plate_from_base64(base64_image: str, regions: Optional[List[str]] 
         # Decode base64 to bytes
         image_bytes = base64.b64decode(base64_image)
         
-        return recognize_plate_from_bytes(image_bytes, regions)
+        return recognize_plate_from_bytes(image_bytes, regions, enhance, min_confidence)
     
     except Exception as e:
         return {
