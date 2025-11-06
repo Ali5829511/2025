@@ -54,3 +54,7 @@ Thumbs.db
 .env
 .env.local
 IMPLEMENTATION_SUMMARY.txt
+
+# Uploads and exports
+uploads/
+exports/
