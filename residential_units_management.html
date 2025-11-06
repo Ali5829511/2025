@@ -660,8 +660,8 @@
                         إعادة تعيين
                     </button>
                     <button onclick="exportData()" class="btn btn-success">
-                        <i class="fas fa-file-excel"></i>
-                        تصدير Excel
+                        <i class="fas fa-file-csv"></i>
+                        تصدير CSV
                     </button>
                 </div>
             </div>
@@ -678,19 +678,19 @@
                         <span id="results-count">عرض جميع الوحدات</span>
                     </div>
                 </div>
-                <table class="table">
+                <table class="table" role="table" aria-label="جدول الوحدات السكنية">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>رقم المبنى</th>
-                            <th>رقم الوحدة</th>
-                            <th>اسم الساكن</th>
-                            <th>رقم الهوية</th>
-                            <th>رقم الهاتف</th>
-                            <th>القسم</th>
-                            <th>الحالة</th>
-                            <th>تاريخ الإشغال</th>
-                            <th>الإجراءات</th>
+                            <th scope="col">#</th>
+                            <th scope="col">رقم المبنى</th>
+                            <th scope="col">رقم الوحدة</th>
+                            <th scope="col">اسم الساكن</th>
+                            <th scope="col">رقم الهوية</th>
+                            <th scope="col">رقم الهاتف</th>
+                            <th scope="col">القسم</th>
+                            <th scope="col">الحالة</th>
+                            <th scope="col">تاريخ الإشغال</th>
+                            <th scope="col">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="units-table-body">
@@ -899,10 +899,10 @@
                         <td>${unit.moveInDate}</td>
                         <td>
                             <div class="action-buttons">
-                                <button onclick="viewUnit(${unit.id})" class="btn btn-info btn-sm" title="عرض التفاصيل">
+                                <button onclick="viewUnit(${unit.id})" class="btn btn-info btn-sm" title="عرض التفاصيل" aria-label="عرض تفاصيل الوحدة ${unit.id}">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button onclick="editUnit(${unit.id})" class="btn btn-warning btn-sm" title="تعديل">
+                                <button onclick="editUnit(${unit.id})" class="btn btn-warning btn-sm" title="تعديل" aria-label="تعديل الوحدة ${unit.id}">
                                     <i class="fas fa-edit"></i>
                                 </button>
                             </div>
@@ -986,19 +986,24 @@
             // Download
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
+            link.href = url;
             link.download = `residential_units_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
+            
+            // Clean up the URL to prevent memory leaks
+            setTimeout(() => URL.revokeObjectURL(url), 100);
         }
 
         // Event listeners
-        document.getElementById('search-input').addEventListener('input', () => {
-            if (document.getElementById('search-input').value === '') {
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', () => {
+            if (searchInput.value === '') {
                 applyFilters();
             }
         });
 
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
+        searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 applyFilters();
             }
