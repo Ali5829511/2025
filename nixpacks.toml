@@ -1,0 +1,16 @@
+# Nixpacks configuration for Railway deployment
+# تكوين Nixpacks للنشر على Railway
+
+[phases.setup]
+nixPkgs = ["python311", "gcc", "postgresql"]
+
+[phases.install]
+cmds = [
+    "pip install -r requirements.txt"
+]
+
+# Note: Database initialization is handled in the start command
+# Database may not be available during build phase
+
+[start]
+cmd = "python init_db.py && gunicorn --config gunicorn_config.py server:app"

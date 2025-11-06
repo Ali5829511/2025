@@ -1,0 +1,36 @@
+# Render.com Blueprint Configuration
+# نظام إدارة إسكان أعضاء هيئة التدريس
+# Faculty Housing Management System
+
+services:
+  # Web Service - Flask Application
+  - type: web
+    name: housing-system
+    env: python
+    region: oregon
+    plan: free  # Free tier with trial period
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --config gunicorn_config.py server:app
+    healthCheckPath: /
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: housing-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+# Database - PostgreSQL
+databases:
+  - name: housing-db
+    databaseName: housing_db
+    user: housing_user
+    plan: free  # Free tier - 90 day trial, then expires
+    region: oregon
