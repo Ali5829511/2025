@@ -1,6 +1,27 @@
-gunicorn
+# Web Framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+Werkzeug==3.0.1
+
+# Environment and Configuration
+python-dotenv==1.0.0
+
+# Data Processing
 pandas==2.1.4
 numpy==1.26.4
+
+# Excel Support
+openpyxl==3.1.2
+
+# Image Processing
+Pillow==10.1.0
+
+# HTTP Requests
+requests==2.31.0
+
+# Production Server
+gunicorn==21.2.0
+
+# Build Dependencies
 cython==3.0.8
 wheel
-# ضع أي مكتبات أخرى يحتاجها المشروع تحت هذا السطر
