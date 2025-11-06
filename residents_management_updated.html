@@ -454,7 +454,7 @@
                     </h1>
                     <p class="header-subtitle">نظام إدارة بيانات سكان إسكان أعضاء هيئة التدريس</p>
                 </div>
-                <a href="dashboard.html" class="back-button">
+                <a href="main_dashboard.html" class="back-button">
                     <i class="fas fa-home"></i>
                     العودة للوحة التحكم
                 </a>
@@ -630,29 +630,57 @@
         let currentPage = 1;
         const itemsPerPage = 50;
 
-        // Load residents data
+        // Load residents data from API
         async function loadResidentsData() {
             try {
-                const response = await fetch('residents_data.json');
-                residentsData = await response.json();
-                filteredData = [...residentsData];
+                const response = await fetch('/api/residents');
+                const result = await response.json();
                 
-                updateStatistics();
-                updateChart();
-                displayResidents();
-                setupEventListeners();
-                
-                console.log('تم تحميل بيانات السكان:', residentsData.length, 'ساكن');
+                if (result.success) {
+                    // Transform API data to match expected format
+                    residentsData = result.data.map(r => ({
+                        'الاسم': r.name,
+                        'الرقم_الوظيفي': r.national_id,
+                        'القسم': r.department || '-',
+                        'الوحدة_السكنية': r.building_number ? `${r.building_name} - شقة ${r.unit_number}` : '-',
+                        'الهاتف': r.phone,
+                        'البريد_الإلكتروني': r.email || '-',
+                        'building_number': r.building_number,
+                        'unit_number': r.unit_number,
+                        'job_title': r.job_title,
+                        'is_active': r.is_active
+                    }));
+                    filteredData = [...residentsData];
+                    
+                    updateStatistics();
+                    updateChart();
+                    displayResidents();
+                    setupEventListeners();
+                    
+                    console.log('تم تحميل بيانات السكان:', residentsData.length, 'ساكن');
+                } else {
+                    throw new Error(result.error_ar || result.error || 'فشل في تحميل البيانات');
+                }
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
                 document.getElementById('residentsTableBody').innerHTML = `
                     <tr>
-                        <td colspan="6" style="color: red; text-align: center;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            خطأ في تحميل البيانات
+                        <td colspan="6" style="color: red; text-align: center; padding: 40px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <br>
+                            <strong>خطأ في تحميل البيانات</strong>
+                            <br>
+                            <small>${error.message}</small>
+                            <br><br>
+                            <small>لا توجد بيانات سكان في النظام حالياً</small>
                         </td>
                     </tr>
                 `;
+                // Set zeros for statistics when no data
+                document.getElementById('totalResidents').textContent = '0';
+                document.getElementById('villaResidents').textContent = '0';
+                document.getElementById('apartmentResidents').textContent = '0';
+                document.getElementById('occupancyRate').textContent = '0%';
             }
         }
 

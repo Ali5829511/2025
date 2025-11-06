@@ -428,9 +428,9 @@
             إدارة المباني
             <small style="font-size: 0.7rem; color: #666;">نظام إدارة المباني السكنية وبياناتها</small>
         </h1>
-        <a href="dashboard.html" class="back-btn">
+        <a href="main_dashboard.html" class="back-btn">
             <i class="fas fa-arrow-right"></i>
-            العودة لوحة التحكم
+            العودة للرئيسية
         </a>
     </div>
 
@@ -564,20 +564,34 @@
         const itemsPerPage = 50;
         let chart = null;
 
-        // تحميل البيانات
+        // تحميل البيانات من قاعدة البيانات
         async function loadBuildingsData() {
             try {
-                const response = await fetch('buildings_data.json');
+                const response = await fetch('/api/buildings');
                 if (!response.ok) {
-                    throw new Error('فشل في تحميل البيانات');
+                    throw new Error('فشل في تحميل البيانات من الخادم');
                 }
-                allBuildingsData = await response.json();
-                filteredData = [...allBuildingsData];
+                const result = await response.json();
                 
-                updateStatistics();
-                updateChart();
-                populateFilters();
-                displayTable();
+                if (result.success) {
+                    // Transform database format to expected format
+                    allBuildingsData = result.data.map(b => ({
+                        'اسم المبنى': b.name,
+                        'الموقع': b.address,
+                        'النوع': b.address === 'منطقة الفلل' ? 'فلة' : 'شقة',
+                        'الوصف': b.address === 'منطقة الفلل' ? 'فيلا' : 'عمارة',
+                        'عدد الشقق': b.total_units,
+                        'رقم المبنى': b.building_number
+                    }));
+                    filteredData = [...allBuildingsData];
+                    
+                    updateStatistics();
+                    updateChart();
+                    populateFilters();
+                    displayTable();
+                } else {
+                    throw new Error(result.error_ar || result.error || 'فشل في تحميل البيانات');
+                }
                 
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
@@ -586,6 +600,8 @@
                         <td colspan="5" class="no-data">
                             <i class="fas fa-exclamation-triangle"></i>
                             خطأ في تحميل البيانات: ${error.message}
+                            <br>
+                            <small>تأكد من تشغيل الخادم بشكل صحيح</small>
                         </td>
                     </tr>
                 `;

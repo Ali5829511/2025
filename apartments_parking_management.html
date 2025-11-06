@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الشقق والمواقف - وحدة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #0f3d68;
+            font-weight: bold;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: white;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #f0f0f0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0f3d68;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f3d68;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #2e8bc0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2e8bc0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0f3d68;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ef;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #2e8bc0;
+            font-size: 18px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="university-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h1>إدارة الشقق والمواقف</h1>
+            </div>
+            <div class="nav-links">
+                <a href="main_dashboard.html" class="nav-link">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للرئيسية
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-door-open stat-icon" style="color: #2e8bc0;"></i>
+                <div class="stat-number" id="totalApartments">0</div>
+                <div class="stat-label">إجمالي الشقق</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-parking stat-icon" style="color: #28a745;"></i>
+                <div class="stat-number" id="totalParking">0</div>
+                <div class="stat-label">إجمالي المواقف</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-user-check stat-icon" style="color: #17a2b8;"></i>
+                <div class="stat-number" id="occupiedApartments">0</div>
+                <div class="stat-label">الشقق المشغولة</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-car stat-icon" style="color: #ffc107;"></i>
+                <div class="stat-number" id="occupiedParking">0</div>
+                <div class="stat-label">المواقف المشغولة</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('apartments')">
+                <i class="fas fa-home"></i>
+                الشقق
+            </button>
+            <button class="tab" onclick="switchTab('parking')">
+                <i class="fas fa-parking"></i>
+                المواقف
+            </button>
+        </div>
+
+        <!-- Apartments Tab -->
+        <div id="apartments-content" class="tab-content active">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-list"></i>
+                        قائمة الشقق
+                    </h2>
+                    <button class="btn btn-secondary" onclick="exportData('apartments')">
+                        <i class="fas fa-download"></i>
+                        تصدير
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" id="apartmentSearch" class="search-input" placeholder="البحث برقم الشقة أو المبنى...">
+                    <select id="apartmentBuildingFilter" class="filter-select">
+                        <option value="">جميع المباني</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم المبنى</th>
+                                <th>اسم المبنى</th>
+                                <th>رقم الشقة</th>
+                                <th>الطابق</th>
+                                <th>النوع</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apartmentsTableBody">
+                            <tr>
+                                <td colspan="6" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    جاري تحميل البيانات...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parking Tab -->
+        <div id="parking-content" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-list"></i>
+                        قائمة المواقف
+                    </h2>
+                    <button class="btn btn-secondary" onclick="exportData('parking')">
+                        <i class="fas fa-download"></i>
+                        تصدير
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" id="parkingSearch" class="search-input" placeholder="البحث برقم الموقف أو المنطقة...">
+                    <select id="parkingAreaFilter" class="filter-select">
+                        <option value="">جميع المناطق</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الموقف</th>
+                                <th>منطقة الوقوف</th>
+                                <th>المبنى</th>
+                                <th>رقم الشقة</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="parkingTableBody">
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    جاري تحميل البيانات...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apartmentsData = [];
+        let parkingData = [];
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.tab').classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
+        // Load apartments data
+        async function loadApartments() {
+            try {
+                const response = await fetch('/api/apartments');
+                const result = await response.json();
+                
+                if (result.success) {
+                    apartmentsData = result.data;
+                    renderApartmentsTable();
+                    populateBuildingFilter();
+                    updateStats();
+                } else {
+                    showError('apartmentsTableBody', 'فشل في تحميل بيانات الشقق', 6);
+                }
+            } catch (error) {
+                console.error('Error loading apartments:', error);
+                showError('apartmentsTableBody', 'حدث خطأ في الاتصال بالخادم', 6);
+            }
+        }
+
+        // Load parking data
+        async function loadParking() {
+            try {
+                const response = await fetch('/api/parking-spots');
+                const result = await response.json();
+                
+                if (result.success) {
+                    parkingData = result.data;
+                    renderParkingTable();
+                    populateAreaFilter();
+                    updateStats();
+                } else {
+                    showError('parkingTableBody', 'فشل في تحميل بيانات المواقف', 5);
+                }
+            } catch (error) {
+                console.error('Error loading parking:', error);
+                showError('parkingTableBody', 'حدث خطأ في الاتصال بالخادم', 5);
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalApartments').textContent = apartmentsData.length;
+            document.getElementById('totalParking').textContent = parkingData.length;
+            
+            const occupiedApts = apartmentsData.filter(a => a.is_occupied).length;
+            const occupiedParking = parkingData.filter(p => p.is_occupied).length;
+            
+            document.getElementById('occupiedApartments').textContent = occupiedApts;
+            document.getElementById('occupiedParking').textContent = occupiedParking;
+        }
+
+        // Render apartments table
+        function renderApartmentsTable(data = apartmentsData) {
+            const tbody = document.getElementById('apartmentsTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-data">
+                            <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                            <br>
+                            لا توجد شقق مسجلة
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(apt => {
+                const statusClass = apt.is_occupied ? 'badge-danger' : 'badge-success';
+                const statusText = apt.is_occupied ? 'مشغولة' : 'شاغرة';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${apt.building_number}</strong></td>
+                    <td>${apt.building_name}</td>
+                    <td>${apt.unit_number}</td>
+                    <td>${apt.floor_number || '-'}</td>
+                    <td>${apt.unit_type}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Render parking table
+        function renderParkingTable(data = parkingData) {
+            const tbody = document.getElementById('parkingTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="no-data">
+                            <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                            <br>
+                            لا توجد مواقف مسجلة
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(spot => {
+                const statusClass = spot.is_occupied ? 'badge-danger' : 'badge-success';
+                const statusText = spot.is_occupied ? 'مشغول' : 'شاغر';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${spot.spot_number}</strong></td>
+                    <td>${spot.parking_area}</td>
+                    <td>${spot.building_name || '-'}</td>
+                    <td>${spot.unit_number || '-'}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate building filter
+        function populateBuildingFilter() {
+            const filter = document.getElementById('apartmentBuildingFilter');
+            const buildings = [...new Set(apartmentsData.map(a => a.building_number))].sort();
+            
+            buildings.forEach(building => {
+                const option = document.createElement('option');
+                option.value = building;
+                option.textContent = `المبنى ${building}`;
+                filter.appendChild(option);
+            });
+        }
+
+        // Populate area filter
+        function populateAreaFilter() {
+            const filter = document.getElementById('parkingAreaFilter');
+            const areas = [...new Set(parkingData.map(p => p.parking_area))].sort();
+            
+            areas.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area;
+                option.textContent = area;
+                filter.appendChild(option);
+            });
+        }
+
+        // Search apartments
+        document.getElementById('apartmentSearch').addEventListener('input', filterApartments);
+        document.getElementById('apartmentBuildingFilter').addEventListener('change', filterApartments);
+
+        function filterApartments() {
+            const searchTerm = document.getElementById('apartmentSearch').value.toLowerCase();
+            const buildingFilter = document.getElementById('apartmentBuildingFilter').value;
+            
+            let filtered = apartmentsData;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(apt => 
+                    apt.unit_number.toLowerCase().includes(searchTerm) ||
+                    apt.building_name.toLowerCase().includes(searchTerm) ||
+                    apt.building_number.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (buildingFilter) {
+                filtered = filtered.filter(apt => apt.building_number === buildingFilter);
+            }
+            
+            renderApartmentsTable(filtered);
+        }
+
+        // Search parking
+        document.getElementById('parkingSearch').addEventListener('input', filterParking);
+        document.getElementById('parkingAreaFilter').addEventListener('change', filterParking);
+
+        function filterParking() {
+            const searchTerm = document.getElementById('parkingSearch').value.toLowerCase();
+            const areaFilter = document.getElementById('parkingAreaFilter').value;
+            
+            let filtered = parkingData;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(spot => 
+                    spot.spot_number.toLowerCase().includes(searchTerm) ||
+                    spot.parking_area.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (areaFilter) {
+                filtered = filtered.filter(spot => spot.parking_area === areaFilter);
+            }
+            
+            renderParkingTable(filtered);
+        }
+
+        // Export data
+        function exportData(type) {
+            if (type === 'apartments') {
+                if (apartmentsData.length === 0) {
+                    alert('لا توجد بيانات للتصدير');
+                    return;
+                }
+                
+                const csv = [
+                    ['رقم المبنى', 'اسم المبنى', 'رقم الشقة', 'الطابق', 'النوع', 'الحالة'],
+                    ...apartmentsData.map(a => [
+                        a.building_number,
+                        a.building_name,
+                        a.unit_number,
+                        a.floor_number || '-',
+                        a.unit_type,
+                        a.is_occupied ? 'مشغولة' : 'شاغرة'
+                    ])
+                ].map(row => row.join(',')).join('\n');
+                
+                downloadCSV(csv, `apartments_${new Date().toISOString().split('T')[0]}.csv`);
+            } else {
+                if (parkingData.length === 0) {
+                    alert('لا توجد بيانات للتصدير');
+                    return;
+                }
+                
+                const csv = [
+                    ['رقم الموقف', 'منطقة الوقوف', 'المبنى', 'رقم الشقة', 'الحالة'],
+                    ...parkingData.map(p => [
+                        p.spot_number,
+                        p.parking_area,
+                        p.building_name || '-',
+                        p.unit_number || '-',
+                        p.is_occupied ? 'مشغول' : 'شاغر'
+                    ])
+                ].map(row => row.join(',')).join('\n');
+                
+                downloadCSV(csv, `parking_${new Date().toISOString().split('T')[0]}.csv`);
+            }
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        function showError(elementId, message, colspan) {
+            document.getElementById(elementId).innerHTML = `
+                <tr>
+                    <td colspan="${colspan}" class="no-data">
+                        <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 48px; margin-bottom: 15px;"></i>
+                        <br>
+                        ${message}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadApartments();
+            loadParking();
+        });
+    </script>
+</body>
+</html>
