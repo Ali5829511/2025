@@ -26,7 +26,26 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+
+# CORS Configuration for production deployment
+# إعدادات CORS للنشر على الإنتاج
+ALLOWED_ORIGINS = [
+    'https://housing-management-system-83yt.onrender.com',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000'
+]
+
+# Get additional origins from environment variable if specified
+env_origins = os.environ.get('ALLOWED_ORIGINS', '')
+if env_origins:
+    ALLOWED_ORIGINS.extend([origin.strip() for origin in env_origins.split(',') if origin.strip()])
+
+# Configure CORS with proper settings for production
+CORS(app, 
+     supports_credentials=True,
+     origins=ALLOWED_ORIGINS,
+     allow_headers=['Content-Type', 'Authorization'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
