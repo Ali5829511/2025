@@ -276,7 +276,7 @@ def plate_recognizer_status():
         app.logger.error(f'Plate recognizer status error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في التحقق من حالة الخدمة'
         }), 500
 
@@ -353,7 +353,7 @@ def recognize_plate():
         app.logger.error(f'Plate recognition error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في تمييز اللوحة'
         }), 500
 
@@ -410,7 +410,7 @@ def plate_recognition_history():
         app.logger.error(f'Plate recognition history error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في جلب سجل التمييز'
         }), 500
 
@@ -547,7 +547,7 @@ def list_vehicle_access():
         app.logger.error(f'Vehicle tracking list error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في جلب البيانات'
         }), 500
 
@@ -591,7 +591,7 @@ def vehicle_tracking_stats():
         app.logger.error(f'Vehicle tracking stats error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في جلب الإحصائيات'
         }), 500
 
@@ -674,7 +674,7 @@ def add_vehicle_access():
         app.logger.error(f'Add vehicle access error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في تسجيل دخول السيارة'
         }), 500
 
@@ -727,7 +727,7 @@ def exit_vehicle_access(vehicle_id):
         app.logger.error(f'Exit vehicle error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في تسجيل خروج السيارة'
         }), 500
 
@@ -777,7 +777,7 @@ def delete_vehicle_access(vehicle_id):
         app.logger.error(f'Delete vehicle error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في حذف السجل'
         }), 500
 
@@ -832,7 +832,7 @@ def export_vehicle_data():
         app.logger.error(f'Export vehicle data error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في تصدير البيانات'
         }), 500
 
@@ -926,7 +926,7 @@ def import_vehicle_data():
         app.logger.error(f'Import vehicle data error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Internal server error',
             'error_ar': 'خطأ في استيراد البيانات'
         }), 500
 
