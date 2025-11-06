@@ -218,6 +218,38 @@ def init_database():
     )
     ''')
     
+    # Apartments table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS apartments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        building_id INTEGER NOT NULL,
+        unit_number TEXT NOT NULL,
+        floor_number INTEGER,
+        unit_type TEXT DEFAULT 'شقة',
+        is_occupied INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (building_id) REFERENCES buildings (id),
+        UNIQUE(building_id, unit_number)
+    )
+    ''')
+    
+    # Parking spots table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS parking_spots (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        spot_number TEXT UNIQUE NOT NULL,
+        parking_area TEXT NOT NULL,
+        building_id INTEGER,
+        apartment_id INTEGER,
+        is_occupied INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (building_id) REFERENCES buildings (id),
+        FOREIGN KEY (apartment_id) REFERENCES apartments (id)
+    )
+    ''')
+    
     conn.commit()
     
     # Check if default users exist

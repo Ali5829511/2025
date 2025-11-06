@@ -617,6 +617,120 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
+@app.route('/api/apartments')
+def get_apartments():
+    """Get all apartments with building info"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        building_id = request.args.get('building_id', type=int)
+        
+        if building_id:
+            cursor.execute('''
+                SELECT a.id, a.unit_number, a.floor_number, a.unit_type, a.is_occupied,
+                       b.name as building_name, b.building_number
+                FROM apartments a
+                JOIN buildings b ON a.building_id = b.id
+                WHERE a.building_id = ?
+                ORDER BY a.floor_number, a.unit_number
+            ''', (building_id,))
+        else:
+            cursor.execute('''
+                SELECT a.id, a.unit_number, a.floor_number, a.unit_type, a.is_occupied,
+                       b.name as building_name, b.building_number
+                FROM apartments a
+                JOIN buildings b ON a.building_id = b.id
+                ORDER BY b.building_number, a.floor_number, a.unit_number
+            ''')
+        
+        apartments = []
+        for row in cursor.fetchall():
+            apartments.append({
+                'id': row[0],
+                'unit_number': row[1],
+                'floor_number': row[2],
+                'unit_type': row[3],
+                'is_occupied': row[4],
+                'building_name': row[5],
+                'building_number': row[6]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': apartments,
+            'total': len(apartments)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Apartments API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load apartments data',
+            'error_ar': 'فشل في تحميل بيانات الشقق'
+        }), 500
+
+@app.route('/api/parking-spots')
+def get_parking_spots():
+    """Get all parking spots with building and apartment info"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        building_id = request.args.get('building_id', type=int)
+        
+        if building_id:
+            cursor.execute('''
+                SELECT p.id, p.spot_number, p.parking_area, p.is_occupied,
+                       b.name as building_name, b.building_number,
+                       a.unit_number
+                FROM parking_spots p
+                LEFT JOIN buildings b ON p.building_id = b.id
+                LEFT JOIN apartments a ON p.apartment_id = a.id
+                WHERE p.building_id = ?
+                ORDER BY p.spot_number
+            ''', (building_id,))
+        else:
+            cursor.execute('''
+                SELECT p.id, p.spot_number, p.parking_area, p.is_occupied,
+                       b.name as building_name, b.building_number,
+                       a.unit_number
+                FROM parking_spots p
+                LEFT JOIN buildings b ON p.building_id = b.id
+                LEFT JOIN apartments a ON p.apartment_id = a.id
+                ORDER BY p.parking_area, p.spot_number
+            ''')
+        
+        parking_spots = []
+        for row in cursor.fetchall():
+            parking_spots.append({
+                'id': row[0],
+                'spot_number': row[1],
+                'parking_area': row[2],
+                'is_occupied': row[3],
+                'building_name': row[4],
+                'building_number': row[5],
+                'unit_number': row[6]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': parking_spots,
+            'total': len(parking_spots)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Parking spots API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load parking spots data',
+            'error_ar': 'فشل في تحميل بيانات المواقف'
+        }), 500
+
 @app.route('/api/buildings')
 def get_buildings():
     """Get all buildings data"""
