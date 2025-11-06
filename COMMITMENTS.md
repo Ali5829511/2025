@@ -419,5 +419,5 @@ We hereby confirm that all commitments listed in this document have been fully f
 
 ---
 
-**جامعة الإمام محمد بن سعود الإسلامية © 2025**  
-**Imam Mohammad Ibn Saud Islamic University © 2025**
+**جامعة الإمام محمد بن سعود الإسلامية © 2024**  
+**Imam Mohammad Ibn Saud Islamic University © 2024**
