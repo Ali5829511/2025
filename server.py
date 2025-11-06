@@ -1353,7 +1353,7 @@ def get_comprehensive_reports():
 # ==================== Car Image Upload and Analysis Routes ====================
 
 @app.route('/api/car-images/upload', methods=['POST'])
-@auth.login_required
+@auth.require_auth
 def upload_car_images():
     """
     Upload multiple car images for analysis
@@ -1476,7 +1476,7 @@ def upload_car_images():
 
 
 @app.route('/api/car-images/analysis', methods=['GET'])
-@auth.login_required
+@auth.require_auth
 def get_car_analysis():
     """
     Get car analysis records
@@ -1501,7 +1501,7 @@ def get_car_analysis():
 
 
 @app.route('/api/car-images/export/<format>', methods=['POST'])
-@auth.login_required
+@auth.require_auth
 def export_car_analysis(format):
     """
     Export car analysis data in specified format (excel, pdf, html)
@@ -1609,7 +1609,7 @@ def export_car_analysis(format):
 
 
 @app.route('/api/car-images/thumbnail/<int:image_id>', methods=['GET'])
-@auth.login_required
+@auth.require_auth
 def get_car_thumbnail(image_id):
     """
     Get thumbnail for a car image
