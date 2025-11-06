@@ -1,5 +1,20 @@
 # سجل التغييرات / Changelog
 
+## [2.0.1] - ديسمبر 2025 / December 2025
+
+### 🚀 تحديثات النشر / Deployment Updates
+### Deployment Ready: Production Release
+
+#### ✅ جاهز للنشر / Ready for Deployment
+- ✅ جميع الأنظمة تم اختبارها وجاهزة للإنتاج / All systems tested and production-ready
+- ✅ الوثائق محدثة وشاملة / Documentation updated and comprehensive
+- ✅ نظام الأمان مفعل بالكامل / Security system fully activated
+- ✅ إحصائيات اللوحة الرئيسية محدثة / Main dashboard statistics updated
+- ✅ تصميم متجاوب ومحسّن / Responsive and optimized design
+- ✅ دعم Docker للنشر السريع / Docker support for quick deployment
+
+---
+
 ## [2.0.0] - نوفمبر 2025 / November 2025
 
 ### 🎉 تحديث رئيسي: نظام قاعدة البيانات والمصادقة الآمن

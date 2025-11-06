@@ -1,9 +1,15 @@
 # نظام إدارة إسكان أعضاء هيئة التدريس
 # Faculty Housing Management System
 
+**🚀 الإصدار 2.0.1 - جاهز للنشر / Version 2.0.1 - Production Ready**
+
 نظام شامل لإدارة إسكان أعضاء هيئة التدريس في جامعة الإمام محمد بن سعود الإسلامية.
 
 A comprehensive system for managing faculty housing at Imam Mohammad Ibn Saud Islamic University.
+
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](https://github.com/Ali5829511/2025)
+[![Version](https://img.shields.io/badge/Version-2.0.1-blue)](https://github.com/Ali5829511/2025)
+[![Security](https://img.shields.io/badge/Security-Hardened-green)](SECURITY.md)
 
 ## المميزات / Features
 
