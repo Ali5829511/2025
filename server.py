@@ -482,7 +482,7 @@ def export_plate_recognition_excel():
         ws.title = "تقرير تمييز اللوحات"
         
         # Define styles
-        header_fill = PatternFill(start_color="0F3D68", end_color="0F3D68", fill_type="solid")
+        header_fill = PatternFill(start_color="1A5F7A", end_color="1A5F7A", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF", size=12, name="Arial")
         cell_border = Border(
             left=Side(style='thin'),
