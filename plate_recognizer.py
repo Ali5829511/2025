@@ -25,6 +25,12 @@ except ImportError:
 API_TOKEN = os.environ.get('PLATE_RECOGNIZER_API_TOKEN', '')
 API_URL = os.environ.get('PLATE_RECOGNIZER_API_URL', 'https://api.platerecognizer.com/v1/plate-reader/')
 
+# Image Enhancement Configuration
+CONTRAST_FACTOR = 1.3  # Increase contrast by 30%
+SHARPNESS_FACTOR = 1.5  # Increase sharpness by 50%
+BRIGHTNESS_FACTOR = 1.1  # Increase brightness by 10%
+MAX_CANDIDATES = 5  # Maximum number of alternative plate readings to return
+
 
 def is_configured() -> bool:
     """
@@ -63,15 +69,15 @@ def preprocess_image(image_bytes: bytes, enhance: bool = True) -> bytes:
         # Apply enhancements for better plate detection
         # 1. Increase contrast
         enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(1.3)
+        image = enhancer.enhance(CONTRAST_FACTOR)
         
         # 2. Increase sharpness
         enhancer = ImageEnhance.Sharpness(image)
-        image = enhancer.enhance(1.5)
+        image = enhancer.enhance(SHARPNESS_FACTOR)
         
         # 3. Adjust brightness slightly
         enhancer = ImageEnhance.Brightness(image)
-        image = enhancer.enhance(1.1)
+        image = enhancer.enhance(BRIGHTNESS_FACTOR)
         
         # 4. Apply slight sharpening filter
         image = image.filter(ImageFilter.SHARPEN)
@@ -81,7 +87,7 @@ def preprocess_image(image_bytes: bytes, enhance: bool = True) -> bytes:
         image.save(output, format='JPEG', quality=95, optimize=True)
         return output.getvalue()
     
-    except Exception as e:
+    except (OSError, ValueError) as e:
         print(f"Error preprocessing image: {str(e)}")
         return image_bytes
 
@@ -142,7 +148,7 @@ def validate_image_quality(image_bytes: bytes) -> Dict:
             result['warnings'].append('Unusual image aspect ratio. Ensure the plate is clearly visible.')
             result['warnings'].append('نسبة أبعاد الصورة غير عادية. تأكد من وضوح اللوحة.')
     
-    except Exception as e:
+    except (OSError, ValueError) as e:
         result['valid'] = False
         result['issues'].append(f'Error validating image: {str(e)}')
         result['issues'].append(f'خطأ في التحقق من الصورة: {str(e)}')
@@ -288,7 +294,7 @@ def recognize_plate_from_bytes(image_bytes: bytes, regions: Optional[List[str]] 
                         'region': result.get('region', {}).get('code', ''),
                         'vehicle_type': result.get('vehicle', {}).get('type', ''),
                         'box': result.get('box', {}),
-                        'candidates': candidates[:5]  # Limit to top 5 candidates
+                        'candidates': candidates[:MAX_CANDIDATES]  # Limit to configured maximum
                     }
                     results.append(plate_data)
             
