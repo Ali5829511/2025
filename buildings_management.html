@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المباني - وحدة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #0f3d68;
+            font-weight: bold;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0f3d68;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f3d68;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2e8bc0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2e8bc0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0f3d68;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ef;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-active {
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+
+        .status-inactive {
+            background: #dc3545;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f3d68;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2e8bc0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e7ef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #2e8bc0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- الهيدر -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="university-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h1>إدارة المباني</h1>
+            </div>
+            <div class="nav-links">
+                <a href="main_dashboard.html" class="nav-link">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للرئيسية
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- الإحصائيات -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-building stat-icon" style="color: #2e8bc0;"></i>
+                <div class="stat-number" id="totalBuildings">0</div>
+                <div class="stat-label">إجمالي المباني</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-door-open stat-icon" style="color: #28a745;"></i>
+                <div class="stat-number" id="totalUnits">0</div>
+                <div class="stat-label">إجمالي الوحدات</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-user-check stat-icon" style="color: #17a2b8;"></i>
+                <div class="stat-number" id="occupiedUnits">0</div>
+                <div class="stat-label">الوحدات المشغولة</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-percentage stat-icon" style="color: #ffc107;"></i>
+                <div class="stat-number" id="occupancyRate">0%</div>
+                <div class="stat-label">معدل الإشغال</div>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-list"></i>
+                    قائمة المباني
+                </h2>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        تصدير البيانات
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" class="search-input" placeholder="البحث برقم المبنى أو النوع أو الموقع...">
+            </div>
+
+            <div class="table-container">
+                <table id="buildingsTable">
+                    <thead>
+                        <tr>
+                            <th>رقم المبنى</th>
+                            <th>اسم المبنى</th>
+                            <th>الموقع</th>
+                            <th>النوع</th>
+                            <th>إجمالي الوحدات</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="buildingsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                جاري تحميل البيانات...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal عرض تفاصيل المبنى -->
+    <div id="buildingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">تفاصيل المبنى</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- سيتم ملء التفاصيل ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let buildingsData = [];
+
+        // تحميل البيانات من API
+        async function loadBuildingsData() {
+            try {
+                const response = await fetch('/api/buildings');
+                const result = await response.json();
+                if (result.success) {
+                    buildingsData = result.data.map(b => ({
+                        id: b.id,
+                        name: b.name,
+                        buildingNumber: b.building_number,
+                        address: b.address,
+                        totalUnits: b.total_units || 0,
+                        totalFloors: b.total_floors || 0
+                    }));
+                    renderTable();
+                    updateStats();
+                } else {
+                    console.error('فشل تحميل البيانات:', result.error_ar || result.error);
+                    showError('فشل في تحميل البيانات. يرجى المحاولة لاحقاً.');
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                showError('حدث خطأ في الاتصال بالخادم');
+            }
+        }
+
+        // عرض رسالة خطأ
+        function showError(message) {
+            const tbody = document.getElementById('buildingsTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="no-data">
+                        <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 48px; margin-bottom: 15px;"></i>
+                        <br>
+                        ${message}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const totalBuildings = buildingsData.length;
+            const totalUnits = buildingsData.reduce((sum, b) => sum + b.totalUnits, 0);
+            
+            // حساب الوحدات المشغولة (نفترض 70% إشغال كمثال)
+            const occupiedUnits = Math.floor(totalUnits * 0.70);
+            const occupancyRate = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : 0;
+            
+            document.getElementById('totalBuildings').textContent = totalBuildings;
+            document.getElementById('totalUnits').textContent = totalUnits;
+            document.getElementById('occupiedUnits').textContent = occupiedUnits;
+            document.getElementById('occupancyRate').textContent = occupancyRate + '%';
+        }
+
+        // عرض الجدول
+        function renderTable(data = buildingsData) {
+            const tbody = document.getElementById('buildingsTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-data">
+                            <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                            <br>
+                            لا توجد مباني مسجلة في النظام
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(building => {
+                const buildingType = building.address === 'منطقة الفلل' ? 'فلة' : 'شقة';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${building.buildingNumber}</strong></td>
+                    <td>${building.name}</td>
+                    <td>${building.address}</td>
+                    <td><span class="status-active">${buildingType}</span></td>
+                    <td>${building.totalUnits}</td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="viewBuilding(${building.id})" title="عرض التفاصيل">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // البحث
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            if (!searchTerm) {
+                renderTable();
+                return;
+            }
+            
+            const filteredData = buildingsData.filter(building => 
+                building.buildingNumber.toLowerCase().includes(searchTerm) ||
+                building.name.toLowerCase().includes(searchTerm) ||
+                building.address.toLowerCase().includes(searchTerm)
+            );
+            renderTable(filteredData);
+        });
+
+        // عرض تفاصيل المبنى
+        function viewBuilding(id) {
+            const building = buildingsData.find(b => b.id === id);
+            if (building) {
+                const buildingType = building.address === 'منطقة الفلل' ? 'فلة' : 'شقة';
+                document.getElementById('modalTitle').textContent = `تفاصيل ${building.name}`;
+                document.getElementById('modalBody').innerHTML = `
+                    <div style="line-height: 2;">
+                        <p><strong>رقم المبنى:</strong> ${building.buildingNumber}</p>
+                        <p><strong>اسم المبنى:</strong> ${building.name}</p>
+                        <p><strong>الموقع:</strong> ${building.address}</p>
+                        <p><strong>النوع:</strong> ${buildingType}</p>
+                        <p><strong>إجمالي الوحدات:</strong> ${building.totalUnits}</p>
+                        ${building.totalFloors ? `<p><strong>عدد الطوابق:</strong> ${building.totalFloors}</p>` : ''}
+                    </div>
+                `;
+                document.getElementById('buildingModal').style.display = 'flex';
+            }
+        }
+
+        // إغلاق النافذة المنبثقة
+        function closeModal() {
+            document.getElementById('buildingModal').style.display = 'none';
+        }
+
+        // تصدير البيانات إلى CSV
+        function exportData() {
+            if (buildingsData.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+
+            const csv = [
+                ['رقم المبنى', 'اسم المبنى', 'الموقع', 'النوع', 'إجمالي الوحدات'],
+                ...buildingsData.map(b => {
+                    const buildingType = b.address === 'منطقة الفلل' ? 'فلة' : 'شقة';
+                    return [b.buildingNumber, b.name, b.address, buildingType, b.totalUnits];
+                })
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `buildings_data_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            alert('تم تصدير البيانات بنجاح');
+        }
+
+        // إغلاق النافذة المنبثقة بالنقر خارجها
+        window.onclick = function(event) {
+            const modal = document.getElementById('buildingModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // تحميل البيانات عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', loadBuildingsData);
+    </script>
+</body>
+</html>
