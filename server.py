@@ -14,6 +14,8 @@ import auth
 import plate_recognizer
 import car_image_analyzer
 import car_data_exporter
+import vehicle_report_exporter
+import import_historical_vehicles
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -1648,30 +1650,444 @@ def get_car_thumbnail(image_id):
         }), 500
 
 
+# ==================== Vehicle Report Export Routes ====================
+
+@app.route('/api/vehicles/<int:vehicle_id>/export/<format>', methods=['GET'])
+@auth.require_auth
+def export_vehicle_report(vehicle_id, format):
+    """
+    Export single vehicle report with violations
+    تصدير تقرير سيارة واحدة مع المخالفات
+    """
+    try:
+        user = request.user
+        
+        # Get vehicle with violations
+        vehicle = vehicle_report_exporter.get_vehicle_with_violations(vehicle_id)
+        
+        if not vehicle:
+            return jsonify({
+                'success': False,
+                'error': 'Vehicle not found',
+                'error_ar': 'السيارة غير موجودة'
+            }), 404
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        plate = vehicle.get('plate_number', 'unknown').replace(' ', '_')
+        
+        if format == 'excel':
+            filename = f'vehicle_report_{plate}_{timestamp}.xlsx'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = vehicle_report_exporter.export_vehicle_to_excel(vehicle, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported vehicle report to Excel: {vehicle.get("plate_number")}',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        elif format == 'pdf':
+            filename = f'vehicle_report_{plate}_{timestamp}.pdf'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = vehicle_report_exporter.export_vehicle_to_pdf(vehicle, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported vehicle report to PDF: {vehicle.get("plate_number")}',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='application/pdf',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        elif format == 'html':
+            filename = f'vehicle_report_{plate}_{timestamp}.html'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = vehicle_report_exporter.export_vehicle_to_html(vehicle, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported vehicle report to HTML: {vehicle.get("plate_number")}',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='text/html',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Unsupported export format: {format}',
+                'error_ar': f'تنسيق التصدير غير مدعوم: {format}'
+            }), 400
+        
+        return jsonify({
+            'success': False,
+            'error': 'Export failed',
+            'error_ar': 'فشل التصدير'
+        }), 500
+        
+    except Exception as e:
+        app.logger.error(f'Export vehicle report error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Server connection error. Please try again later.',
+            'error_ar': 'خطأ في اتصال الخادم. يرجى المحاولة لاحقاً.'
+        }), 500
+
+
+@app.route('/api/vehicles/export-all/<format>', methods=['GET'])
+@auth.require_auth
+def export_all_vehicles_report(format):
+    """
+    Export all vehicles report
+    تصدير تقرير جميع السيارات
+    """
+    try:
+        user = request.user
+        
+        # Get all vehicles with violations
+        vehicles = vehicle_report_exporter.get_all_vehicles_with_violations()
+        
+        if not vehicles:
+            return jsonify({
+                'success': False,
+                'error': 'No vehicles found',
+                'error_ar': 'لا توجد سيارات'
+            }), 404
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        if format == 'excel':
+            filename = f'all_vehicles_report_{timestamp}.xlsx'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = vehicle_report_exporter.export_all_vehicles_to_excel(vehicles, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported all vehicles report to Excel ({len(vehicles)} vehicles)',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        elif format == 'html':
+            filename = f'all_vehicles_report_{timestamp}.html'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = vehicle_report_exporter.export_all_vehicles_to_html(vehicles, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported all vehicles report to HTML ({len(vehicles)} vehicles)',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='text/html',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Unsupported export format: {format}',
+                'error_ar': f'تنسيق التصدير غير مدعوم: {format}'
+            }), 400
+        
+        return jsonify({
+            'success': False,
+            'error': 'Export failed',
+            'error_ar': 'فشل التصدير'
+        }), 500
+        
+    except Exception as e:
+        app.logger.error(f'Export all vehicles report error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Server connection error. Please try again later.',
+            'error_ar': 'خطأ في اتصال الخادم. يرجى المحاولة لاحقاً.'
+        }), 500
+
+
+@app.route('/api/vehicles', methods=['GET'])
+@auth.require_auth
+def get_vehicles_list():
+    """
+    Get list of all vehicles with basic info
+    الحصول على قائمة جميع السيارات
+    """
+    try:
+        vehicles = vehicle_report_exporter.get_all_vehicles_with_violations()
+        
+        return jsonify({
+            'success': True,
+            'vehicles': vehicles,
+            'total': len(vehicles)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get vehicles list error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Server connection error. Please try again later.',
+            'error_ar': 'خطأ في اتصال الخادم. يرجى المحاولة لاحقاً.'
+        }), 500
+
+
+# ==================== Historical Data Import Routes ====================
+
+@app.route('/api/import/vehicles', methods=['POST'])
+@auth.require_auth
+def import_vehicles_data():
+    """
+    Import historical vehicles data from Excel
+    استيراد البيانات التاريخية للسيارات من Excel
+    """
+    try:
+        user = request.user
+        
+        # Check if user has admin role
+        if user['role'] != 'admin':
+            return jsonify({
+                'success': False,
+                'error': 'Unauthorized. Admin access required.',
+                'error_ar': 'غير مصرح. يتطلب صلاحيات المدير.'
+            }), 403
+        
+        # Check if file is provided
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided',
+                'error_ar': 'لم يتم تقديم ملف'
+            }), 400
+        
+        file = request.files['file']
+        
+        if not file.filename:
+            return jsonify({
+                'success': False,
+                'error': 'No file selected',
+                'error_ar': 'لم يتم اختيار ملف'
+            }), 400
+        
+        # Check file extension
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file format. Please upload Excel file (.xlsx or .xls)',
+                'error_ar': 'تنسيق الملف غير صالح. يرجى رفع ملف Excel (.xlsx أو .xls)'
+            }), 400
+        
+        # Save file temporarily
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'vehicles_import_{timestamp}.xlsx'
+        file_path = os.path.join(EXPORT_FOLDER, filename)
+        file.save(file_path)
+        
+        # Get merge mode from request
+        merge_mode = request.form.get('merge_mode', 'true').lower() == 'true'
+        
+        # Import data
+        stats = import_historical_vehicles.import_vehicles_from_excel(file_path, merge_mode)
+        
+        # Clean up temporary file
+        try:
+            os.remove(file_path)
+        except:
+            pass
+        
+        # Log audit
+        database.log_audit(
+            user['id'],
+            f'Imported vehicles data: {stats["imported"]} imported, {stats["skipped"]} skipped, {stats["errors"]} errors',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Import completed',
+            'message_ar': 'اكتمل الاستيراد',
+            'stats': stats
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Import vehicles error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to import data. Please check file format.',
+            'error_ar': 'فشل استيراد البيانات. يرجى التحقق من تنسيق الملف.'
+        }), 500
+
+
+@app.route('/api/import/violations', methods=['POST'])
+@auth.require_auth
+def import_violations_data():
+    """
+    Import historical violations data from Excel
+    استيراد البيانات التاريخية للمخالفات من Excel
+    """
+    try:
+        user = request.user
+        
+        # Check if user has admin role
+        if user['role'] != 'admin':
+            return jsonify({
+                'success': False,
+                'error': 'Unauthorized. Admin access required.',
+                'error_ar': 'غير مصرح. يتطلب صلاحيات المدير.'
+            }), 403
+        
+        # Check if file is provided
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided',
+                'error_ar': 'لم يتم تقديم ملف'
+            }), 400
+        
+        file = request.files['file']
+        
+        if not file.filename:
+            return jsonify({
+                'success': False,
+                'error': 'No file selected',
+                'error_ar': 'لم يتم اختيار ملف'
+            }), 400
+        
+        # Check file extension
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file format. Please upload Excel file (.xlsx or .xls)',
+                'error_ar': 'تنسيق الملف غير صالح. يرجى رفع ملف Excel (.xlsx أو .xls)'
+            }), 400
+        
+        # Save file temporarily
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'violations_import_{timestamp}.xlsx'
+        file_path = os.path.join(EXPORT_FOLDER, filename)
+        file.save(file_path)
+        
+        # Import data
+        stats = import_historical_vehicles.import_violations_from_excel(file_path)
+        
+        # Clean up temporary file
+        try:
+            os.remove(file_path)
+        except:
+            pass
+        
+        # Log audit
+        database.log_audit(
+            user['id'],
+            f'Imported violations data: {stats["imported"]} imported, {stats["skipped"]} skipped, {stats["errors"]} errors',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Import completed',
+            'message_ar': 'اكتمل الاستيراد',
+            'stats': stats
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Import violations error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to import data. Please check file format.',
+            'error_ar': 'فشل استيراد البيانات. يرجى التحقق من تنسيق الملف.'
+        }), 500
+
+
 # ==================== Error Handlers ====================
 
 @app.errorhandler(404)
 def not_found(error):
     """Handle 404 errors"""
     return jsonify({
+        'success': False,
         'error': 'Resource not found',
-        'error_ar': 'المورد غير موجود'
+        'error_ar': 'المورد المطلوب غير موجود',
+        'status': 404
     }), 404
 
 @app.errorhandler(403)
 def forbidden(error):
     """Handle 403 errors"""
     return jsonify({
+        'success': False,
         'error': 'Access forbidden',
-        'error_ar': 'الوصول ممنوع'
+        'error_ar': 'الوصول غير مسموح به',
+        'status': 403
     }), 403
 
 @app.errorhandler(500)
 def internal_error(error):
-    """Handle 500 errors"""
+    """Handle 500 errors - Enhanced error message"""
+    app.logger.error(f'Internal server error: {str(error)}')
     return jsonify({
-        'error': 'Internal server error',
-        'error_ar': 'خطأ في الخادم'
+        'success': False,
+        'error': 'Internal server error. Please contact system administrator.',
+        'error_ar': 'خطأ داخلي في الخادم. يرجى الاتصال بمسؤول النظام.',
+        'status': 500
+    }), 500
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    """Handle all unhandled exceptions with professional error message"""
+    app.logger.error(f'Unhandled exception: {str(error)}', exc_info=True)
+    
+    # Check if it's a connection error
+    error_msg = str(error).lower()
+    if 'connection' in error_msg or 'timeout' in error_msg or 'network' in error_msg:
+        return jsonify({
+            'success': False,
+            'error': 'Server connection error. Please check your internet connection and try again.',
+            'error_ar': 'خطأ في الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.',
+            'status': 503
+        }), 503
+    
+    return jsonify({
+        'success': False,
+        'error': 'An unexpected error occurred. Please try again later.',
+        'error_ar': 'حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.',
+        'status': 500
     }), 500
 
 # ==================== Startup ====================
