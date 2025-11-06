@@ -14,7 +14,9 @@ from datetime import datetime
 import database
 
 # API Configuration
-API_TOKEN = os.environ.get('PLATE_RECOGNIZER_API_TOKEN', '22ba3cf7155a1ea730a0b64787f98ab5f9a3de94')
+# IMPORTANT: Set PLATE_RECOGNIZER_API_TOKEN in environment variables or .env file
+# For security, do NOT hardcode API keys in source code
+API_TOKEN = os.environ.get('PLATE_RECOGNIZER_API_TOKEN', '')
 API_URL = os.environ.get('PLATE_RECOGNIZER_API_URL', 'https://api.platerecognizer.com/v1/plate-reader/')
 
 

@@ -7,6 +7,9 @@ from flask import Flask, request, jsonify, send_from_directory, make_response, a
 from flask_cors import CORS
 from werkzeug.security import safe_join
 import os
+import csv
+import re
+from io import StringIO
 import database
 import auth
 import plate_recognizer
@@ -608,6 +611,18 @@ def add_vehicle_access():
                     'error_ar': f'حقل مطلوب مفقود: {field}'
                 }), 400
         
+        # Validate and sanitize plate number
+        plate_number = data['plate_number'].strip().upper()
+        if len(plate_number) < 2 or len(plate_number) > 20:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid plate number length',
+                'error_ar': 'رقم اللوحة غير صالح'
+            }), 400
+        
+        # Remove potentially dangerous characters (keep alphanumeric, Arabic, and hyphens)
+        plate_number = re.sub(r'[^\w\u0600-\u06FF-]', '', plate_number)
+        
         conn = database.get_db_connection()
         cursor = conn.cursor()
         
@@ -619,7 +634,7 @@ def add_vehicle_access():
                 security_officer_entry, status, entry_time
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'inside', CURRENT_TIMESTAMP)
         ''', (
-            data['plate_number'].upper(),
+            plate_number,
             data['vehicle_type'],
             data['vehicle_category'],
             data['purpose'],
@@ -771,9 +786,6 @@ def delete_vehicle_access(vehicle_id):
 def export_vehicle_data():
     """Export vehicle tracking data to CSV"""
     try:
-        import csv
-        from io import StringIO
-        
         conn = database.get_db_connection()
         cursor = conn.cursor()
         
@@ -854,9 +866,6 @@ def import_vehicle_data():
             }), 400
         
         # Read CSV
-        import csv
-        from io import StringIO
-        
         content = file.read().decode('utf-8-sig')
         reader = csv.DictReader(StringIO(content))
         

@@ -566,6 +566,28 @@
         padding: 8px;
       }
     }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1313,7 +1335,12 @@
     // استخدام الرقم المعرّف
     function useRecognizedPlate() {
       const plateText = document.getElementById('recognizedPlate').textContent;
-      const plateNumber = plateText.match(/رقم اللوحة: (.*?) \(/)[1];
+      const match = plateText.match(/رقم اللوحة: (.*?) \(/);
+      if (!match || !match[1]) {
+        showAlert('خطأ في قراءة رقم اللوحة', 'error');
+        return;
+      }
+      const plateNumber = match[1];
       closeCameraModal();
       openAddModal();
       document.getElementById('plateNumber').value = plateNumber;
@@ -1376,8 +1403,43 @@
     }
 
     // عرض رسالة تنبيه
-    function showAlert(message, type) {
-      alert(message);
+    function showAlert(message, type = 'info') {
+      // Create alert element
+      const alertDiv = document.createElement('div');
+      alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-family: 'Tajawal', Arial, sans-serif;
+        font-size: 14px;
+        max-width: 400px;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      // Set color based on type
+      const colors = {
+        success: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        error: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+        warning: 'linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%)',
+        info: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      };
+      
+      alertDiv.style.background = colors[type] || colors.info;
+      alertDiv.style.color = type === 'warning' ? '#2d3436' : 'white';
+      alertDiv.textContent = message;
+      
+      // Add to page
+      document.body.appendChild(alertDiv);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        alertDiv.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => alertDiv.remove(), 300);
+      }, 3000);
     }
 
     // إغلاق النافذة عند الضغط خارجها
