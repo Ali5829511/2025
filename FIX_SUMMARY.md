@@ -114,13 +114,13 @@ wheel==0.42.0
 ### 2. اختبار استيراد المكتبات / Import Test
 ```bash
 ✅ import flask
-✅ import flask_cors
-✅ import werkzeug
-✅ import dotenv
+✅ from flask_cors import CORS
+✅ from werkzeug.security import safe_join
+✅ from dotenv import load_dotenv
 ✅ import pandas
 ✅ import numpy
 ✅ import openpyxl
-✅ import PIL
+✅ from PIL import Image
 ✅ import requests
 ```
 
