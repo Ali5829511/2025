@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الخدمات السريعة - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    html, body { direction: rtl !important; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: 'Tajawal', Arial, sans-serif; 
+      background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%); 
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+    
+    .header {
+      background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+      color: #fff;
+      padding: 26px 0 20px 0;
+      margin-bottom: 36px;
+      border-radius: 0 0 32px 32px;
+      box-shadow: 0 6px 16px #2e8bc055;
+      text-align: center;
+      position: relative;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .university-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      object-fit: contain;
+      background: white;
+      padding: 5px;
+    }
+    
+    .header-text {
+      text-align: center;
+    }
+    
+    .header-title { 
+      font-size: 2.2em; 
+      font-weight: bold; 
+      margin: 0; 
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header-subtitle { 
+      margin: 5px 0 0 0; 
+      font-size: 1.1em; 
+      font-weight: 400; 
+      color: #e2eaf3; 
+    }
+    
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .user-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .main-container {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .intro-section {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 20px rgba(15, 61, 104, 0.1);
+      text-align: center;
+      border-right: 5px solid #2e8bc0;
+    }
+    
+    .intro-section h2 {
+      color: #0f3d68;
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    
+    .intro-section p {
+      color: #456;
+      font-size: 1.1em;
+      line-height: 1.8;
+    }
+
+    .services-section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 1.6em;
+      font-weight: bold;
+      color: #0f3d68;
+      margin-bottom: 25px;
+      padding-right: 15px;
+      border-right: 5px solid #2e8bc0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title i {
+      color: #2e8bc0;
+      font-size: 1.2em;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .service-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .service-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .service-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      border-color: #2e8bc0;
+    }
+
+    .service-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: white;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .service-card:nth-child(4n+1) .service-icon {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .service-card:nth-child(4n+2) .service-icon {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .service-card:nth-child(4n+3) .service-icon {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .service-card:nth-child(4n+4) .service-icon {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .service-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #0f3d68;
+      margin-bottom: 12px;
+    }
+
+    .service-description {
+      font-size: 0.95em;
+      color: #456;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .service-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #2e8bc0 0%, #0f3d68 100%);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid #2e8bc0;
+      transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #0f3d68;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 1em;
+      color: #456;
+      font-weight: 500;
+    }
+
+    .help-section {
+      background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 40px;
+      box-shadow: 0 5px 20px rgba(255, 107, 107, 0.1);
+      border-right: 5px solid #ff6b6b;
+    }
+
+    .help-section h3 {
+      color: #d63031;
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .help-section p {
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    .help-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .help-item {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .help-item i {
+      color: #d63031;
+      font-size: 1.3em;
+    }
+
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 1.5em;
+      }
+      
+      .header-subtitle {
+        font-size: 0.9em;
+      }
+      
+      .university-logo {
+        width: 60px;
+        height: 60px;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 1.3em;
+      }
+
+      .back-btn, .user-info {
+        position: static;
+        margin: 10px auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <img src="university_logo.png" alt="شعار الجامعة" class="university-logo" onerror="this.style.display='none'">
+      <div class="header-text">
+        <h1 class="header-title">الخدمات السريعة</h1>
+        <p class="header-subtitle">نظام إدارة إسكان أعضاء هيئة التدريس</p>
+      </div>
+    </div>
+    <a href="main_dashboard.html" class="back-btn">
+      <i class="fas fa-arrow-right"></i>
+      <span>العودة للرئيسية</span>
+    </a>
+    <div class="user-info" id="userInfo">
+      <i class="fas fa-user"></i>
+      <span id="userName">مستخدم</span>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <!-- مقدمة -->
+    <div class="intro-section">
+      <h2>
+        <i class="fas fa-bolt"></i>
+        مرحباً بك في صفحة الخدمات السريعة
+      </h2>
+      <p>
+        توفر هذه الصفحة وصولاً سريعاً لأهم الخدمات والعمليات الأكثر استخداماً في النظام.
+        يمكنك من هنا الوصول مباشرة إلى الخدمات التي تحتاجها دون الحاجة للتنقل بين القوائم المتعددة.
+      </p>
+    </div>
+
+    <!-- خدمات إدارة السكان -->
+    <div class="services-section">
+      <h2 class="section-title">
+        <i class="fas fa-users"></i>
+        إدارة السكان والوحدات السكنية
+      </h2>
+      <div class="services-grid">
+        <a href="residents_management_updated.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="service-title">إضافة ساكن جديد</div>
+          <div class="service-description">
+            تسجيل عضو هيئة تدريس جديد في قاعدة بيانات السكان مع كافة البيانات الشخصية والوظيفية
+          </div>
+          <span class="service-badge">وصول سريع</span>
+        </a>
+
+        <a href="resident_inquiry.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="service-title">استعلام عن ساكن</div>
+          <div class="service-description">
+            البحث عن معلومات أعضاء هيئة التدريس والاستعلام عن بياناتهم السكنية والمركبات المسجلة
+          </div>
+          <span class="service-badge">استعلام</span>
+        </a>
+
+        <a href="buildings_management_updated.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-building"></i>
+          </div>
+          <div class="service-title">إدارة المباني والشقق</div>
+          <div class="service-description">
+            عرض وإدارة المباني السكنية والشقق المتاحة وتخصيصها للسكان
+          </div>
+          <span class="service-badge">إدارة</span>
+        </a>
+
+        <a href="apartments_management.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-home"></i>
+          </div>
+          <div class="service-title">تخصيص الوحدات السكنية</div>
+          <div class="service-description">
+            تخصيص الشقق والفلل لأعضاء هيئة التدريس ومتابعة حالة الإشغال
+          </div>
+          <span class="service-badge">تخصيص</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- خدمات المرور والمواقف -->
+    <div class="services-section">
+      <h2 class="section-title">
+        <i class="fas fa-car"></i>
+        خدمات المرور والمواقف
+      </h2>
+      <div class="services-grid">
+        <a href="enhanced_parking_management.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-parking"></i>
+          </div>
+          <div class="service-title">إدارة المواقف</div>
+          <div class="service-description">
+            إدارة مواقف السيارات وتخصيص المواقف للسكان ومتابعة الإشغال
+          </div>
+          <span class="service-badge">مواقف</span>
+        </a>
+
+        <a href="enhanced_stickers_management.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div class="service-title">ملصقات المركبات</div>
+          <div class="service-description">
+            إصدار وإدارة ملصقات التصاريح للمركبات المسجلة في النظام
+          </div>
+          <span class="service-badge">تصاريح</span>
+        </a>
+
+        <a href="enhanced_traffic_violations_updated.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="service-title">تسجيل مخالفة مرورية</div>
+          <div class="service-description">
+            تسجيل المخالفات المرورية داخل الإسكان ومتابعة حالتها
+          </div>
+          <span class="service-badge">مخالفات</span>
+        </a>
+
+        <a href="enhanced_immobilized_cars.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="service-title">المركبات المكبوحة</div>
+          <div class="service-description">
+            إدارة ومتابعة المركبات المكبوحة والمتوقفة لفترات طويلة
+          </div>
+          <span class="service-badge">كبح</span>
+        </a>
+
+        <a href="plate_recognition.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-camera"></i>
+          </div>
+          <div class="service-title">تمييز لوحات السيارات</div>
+          <div class="service-description">
+            استخدام تقنية التمييز الآلي للوحات السيارات للتحقق من المركبات
+          </div>
+          <span class="service-badge">جديد</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- خدمات الأمن والسلامة -->
+    <div class="services-section">
+      <h2 class="section-title">
+        <i class="fas fa-shield-alt"></i>
+        الأمن والسلامة
+      </h2>
+      <div class="services-grid">
+        <a href="security_incidents.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <div class="service-title">الوقائع الأمنية</div>
+          <div class="service-description">
+            تسجيل ومتابعة الوقائع والحوادث الأمنية داخل الإسكان
+          </div>
+          <span class="service-badge">أمن</span>
+        </a>
+
+        <a href="access_monitoring.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-door-open"></i>
+          </div>
+          <div class="service-title">مراقبة الدخول</div>
+          <div class="service-description">
+            مراقبة دخول وخروج المركبات والأشخاص من وإلى الإسكان
+          </div>
+          <span class="service-badge">مراقبة</span>
+        </a>
+
+        <a href="visitors_management.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-user-friends"></i>
+          </div>
+          <div class="service-title">إدارة الزوار</div>
+          <div class="service-description">
+            تسجيل ومتابعة زوار السكان والتصاريح المؤقتة
+          </div>
+          <span class="service-badge">زوار</span>
+        </a>
+
+        <a href="emergency_contacts.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <div class="service-title">أرقام الطوارئ</div>
+          <div class="service-description">
+            قائمة بأرقام الطوارئ والجهات المهمة للتواصل السريع
+          </div>
+          <span class="service-badge">طوارئ</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- خدمات الشكاوى والتقارير -->
+    <div class="services-section">
+      <h2 class="section-title">
+        <i class="fas fa-clipboard-list"></i>
+        الشكاوى والتقارير
+      </h2>
+      <div class="services-grid">
+        <a href="complaints_management.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-comment-dots"></i>
+          </div>
+          <div class="service-title">تقديم شكوى</div>
+          <div class="service-description">
+            تسجيل شكاوى السكان ومتابعة حالتها وردود الإدارة
+          </div>
+          <span class="service-badge">شكاوى</span>
+        </a>
+
+        <a href="comprehensive_reports_enhanced.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="service-title">التقارير الشاملة</div>
+          <div class="service-description">
+            عرض التقارير والإحصائيات الشاملة لجميع أقسام النظام
+          </div>
+          <span class="service-badge">تقارير</span>
+        </a>
+
+        <a href="housing_report.html" class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <div class="service-title">تقرير الإسكان</div>
+          <div class="service-description">
+            تقرير تفصيلي عن حالة الإسكان والإشغال والإحصائيات
+          </div>
+          <span class="service-badge">تقارير</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- إحصائيات سريعة -->
+    <div class="services-section">
+      <h2 class="section-title">
+        <i class="fas fa-tachometer-alt"></i>
+        إحصائيات سريعة
+      </h2>
+      <div class="quick-stats">
+        <div class="stat-box">
+          <div class="stat-number" id="totalResidents">---</div>
+          <div class="stat-label">إجمالي السكان</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="totalVehicles">---</div>
+          <div class="stat-label">المركبات المسجلة</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="openViolations">---</div>
+          <div class="stat-label">المخالفات المفتوحة</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="totalBuildings">---</div>
+          <div class="stat-label">المباني السكنية</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم المساعدة -->
+    <div class="help-section">
+      <h3>
+        <i class="fas fa-question-circle"></i>
+        هل تحتاج إلى مساعدة؟
+      </h3>
+      <p>
+        إذا كنت بحاجة إلى مساعدة في استخدام النظام أو لديك أي استفسارات، يمكنك التواصل مع فريق الدعم الفني.
+      </p>
+      <div class="help-contact">
+        <div class="help-item">
+          <i class="fas fa-envelope"></i>
+          <span>support@housing.edu.sa</span>
+        </div>
+        <div class="help-item">
+          <i class="fas fa-phone"></i>
+          <span>٩٢٠٠٠٣٢٨٢</span>
+        </div>
+        <div class="help-item">
+          <i class="fas fa-clock"></i>
+          <span>الأحد - الخميس: ٨ص - ٤م</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // التحقق من تسجيل الدخول
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/auth/validate', {
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+          window.location.href = 'index.html';
+          return;
+        }
+        
+        // عرض معلومات المستخدم
+        if (data.user) {
+          document.getElementById('userName').textContent = data.user.name || data.user.username;
+        }
+        
+        // تحميل الإحصائيات
+        loadStats();
+      } catch (error) {
+        console.error('Authentication error:', error);
+        window.location.href = 'index.html';
+      }
+    }
+
+    // تحميل الإحصائيات
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/system/stats');
+        const stats = await response.json();
+        
+        if (stats) {
+          document.getElementById('totalResidents').textContent = stats.residents || 0;
+          document.getElementById('totalVehicles').textContent = stats.vehicles || 0;
+          document.getElementById('openViolations').textContent = stats.openViolations || 0;
+          document.getElementById('totalBuildings').textContent = stats.buildings || 0;
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // تشغيل عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', checkAuth);
+  </script>
+</body>
+</html>
