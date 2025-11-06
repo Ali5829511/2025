@@ -968,8 +968,10 @@
                 }
             } catch (error) {
                 console.error('Export error:', error);
-                if (document.body.contains(loadingMsg)) {
-                    document.body.removeChild(loadingMsg);
+                // Remove loading message if it exists
+                const existingLoadingMsg = document.querySelector('div[style*="position: fixed"]');
+                if (existingLoadingMsg && existingLoadingMsg.parentNode) {
+                    existingLoadingMsg.parentNode.removeChild(existingLoadingMsg);
                 }
                 alert(`خطأ في تصدير التقرير\nError: ${error.message}`);
             }

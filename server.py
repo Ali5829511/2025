@@ -555,8 +555,12 @@ def export_plate_recognition_excel():
             # DateTime
             cell = ws.cell(row=idx, column=4)
             if row['recognized_at']:
-                dt = datetime.fromisoformat(row['recognized_at'])
-                cell.value = dt.strftime('%Y-%m-%d %H:%M:%S')
+                try:
+                    dt = datetime.fromisoformat(row['recognized_at'])
+                    cell.value = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except (ValueError, TypeError):
+                    # Fallback for different datetime formats
+                    cell.value = str(row['recognized_at'])
             cell.alignment = center_alignment
             cell.border = cell_border
             
@@ -686,11 +690,10 @@ def export_plate_recognition_excel():
         )
     
     except Exception as e:
-        app.logger.error(f'Excel export error for user {request.user["id"]}: {str(e)}', 
-                        extra={'user_id': request.user['id'], 
-                               'start_date': start_date, 
-                               'end_date': end_date,
-                               'ip_address': request.remote_addr})
+        # Log error with minimal sensitive information
+        app.logger.error(f'Excel export error: {type(e).__name__}', 
+                        extra={'error_type': type(e).__name__,
+                               'timestamp': datetime.now().isoformat()})
         return jsonify({
             'success': False,
             'error': 'Failed to export report. Please contact system administrator.',
