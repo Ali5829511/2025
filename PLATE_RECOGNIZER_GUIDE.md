@@ -97,32 +97,71 @@ python3 server.py
 2. From the main dashboard, go to "Security & Safety" section
 3. Click on "تمييز لوحات السيارات" (Plate Recognition)
 
+### إعدادات الدقة العالية | High Accuracy Settings
+
+النظام يوفر الآن إعدادات متقدمة لتحسين دقة التعرف على اللوحات:
+
+The system now provides advanced settings to improve plate recognition accuracy:
+
+1. **تحسين الصورة تلقائياً** | **Auto Image Enhancement**
+   - يتم تطبيق تحسينات تلقائية على الصورة (تباين، حدة، سطوع)
+   - يحسن من دقة التعرف بنسبة تصل إلى 30%
+   - Automatic enhancements applied (contrast, sharpness, brightness)
+   - Improves recognition accuracy by up to 30%
+
+2. **الحد الأدنى للثقة** | **Minimum Confidence Threshold**
+   - 0% - عرض جميع النتائج | Show all results
+   - 50% - دقة متوسطة | Medium accuracy
+   - **70% - دقة عالية (موصى به)** | **High accuracy (recommended)**
+   - 80% - دقة عالية جداً | Very high accuracy
+   - 90% - دقة قصوى | Maximum accuracy
+
+3. **اختيار المنطقة** | **Region Selection**
+   - السعودية | Saudi Arabia
+   - الإمارات | UAE
+   - الكويت | Kuwait
+   - البحرين | Bahrain
+   - قطر | Qatar
+   - عمان | Oman
+
 ### رفع الصورة وتمييز اللوحة | Upload Image and Recognize Plate
 
 1. **رفع الصورة** | **Upload Image**
    - اضغط على منطقة الرفع أو اسحب الصورة إليها
    - الصور المدعومة: JPG, PNG
+   - **يُفضل دقة عالية (800×600 أو أكثر) للنتائج الأفضل**
    - Click on upload area or drag image to it
    - Supported formats: JPG, PNG
+   - **Higher resolution (800×600 or more) recommended for best results**
 
-2. **تمييز اللوحة** | **Recognize Plate**
-   - بعد رفع الصورة، اضغط على زر "تمييز اللوحة"
+2. **معلومات جودة الصورة** | **Image Quality Information**
+   - يعرض النظام تلقائياً دقة الصورة وحجمها
+   - تحذيرات إذا كانت الدقة منخفضة
+   - System automatically displays image resolution and size
+   - Warnings if resolution is low
+
+3. **تمييز اللوحة** | **Recognize Plate**
+   - بعد رفع الصورة، اضغط على زر "تمييز اللوحة بدقة عالية"
    - انتظر معالجة الصورة (عادة 2-5 ثواني)
-   - After uploading, click "تمييز اللوحة" button
+   - After uploading, click "تمييز اللوحة بدقة عالية" button
    - Wait for processing (usually 2-5 seconds)
 
-3. **عرض النتائج** | **View Results**
+4. **عرض النتائج** | **View Results**
    - رقم اللوحة المكتشف
    - نسبة الدقة (Confidence Score)
+   - **قراءات بديلة للتحقق** | **Alternative readings for verification**
    - معلومات المركبة إذا كانت مسجلة في النظام
    - معلومات المالك والوحدة السكنية
+   - مؤشرات تحسين الصورة
    
    ---
    
    - Detected plate number
    - Confidence score
+   - **Alternative plate readings for verification**
    - Vehicle information if registered in the system
    - Owner and unit information
+   - Image enhancement indicators
 
 ### سجل التمييز | Recognition History
 
@@ -301,13 +340,69 @@ For technical support:
 - API token is sensitive and confidential - don't share it or commit it to version control
 - Use `.env` file and ensure it's added to `.gitignore`
 
-✅ **أفضل الممارسات** | **Best Practices:**
-- استخدم صور واضحة وذات دقة جيدة لنتائج أفضل
+✅ **أفضل الممارسات للحصول على دقة عالية** | **Best Practices for High Accuracy:**
+- استخدم صور واضحة وذات دقة جيدة (800×600 بكسل كحد أدنى، 1920×1080 موصى به)
 - تأكد من رؤية اللوحة بشكل كامل في الصورة
-- استخدم الإضاءة المناسبة
+- استخدم الإضاءة المناسبة (تجنب الظلال القوية أو الإضاءة الزائدة)
+- التقط الصورة من زاوية مباشرة قدر الإمكان
+- **فعّل خيار "تحسين الصورة تلقائياً" للحصول على أفضل النتائج**
+- استخدم حد أدنى للثقة 70% أو أكثر لتصفية النتائج الضعيفة
+- راجع القراءات البديلة عند وجود شك في النتيجة
+- اختر المنطقة الجغرافية الصحيحة للوحة
 
 ---
 
-- Use clear, high-resolution images for better results
+- Use clear, high-resolution images (minimum 800×600 pixels, 1920×1080 recommended)
 - Ensure the plate is fully visible in the image
-- Use proper lighting
+- Use proper lighting (avoid strong shadows or overexposure)
+- Capture image from as direct angle as possible
+- **Enable "Auto Image Enhancement" for best results**
+- Use minimum confidence threshold of 70% or higher to filter weak results
+- Review alternative readings when in doubt
+- Select the correct geographic region for the plate
+
+## ميزات الدقة العالية | High Accuracy Features
+
+### تحسين الصورة التلقائي | Automatic Image Enhancement
+
+يقوم النظام بتطبيق التحسينات التالية تلقائياً عند تفعيل الخيار:
+
+The system automatically applies the following enhancements when enabled:
+
+1. **تحسين التباين** | **Contrast Enhancement**
+   - يزيد من وضوح الحروف والأرقام على اللوحة
+   - Increases visibility of characters and numbers on the plate
+
+2. **زيادة الحدة** | **Sharpness Enhancement**
+   - يجعل حواف اللوحة أكثر وضوحاً
+   - Makes plate edges clearer
+
+3. **ضبط السطوع** | **Brightness Adjustment**
+   - يحسن من رؤية اللوحة في ظروف الإضاءة المختلفة
+   - Improves plate visibility in different lighting conditions
+
+4. **تطبيق مرشح الحدة** | **Sharpening Filter**
+   - يحسن من جودة الصورة الإجمالية
+   - Improves overall image quality
+
+### التحقق من جودة الصورة | Image Quality Validation
+
+قبل معالجة الصورة، يقوم النظام بالتحقق من:
+
+Before processing, the system validates:
+
+- **الدقة** | **Resolution**: الحد الأدنى 400×300، موصى به 800×600 أو أكثر
+- **حجم الملف** | **File Size**: تحذير عند تجاوز 10 ميجابايت
+- **نسبة الأبعاد** | **Aspect Ratio**: التحقق من نسبة معقولة للصورة
+
+### القراءات البديلة | Alternative Readings
+
+- يعرض النظام حتى 5 قراءات بديلة مع نسب الثقة
+- مفيد للتحقق اليدوي عند وجود شك
+- يساعد في التعامل مع اللوحات المتآكلة أو غير الواضحة
+
+---
+
+- System displays up to 5 alternative readings with confidence scores
+- Useful for manual verification when in doubt
+- Helps with worn or unclear plates

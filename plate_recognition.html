@@ -423,30 +423,57 @@
 
         <!-- Recognition Section -->
         <div class="recognition-section">
-            <h2 class="section-title"><i class="fas fa-camera"></i> تمييز اللوحة من الصورة</h2>
+            <h2 class="section-title"><i class="fas fa-camera"></i> تمييز اللوحة من الصورة - وضع الدقة العالية</h2>
+            
+            <!-- Settings -->
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="color: #0f3d68; margin-bottom: 10px;">
+                    <i class="fas fa-cog"></i> إعدادات الدقة العالية / High Accuracy Settings
+                </h4>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enhanceCheckbox" checked>
+                        <span>تحسين الصورة تلقائياً / Auto Image Enhancement</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <span>الحد الأدنى للثقة / Min Confidence:</span>
+                        <select id="minConfidence" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="0.0">0% - عرض الكل / Show All</option>
+                            <option value="0.5">50% - متوسط / Medium</option>
+                            <option value="0.7" selected>70% - عالي / High</option>
+                            <option value="0.8">80% - عالي جداً / Very High</option>
+                            <option value="0.9">90% - دقة قصوى / Maximum</option>
+                        </select>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <span>المنطقة / Region:</span>
+                        <select id="regionSelect" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="sa">السعودية / Saudi Arabia</option>
+                            <option value="ae">الإمارات / UAE</option>
+                            <option value="kw">الكويت / Kuwait</option>
+                            <option value="bh">البحرين / Bahrain</option>
+                            <option value="qa">قطر / Qatar</option>
+                            <option value="om">عمان / Oman</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
             
             <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-icon">
                     <i class="fas fa-cloud-upload-alt"></i>
                 </div>
-                <div class="upload-text">اضغط أو اسحب الصور هنا</div>
-                <div class="upload-subtext">رفع صورة واحدة أو عدة صور أو مجلد كامل</div>
-                <div class="upload-subtext">Upload single image, multiple images, or entire folder (JPG, PNG)</div>
-                <input type="file" id="fileInput" accept="image/*" multiple webkitdirectory="false" onchange="handleFileSelect(event)">
-                <div style="margin-top: 15px;">
-                    <button class="btn-secondary" onclick="event.stopPropagation(); document.getElementById('folderInput').click();" style="padding: 8px 16px; font-size: 0.9em;">
-                        <i class="fas fa-folder-open"></i> اختيار مجلد
-                    </button>
-                    <input type="file" id="folderInput" accept="image/*" webkitdirectory directory multiple style="display: none;" onchange="handleFolderSelect(event)">
-                </div>
+                <div class="upload-text">اضغط أو اسحب الصورة هنا</div>
+                <div class="upload-subtext">Click or drag image here (JPG, PNG) - يُفضل دقة عالية للنتائج الأفضل</div>
+                <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
             </div>
 
             <div class="preview-container" id="previewContainer">
+                <div id="imageQualityInfo" style="display: none; margin-bottom: 15px;"></div>
                 <img id="previewImage" class="preview-image" alt="معاينة الصورة">
-                <div id="fileCountInfo" style="display: none;"></div>
                 <div style="text-align: center;">
                     <button class="btn-primary" id="recognizeBtn" onclick="recognizePlate()">
-                        <i class="fas fa-search"></i> <span id="recognizeBtnText">تمييز اللوحة</span>
+                        <i class="fas fa-search"></i> تمييز اللوحة بدقة عالية
                     </button>
                     <button class="btn-secondary" onclick="clearSelection()">
                         <i class="fas fa-times"></i> إلغاء
@@ -468,26 +495,15 @@
         <!-- History Section -->
         <div class="history-section" id="historySection" style="display: none;">
             <h2 class="section-title"><i class="fas fa-history"></i> سجل التمييز</h2>
-            <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <button class="btn-secondary" onclick="loadHistory()">
-                    <i class="fas fa-sync"></i> تحديث السجل
-                </button>
-                <button class="btn-primary" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> تصدير إلى Excel
-                </button>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <label style="color: #0f3d68; font-weight: bold;">من:</label>
-                    <input type="date" id="startDate" style="padding: 8px; border: 1px solid #2e8bc0; border-radius: 5px;">
-                    <label style="color: #0f3d68; font-weight: bold;">إلى:</label>
-                    <input type="date" id="endDate" style="padding: 8px; border: 1px solid #2e8bc0; border-radius: 5px;">
-                </div>
-            </div>
+            <button class="btn-secondary" onclick="loadHistory()">
+                <i class="fas fa-sync"></i> تحديث السجل
+            </button>
             <div id="historyContainer"></div>
         </div>
     </div>
 
     <script>
-        let selectedFiles = [];
+        let selectedFile = null;
 
         // Check API status on load
         window.addEventListener('load', function() {
@@ -546,77 +562,88 @@
             
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                handleFiles(Array.from(files).filter(f => f.type.startsWith('image/')));
+                handleFile(files[0]);
             }
         });
 
         function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            if (files.length > 0) {
-                handleFiles(files.filter(f => f.type.startsWith('image/')));
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
             }
         }
 
-        function handleFolderSelect(event) {
-            const files = Array.from(event.target.files);
-            if (files.length > 0) {
-                handleFiles(files.filter(f => f.type.startsWith('image/')));
-            }
-        }
-
-        function handleFiles(files) {
-            if (files.length === 0) {
-                alert('يرجى اختيار ملف صورة\nPlease select image files');
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('يرجى اختيار ملف صورة\nPlease select an image file');
                 return;
             }
 
-            selectedFiles = files;
+            selectedFile = file;
 
-            // Show preview container
-            const previewContainer = document.getElementById('previewContainer');
-            const previewImage = document.getElementById('previewImage');
-            
-            if (files.length === 1) {
-                // Single file - show preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewImage.style.display = 'block';
-                    document.getElementById('fileCountInfo').style.display = 'none';
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('previewContainer').style.display = 'block';
+                    document.getElementById('resultsSection').style.display = 'none';
+                    
+                    // Show image quality info
+                    const qualityInfo = document.getElementById('imageQualityInfo');
+                    const fileSize = (file.size / 1024).toFixed(2);
+                    const resolution = `${img.width} × ${img.height}`;
+                    
+                    let qualityHtml = `
+                        <div style="background: #e7f3ff; padding: 12px; border-radius: 8px; border-left: 4px solid #2e8bc0;">
+                            <strong><i class="fas fa-info-circle"></i> معلومات الصورة / Image Info:</strong><br>
+                            <span>📐 الدقة / Resolution: ${resolution} بكسل</span><br>
+                            <span>💾 الحجم / Size: ${fileSize} KB</span><br>
+                    `;
+                    
+                    // Quality recommendations
+                    if (img.width < 800 || img.height < 600) {
+                        qualityHtml += `
+                            <div style="margin-top: 8px; color: #856404; background: #fff3cd; padding: 8px; border-radius: 5px;">
+                                ⚠️ يُنصح باستخدام صورة بدقة أعلى (800×600 أو أكثر) للحصول على نتائج أفضل<br>
+                                ⚠️ Higher resolution (800×600 or more) recommended for better accuracy
+                            </div>
+                        `;
+                    } else if (img.width >= 1920 && img.height >= 1080) {
+                        qualityHtml += `
+                            <div style="margin-top: 8px; color: #155724; background: #d4edda; padding: 8px; border-radius: 5px;">
+                                ✓ دقة ممتازة للحصول على أفضل النتائج<br>
+                                ✓ Excellent resolution for best results
+                            </div>
+                        `;
+                    } else {
+                        qualityHtml += `
+                            <div style="margin-top: 8px; color: #155724;">
+                                ✓ دقة جيدة<br>
+                                ✓ Good resolution
+                            </div>
+                        `;
+                    }
+                    
+                    qualityHtml += `</div>`;
+                    qualityInfo.innerHTML = qualityHtml;
+                    qualityInfo.style.display = 'block';
                 };
-                reader.readAsDataURL(files[0]);
-            } else {
-                // Multiple files - show count
-                previewImage.style.display = 'none';
-                const fileCountInfo = document.getElementById('fileCountInfo');
-                fileCountInfo.style.display = 'block';
-                fileCountInfo.innerHTML = `
-                    <div style="text-align: center; padding: 40px; background: #e9ecef; border-radius: 10px;">
-                        <i class="fas fa-images" style="font-size: 3em; color: #2e8bc0; margin-bottom: 15px;"></i>
-                        <div style="font-size: 1.5em; font-weight: bold; color: #0f3d68; margin-bottom: 10px;">
-                            ${files.length} صورة محددة
-                        </div>
-                        <div style="color: #6c757d; font-size: 0.9em;">
-                            ${files.length} images selected for batch processing
-                        </div>
-                    </div>
-                `;
-            }
-            
-            previewContainer.style.display = 'block';
-            document.getElementById('resultsSection').style.display = 'none';
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function clearSelection() {
-            selectedFiles = [];
+            selectedFile = null;
             document.getElementById('fileInput').value = '';
-            document.getElementById('folderInput').value = '';
             document.getElementById('previewContainer').style.display = 'none';
             document.getElementById('resultsSection').style.display = 'none';
         }
 
         async function recognizePlate() {
-            if (!selectedFiles || selectedFiles.length === 0) {
+            if (!selectedFile) {
                 alert('يرجى اختيار صورة أولاً\nPlease select an image first');
                 return;
             }
@@ -627,115 +654,78 @@
             const resultsContainer = document.getElementById('resultsContainer');
 
             loading.style.display = 'block';
-            loading.innerHTML = `
-                <div class="spinner"></div>
-                <p>جارٍ تمييز اللوحات... (0/${selectedFiles.length})<br>Processing images... (0/${selectedFiles.length})</p>
-            `;
             recognizeBtn.disabled = true;
             resultsSection.style.display = 'none';
 
-            let allResults = [];
-            let successCount = 0;
-            let failedCount = 0;
-
             try {
-                // Process all files
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    const file = selectedFiles[i];
-                    
-                    // Update progress
-                    loading.innerHTML = `
-                        <div class="spinner"></div>
-                        <p>جارٍ تمييز اللوحات... (${i + 1}/${selectedFiles.length})<br>Processing images... (${i + 1}/${selectedFiles.length})</p>
-                        <p style="font-size: 0.9em; color: #6c757d;">${file.name}</p>
-                    `;
+                // Get high-accuracy settings
+                const enhance = document.getElementById('enhanceCheckbox').checked;
+                const minConfidence = document.getElementById('minConfidence').value;
+                const region = document.getElementById('regionSelect').value;
 
-                    const formData = new FormData();
-                    formData.append('image', file);
-                    formData.append('regions', 'sa');
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                formData.append('regions', region);
+                formData.append('enhance', enhance);
+                formData.append('min_confidence', minConfidence);
 
-                    try {
-                        const response = await fetch('/api/plate-recognizer/recognize', {
-                            method: 'POST',
-                            body: formData,
-                            credentials: 'include'
-                        });
+                const response = await fetch('/api/plate-recognizer/recognize', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
 
-                        const data = await response.json();
-
-                        if (data.success && data.results && data.results.length > 0) {
-                            data.results.forEach(result => {
-                                result.filename = file.name;
-                                allResults.push(result);
-                            });
-                            successCount++;
-                        } else {
-                            failedCount++;
-                        }
-                    } catch (error) {
-                        console.error(`Error processing ${file.name}:`, error);
-                        failedCount++;
-                    }
-                }
+                const data = await response.json();
 
                 loading.style.display = 'none';
                 recognizeBtn.disabled = false;
 
-                // Display results
-                resultsContainer.innerHTML = '';
-                
-                // Summary card
-                if (selectedFiles.length > 1) {
-                    const summaryCard = document.createElement('div');
-                    summaryCard.className = 'result-card';
-                    summaryCard.style.background = '#e9ecef';
-                    summaryCard.innerHTML = `
-                        <h4 style="color: #0f3d68; margin-bottom: 15px;">
-                            <i class="fas fa-chart-bar"></i> ملخص المعالجة / Processing Summary
-                        </h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                            <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
-                                <div style="font-size: 2em; font-weight: bold; color: #2e8bc0;">${selectedFiles.length}</div>
-                                <div style="color: #6c757d;">إجمالي الصور</div>
-                                <div style="font-size: 0.8em; color: #6c757d;">Total Images</div>
-                            </div>
-                            <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
-                                <div style="font-size: 2em; font-weight: bold; color: #28a745;">${allResults.length}</div>
-                                <div style="color: #6c757d;">لوحات مكتشفة</div>
-                                <div style="font-size: 0.8em; color: #6c757d;">Plates Detected</div>
-                            </div>
-                            <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
-                                <div style="font-size: 2em; font-weight: bold; color: #28a745;">${successCount}</div>
-                                <div style="color: #6c757d;">نجحت</div>
-                                <div style="font-size: 0.8em; color: #6c757d;">Successful</div>
-                            </div>
-                            <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
-                                <div style="font-size: 2em; font-weight: bold; color: #dc3545;">${failedCount}</div>
-                                <div style="color: #6c757d;">فشلت</div>
-                                <div style="font-size: 0.8em; color: #6c757d;">Failed</div>
-                            </div>
-                        </div>
-                    `;
-                    resultsContainer.appendChild(summaryCard);
-                }
-                
-                if (allResults.length > 0) {
-                    allResults.forEach((result, index) => {
+                if (data.success && data.results && data.results.length > 0) {
+                    resultsContainer.innerHTML = '';
+                    
+                    // Show enhancement info if applicable
+                    if (data.enhanced || data.validation) {
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'alert alert-success';
+                        infoDiv.innerHTML = `
+                            <i class="fas fa-check-circle"></i>
+                            ${data.enhanced ? '✓ تم تحسين الصورة للحصول على دقة أعلى / Image enhanced for better accuracy<br>' : ''}
+                            ${data.validation && data.validation.warnings ? data.validation.warnings.map(w => '⚠️ ' + w).join('<br>') : ''}
+                        `;
+                        resultsContainer.appendChild(infoDiv);
+                    }
+                    
+                    data.results.forEach((result, index) => {
                         const resultCard = createResultCard(result, index + 1);
                         resultsContainer.appendChild(resultCard);
                     });
 
                     resultsSection.style.display = 'block';
                     
-                    // Reload history to show new entries
+                    // Reload history to show new entry
                     setTimeout(loadHistory, 1000);
                 } else {
-                    resultsContainer.innerHTML += `
+                    const minConf = parseFloat(minConfidence) * 100;
+                    resultsContainer.innerHTML = `
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle"></i>
-                            لم يتم العثور على لوحات في الصور
+                            لم يتم العثور على لوحات في الصورة ${minConf > 0 ? `بدرجة ثقة ${minConf}% أو أعلى` : ''}
                             <br>
-                            No license plates detected in the images
+                            No license plates detected in the image ${minConf > 0 ? `with confidence ${minConf}% or higher` : ''}
+                            <br><br>
+                            <small>💡 جرب تقليل الحد الأدنى للثقة أو استخدام صورة بدقة أعلى<br>
+                            💡 Try lowering the minimum confidence or using a higher resolution image</small>
+                        </div>
+                    `;
+                    resultsSection.style.display = 'block';
+                }
+
+                if (!data.success) {
+                    resultsContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i>
+                            ${data.error_ar || data.error}
+                            ${data.validation && data.validation.issues ? '<br><br>' + data.validation.issues.join('<br>') : ''}
                         </div>
                     `;
                     resultsSection.style.display = 'block';
@@ -765,21 +755,42 @@
 
             let html = `
                 <h4>النتيجة ${index}</h4>
-                ${result.filename ? `<div style="color: #6c757d; font-size: 0.9em; margin-bottom: 10px;"><i class="fas fa-file-image"></i> ${result.filename}</div>` : ''}
                 <div class="plate-number">${result.plate}</div>
                 <div class="confidence-bar">
                     <div class="confidence-fill" style="width: ${confidencePercent}%; background: ${confidenceColor}">
-                        ${confidencePercent}% دقة
+                        ${confidencePercent}% دقة / ${confidencePercent}% Confidence
                     </div>
                 </div>
             `;
+
+            // Show alternative candidates if available
+            if (result.candidates && result.candidates.length > 0) {
+                html += `
+                    <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                        <strong><i class="fas fa-list"></i> قراءات بديلة / Alternative Readings:</strong>
+                        <div style="margin-top: 8px;">
+                `;
+                result.candidates.forEach((candidate, idx) => {
+                    const candConf = Math.round(candidate.confidence * 100);
+                    html += `
+                        <div style="padding: 5px 0; border-bottom: 1px solid #e0e0e0;">
+                            <span style="font-family: 'Courier New', monospace; font-weight: bold;">${candidate.plate}</span>
+                            <span style="color: #6c757d; margin-right: 10px;">${candConf}%</span>
+                        </div>
+                    `;
+                });
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
 
             if (result.vehicle_info) {
                 const vehicle = result.vehicle_info;
                 html += `
                     <div class="vehicle-info">
                         <div class="vehicle-info-title">
-                            <i class="fas fa-car"></i> معلومات المركبة المسجلة
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i> معلومات المركبة المسجلة
                         </div>
                         <div class="info-row">
                             <span class="info-label">المالك:</span>
@@ -875,105 +886,6 @@
                 }
             } catch (error) {
                 console.error('Error loading history:', error);
-            }
-        }
-
-        async function exportToExcel() {
-            try {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                
-                let url = '/api/plate-recognizer/export-excel';
-                const params = new URLSearchParams();
-                
-                if (startDate) {
-                    params.append('start_date', startDate);
-                }
-                if (endDate) {
-                    params.append('end_date', endDate);
-                }
-                
-                if (params.toString()) {
-                    url += '?' + params.toString();
-                }
-                
-                // Show loading indicator
-                const loadingMsg = document.createElement('div');
-                loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
-                loadingMsg.innerHTML = `
-                    <div style="margin-bottom: 15px;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: #2e8bc0;"></i>
-                    </div>
-                    <div style="color: #0f3d68; font-size: 1.2em;">جارٍ تصدير التقرير...</div>
-                    <div style="color: #6c757d; margin-top: 5px;">Exporting report...</div>
-                `;
-                document.body.appendChild(loadingMsg);
-                
-                // Create a temporary link to download the file
-                const response = await fetch(url, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const downloadUrl = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = downloadUrl;
-                    
-                    // Get filename from Content-Disposition header or use default
-                    const contentDisposition = response.headers.get('Content-Disposition');
-                    let filename = 'تقرير_تمييز_اللوحات.xlsx';
-                    if (contentDisposition) {
-                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
-                        if (matches != null && matches[1]) {
-                            filename = matches[1].replace(/['"]/g, '');
-                        }
-                    }
-                    
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(downloadUrl);
-                    document.body.removeChild(a);
-                    
-                    // Show success message
-                    document.body.removeChild(loadingMsg);
-                    
-                    const successMsg = document.createElement('div');
-                    successMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #d4edda; color: #155724; padding: 20px 40px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center; border: 2px solid #c3e6cb;';
-                    successMsg.innerHTML = `
-                        <div style="margin-bottom: 10px;">
-                            <i class="fas fa-check-circle" style="font-size: 2em;"></i>
-                        </div>
-                        <div style="font-size: 1.2em; font-weight: bold;">تم تصدير التقرير بنجاح</div>
-                        <div style="margin-top: 5px;">Report exported successfully</div>
-                    `;
-                    document.body.appendChild(successMsg);
-                    
-                    setTimeout(() => {
-                        document.body.removeChild(successMsg);
-                    }, 3000);
-                } else {
-                    document.body.removeChild(loadingMsg);
-                    let errorMsg = 'خطأ في تصدير التقرير';
-                    try {
-                        const errorData = await response.json();
-                        errorMsg += `\nError: ${errorData.error_ar || errorData.error}`;
-                    } catch (e) {
-                        errorMsg += `\nHTTP Error: ${response.status} ${response.statusText}`;
-                    }
-                    alert(errorMsg);
-                }
-            } catch (error) {
-                console.error('Export error:', error);
-                // Remove loading message if it exists
-                const existingLoadingMsg = document.querySelector('div[style*="position: fixed"]');
-                if (existingLoadingMsg && existingLoadingMsg.parentNode) {
-                    existingLoadingMsg.parentNode.removeChild(existingLoadingMsg);
-                }
-                alert(`خطأ في تصدير التقرير\nError: ${error.message}`);
             }
         }
     </script>
