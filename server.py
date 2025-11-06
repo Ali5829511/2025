@@ -273,8 +273,8 @@ def plate_recognizer_status():
         app.logger.error(f'Plate recognizer status error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
-            'error_ar': 'خطأ في التحقق من حالة الخدمة'
+            'error': 'Unable to check API status. Please try again later.',
+            'error_ar': 'تعذر التحقق من حالة الخدمة. يرجى المحاولة لاحقاً.'
         }), 500
 
 @app.route('/api/plate-recognizer/recognize', methods=['POST'])
@@ -370,8 +370,8 @@ def recognize_plate():
         app.logger.error(f'Plate recognition error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
-            'error_ar': 'خطأ في تمييز اللوحة'
+            'error': 'An error occurred during plate recognition. Please try again.',
+            'error_ar': 'حدث خطأ أثناء تمييز اللوحة. يرجى المحاولة مرة أخرى.'
         }), 500
 
 @app.route('/api/plate-recognizer/history', methods=['GET'])
