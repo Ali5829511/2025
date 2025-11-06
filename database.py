@@ -250,6 +250,53 @@ def init_database():
     )
     ''')
     
+    # Car images table for uploaded car images
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS car_images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        original_filename TEXT NOT NULL,
+        image_path TEXT NOT NULL,
+        thumbnail_path TEXT,
+        uploaded_by INTEGER NOT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        processed INTEGER DEFAULT 0,
+        FOREIGN KEY (uploaded_by) REFERENCES users (id)
+    )
+    ''')
+    
+    # Car analysis results table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS car_analysis (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        car_image_id INTEGER NOT NULL,
+        plate_number TEXT,
+        plate_confidence REAL,
+        vehicle_type TEXT,
+        vehicle_color TEXT,
+        analysis_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        vehicle_id INTEGER,
+        violation_count INTEGER DEFAULT 0,
+        notes TEXT,
+        FOREIGN KEY (car_image_id) REFERENCES car_images (id) ON DELETE CASCADE,
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
+    )
+    ''')
+    
+    # Car violations mapping table - links car analysis to violations
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS car_violations_mapping (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        car_analysis_id INTEGER NOT NULL,
+        violation_id INTEGER NOT NULL,
+        linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        linked_by INTEGER,
+        FOREIGN KEY (car_analysis_id) REFERENCES car_analysis (id) ON DELETE CASCADE,
+        FOREIGN KEY (violation_id) REFERENCES traffic_violations (id) ON DELETE CASCADE,
+        FOREIGN KEY (linked_by) REFERENCES users (id),
+        UNIQUE(car_analysis_id, violation_id)
+    )
+    ''')
+    
     conn.commit()
     
     # Check if default users exist

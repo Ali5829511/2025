@@ -6,11 +6,14 @@ Main Flask server for Faculty Housing Management System
 from flask import Flask, request, jsonify, send_from_directory, make_response, abort, send_file
 from flask_cors import CORS
 from werkzeug.security import safe_join
+from werkzeug.utils import secure_filename
 import os
 from dotenv import load_dotenv
 import database
 import auth
 import plate_recognizer
+import car_image_analyzer
+import car_data_exporter
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -28,12 +31,24 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-i
 app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
 # Base directory for serving files
 BASE_DIR = os.path.abspath('.')
 
+# Upload configuration
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'car_images')
+THUMBNAIL_FOLDER = os.path.join(BASE_DIR, 'uploads', 'thumbnails')
+EXPORT_FOLDER = os.path.join(BASE_DIR, 'exports')
+
+# Create directories if they don't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(THUMBNAIL_FOLDER, exist_ok=True)
+os.makedirs(EXPORT_FOLDER, exist_ok=True)
+
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.pdf', '.md'}
+ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif'}
 
 def is_safe_path(filename):
     """Check if the requested file is safe to serve"""
@@ -49,6 +64,12 @@ def is_safe_path(filename):
         return False
     
     return True
+
+
+def allowed_image_file(filename):
+    """Check if file is an allowed image type"""
+    _, ext = os.path.splitext(filename)
+    return ext.lower() in ALLOWED_IMAGE_EXTENSIONS
 
 # Initialize database on startup
 with app.app_context():
@@ -1326,6 +1347,306 @@ def get_comprehensive_reports():
             'error': 'Failed to load comprehensive reports data',
             'error_ar': 'فشل في تحميل بيانات التقارير الشاملة'
         }), 500
+
+# ==================== Car Image Upload and Analysis Routes ====================
+
+@app.route('/api/car-images/upload', methods=['POST'])
+@auth.login_required
+def upload_car_images():
+    """
+    Upload multiple car images for analysis
+    رفع عدة صور سيارات للتحليل
+    """
+    try:
+        user = request.user
+        
+        # Check if files are present
+        if 'images' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No images provided',
+                'error_ar': 'لم يتم تقديم أي صور'
+            }), 400
+        
+        files = request.files.getlist('images')
+        
+        if not files or len(files) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'No images provided',
+                'error_ar': 'لم يتم تقديم أي صور'
+            }), 400
+        
+        uploaded_images = []
+        analysis_results = []
+        
+        for file in files:
+            if file and file.filename and allowed_image_file(file.filename):
+                # Secure filename
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+                unique_filename = f"{timestamp}_{filename}"
+                
+                # Save image
+                image_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+                file.save(image_path)
+                
+                # Create thumbnail
+                thumbnail_filename = f"thumb_{unique_filename}"
+                thumbnail_path = os.path.join(THUMBNAIL_FOLDER, thumbnail_filename)
+                car_image_analyzer.create_thumbnail(image_path, thumbnail_path)
+                
+                # Save to database
+                conn = database.get_db_connection()
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    INSERT INTO car_images 
+                    (original_filename, image_path, thumbnail_path, uploaded_by)
+                    VALUES (?, ?, ?, ?)
+                ''', (filename, image_path, thumbnail_path, user['id']))
+                
+                car_image_id = cursor.lastrowid
+                conn.commit()
+                conn.close()
+                
+                # Analyze image
+                analysis = car_image_analyzer.analyze_car_image(image_path)
+                
+                if analysis['success']:
+                    # Find matching vehicle
+                    vehicle = None
+                    vehicle_id = None
+                    
+                    if analysis.get('plate_number') and analysis['plate_number'] != 'غير محدد':
+                        vehicle = car_image_analyzer.find_matching_vehicle(analysis['plate_number'])
+                        if vehicle:
+                            vehicle_id = vehicle['id']
+                    
+                    # Save analysis results
+                    analysis_id = car_image_analyzer.save_car_analysis(
+                        car_image_id,
+                        analysis,
+                        vehicle_id
+                    )
+                    
+                    analysis_results.append({
+                        'car_image_id': car_image_id,
+                        'analysis_id': analysis_id,
+                        'filename': filename,
+                        'plate_number': analysis.get('plate_number'),
+                        'vehicle_type': analysis.get('vehicle_type'),
+                        'vehicle_color': analysis.get('vehicle_color'),
+                        'confidence': analysis.get('plate_confidence'),
+                        'matched_vehicle': vehicle is not None,
+                        'vehicle_owner': vehicle.get('owner_name') if vehicle else None
+                    })
+                
+                uploaded_images.append({
+                    'id': car_image_id,
+                    'filename': filename,
+                    'path': image_path,
+                    'thumbnail': thumbnail_path
+                })
+        
+        # Log action
+        database.log_audit(
+            user['id'],
+            f'Uploaded {len(uploaded_images)} car images for analysis',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': f'Successfully uploaded and analyzed {len(uploaded_images)} images',
+            'message_ar': f'تم رفع وتحليل {len(uploaded_images)} صورة بنجاح',
+            'uploaded_images': uploaded_images,
+            'analysis_results': analysis_results
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Car image upload error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': f'Failed to upload images: {str(e)}',
+            'error_ar': f'فشل في رفع الصور: {str(e)}'
+        }), 500
+
+
+@app.route('/api/car-images/analysis', methods=['GET'])
+@auth.login_required
+def get_car_analysis():
+    """
+    Get car analysis records
+    الحصول على سجلات تحليل السيارات
+    """
+    try:
+        records = car_data_exporter.get_car_analysis_records()
+        
+        return jsonify({
+            'success': True,
+            'data': records,
+            'count': len(records)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get car analysis error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get car analysis data',
+            'error_ar': 'فشل في الحصول على بيانات تحليل السيارات'
+        }), 500
+
+
+@app.route('/api/car-images/export/<format>', methods=['POST'])
+@auth.login_required
+def export_car_analysis(format):
+    """
+    Export car analysis data in specified format (excel, pdf, html)
+    تصدير بيانات تحليل السيارات بالتنسيق المحدد
+    """
+    try:
+        user = request.user
+        
+        # Get filter params from request
+        filter_params = request.get_json() if request.is_json else None
+        
+        # Get data
+        records = car_data_exporter.get_car_analysis_records(filter_params)
+        
+        if not records:
+            return jsonify({
+                'success': False,
+                'error': 'No data to export',
+                'error_ar': 'لا توجد بيانات للتصدير'
+            }), 400
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        if format == 'excel':
+            filename = f'car_analysis_{timestamp}.xlsx'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = car_data_exporter.export_to_excel(records, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported car analysis to Excel',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        elif format == 'pdf':
+            filename = f'car_analysis_{timestamp}.pdf'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = car_data_exporter.export_to_pdf(records, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported car analysis to PDF',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='application/pdf',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        elif format == 'html':
+            filename = f'car_analysis_{timestamp}.html'
+            output_path = os.path.join(EXPORT_FOLDER, filename)
+            
+            success = car_data_exporter.export_to_html(records, output_path)
+            
+            if success:
+                database.log_audit(
+                    user['id'],
+                    f'Exported car analysis to HTML',
+                    ip_address=request.remote_addr
+                )
+                
+                return send_file(
+                    output_path,
+                    mimetype='text/html',
+                    as_attachment=True,
+                    download_name=filename
+                )
+        
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Unsupported export format: {format}',
+                'error_ar': f'تنسيق التصدير غير مدعوم: {format}'
+            }), 400
+        
+        return jsonify({
+            'success': False,
+            'error': 'Export failed',
+            'error_ar': 'فشل التصدير'
+        }), 500
+        
+    except Exception as e:
+        app.logger.error(f'Export car analysis error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': f'Failed to export data: {str(e)}',
+            'error_ar': f'فشل في تصدير البيانات: {str(e)}'
+        }), 500
+
+
+@app.route('/api/car-images/thumbnail/<int:image_id>', methods=['GET'])
+@auth.login_required
+def get_car_thumbnail(image_id):
+    """
+    Get thumbnail for a car image
+    الحصول على صورة مصغرة لصورة السيارة
+    """
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT thumbnail_path FROM car_images WHERE id = ?', (image_id,))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row or not row[0]:
+            return jsonify({
+                'success': False,
+                'error': 'Thumbnail not found',
+                'error_ar': 'الصورة المصغرة غير موجودة'
+            }), 404
+        
+        thumbnail_path = row[0]
+        
+        if not os.path.exists(thumbnail_path):
+            return jsonify({
+                'success': False,
+                'error': 'Thumbnail file not found',
+                'error_ar': 'ملف الصورة المصغرة غير موجود'
+            }), 404
+        
+        return send_file(thumbnail_path, mimetype='image/jpeg')
+        
+    except Exception as e:
+        app.logger.error(f'Get thumbnail error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get thumbnail',
+            'error_ar': 'فشل في الحصول على الصورة المصغرة'
+        }), 500
+
 
 # ==================== Error Handlers ====================
 
