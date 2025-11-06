@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة الشقق - إسكان أعضاء هيئة التدريس</title>
+    <title>الوحدات السكنية - إسكان أعضاء هيئة التدريس</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -17,16 +18,38 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             direction: rtl;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(90deg, #0f3d68 0%, #2e8bc0 100%);
             color: white;
             padding: 30px;
             border-radius: 20px;
@@ -58,12 +81,35 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .university-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+        }
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
         }
 
         .header-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .header-subtitle {
@@ -353,18 +399,22 @@
     <div class="container">
         <div class="header">
             <div class="header-content">
-                <div>
-                    <h1 class="header-title">إدارة الشقق</h1>
-                    <p class="header-subtitle">نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                <div class="header-left">
+                    <img src="university_logo.png" alt="شعار الجامعة" class="university-logo" onerror="this.style.display='none'">
+                    <div class="header-text">
+                        <h1 class="header-title">الوحدات السكنية</h1>
+                        <p class="header-subtitle">نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                    </div>
                 </div>
                 <a href="dashboard.html" class="back-button">
-                    🏠 العودة للوحة التحكم
+                    <i class="fas fa-home"></i>
+                    العودة للوحة التحكم
                 </a>
             </div>
         </div>
 
         <div class="main-content">
-            <h2 class="section-title">📊 إحصائيات الشقق</h2>
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i> إحصائيات الوحدات السكنية</h2>
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -389,7 +439,7 @@
                 </div>
             </div>
 
-            <h2 class="section-title">🔍 البحث والتصفية</h2>
+            <h2 class="section-title"><i class="fas fa-search"></i> البحث والتصفية</h2>
             
             <div class="filters-section">
                 <div class="filters-grid">
@@ -417,13 +467,12 @@
                 </div>
             </div>
 
-            <h2 class="section-title">🏢 قائمة الشقق</h2>
+            <h2 class="section-title"><i class="fas fa-building"></i> قائمة الوحدات السكنية</h2>
             
             <div class="table-container">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>اسم الساكن</th>
                             <th>نوع الوحدة</th>
                             <th>وصف المبنى</th>
                             <th>حالة الشقة</th>
@@ -433,7 +482,7 @@
                     </thead>
                     <tbody id="apartments-table-body">
                         <tr>
-                            <td colspan="6" class="loading">جاري تحميل البيانات...</td>
+                            <td colspan="5" class="loading">جاري تحميل البيانات...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -452,16 +501,30 @@
         // تحميل البيانات
         async function loadApartmentsData() {
             try {
-                const response = await fetch('apartments_data.json');
-                apartmentsData = await response.json();
-                filteredData = [...apartmentsData];
-                
-                updateStats();
-                updateTable();
+                const response = await fetch('/api/data/units');
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    // تحويل الحقول من الإنجليزية إلى العربية حسب الجدول
+                    apartmentsData = result.data.map(function(unit) {
+                        return {
+                            'نوع الوحدة': unit.type === 'villa' ? 'فلة' : 'شقة',
+                            'وصف المبنى': unit.description || '',
+                            'حالة الشقة': unit.status === 'occupied' ? 'مشغولة' : (unit.status === 'vacant' ? 'شاغرة' : unit.status),
+                            'رقم المبنى': unit.building_number ? unit.building_number.toString() : '',
+                            'رقم الشقة': unit.unit_number || ''
+                        };
+                    });
+                    filteredData = [...apartmentsData];
+                    updateStats();
+                    updateTable();
+                } else {
+                    document.getElementById('apartments-table-body').innerHTML = 
+                        '<tr><td colspan="5" class="no-data">خطأ في تحميل البيانات من قاعدة البيانات</td></tr>';
+                }
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
                 document.getElementById('apartments-table-body').innerHTML = 
-                    '<tr><td colspan="6" class="no-data">خطأ في تحميل البيانات</td></tr>';
+                    '<tr><td colspan="5" class="no-data">خطأ في تحميل البيانات</td></tr>';
             }
         }
 
@@ -470,8 +533,8 @@
             const totalApartments = apartmentsData.length;
             const occupiedApartments = apartmentsData.filter(apt => apt['حالة الشقة'] === 'مشغولة').length;
             const vacantApartments = apartmentsData.filter(apt => apt['حالة الشقة'] === 'شاغرة').length;
-            const oldBuildings = apartmentsData.filter(apt => apt['وصف المبنى'] === 'المباني القديمة').length;
-            const newBuildings = apartmentsData.filter(apt => apt['وصف المبنى'] === 'المباني الجديدة').length;
+            const oldBuildings = apartmentsData.filter(apt => apt['وصف المبنى'].includes('المباني القديمة')).length;
+            const newBuildings = apartmentsData.filter(apt => apt['وصف المبنى'].includes('المباني الجديدة')).length;
 
             document.getElementById('total-apartments').textContent = totalApartments.toLocaleString();
             document.getElementById('occupied-apartments').textContent = occupiedApartments.toLocaleString();
@@ -488,13 +551,12 @@
             
             filteredData = apartmentsData.filter(apartment => {
                 const matchesSearch = !searchTerm || 
-                    apartment['اسم_الساكن'].toLowerCase().includes(searchTerm) ||
                     apartment['نوع الوحدة'].toLowerCase().includes(searchTerm) ||
-                    apartment['رقم المبنى'].includes(searchTerm) ||
-                    apartment['رقم الشقة'].includes(searchTerm);
+                    apartment['رقم المبنى'].toString().includes(searchTerm) ||
+                    apartment['رقم الشقة'].toString().includes(searchTerm);
                 
                 const matchesStatus = !statusFilter || apartment['حالة الشقة'] === statusFilter;
-                const matchesBuilding = !buildingFilter || apartment['وصف المبنى'] === buildingFilter;
+                const matchesBuilding = !buildingFilter || apartment['وصف المبنى'].includes(buildingFilter);
                 
                 return matchesSearch && matchesStatus && matchesBuilding;
             });
@@ -507,17 +569,16 @@
             const tbody = document.getElementById('apartments-table-body');
             
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="no-data">لا توجد بيانات مطابقة للبحث</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data">لا توجد بيانات مطابقة للبحث</td></tr>';
                 return;
             }
 
             const rows = filteredData.map(apartment => {
                 const statusClass = apartment['حالة الشقة'] === 'مشغولة' ? 'status-occupied' : 'status-vacant';
-                const buildingClass = apartment['وصف المبنى'] === 'المباني القديمة' ? 'building-old' : 'building-new';
-                
+                const buildingClass = apartment['وصف المبنى'].includes('المباني القديمة') ? 'building-old' : 
+                                     apartment['وصف المبنى'].includes('المباني الجديدة') ? 'building-new' : '';
                 return `
                     <tr>
-                        <td>${apartment['اسم_الساكن']}</td>
                         <td>${apartment['نوع الوحدة']}</td>
                         <td><span class="building-type ${buildingClass}">${apartment['وصف المبنى']}</span></td>
                         <td><span class="status-badge ${statusClass}">${apartment['حالة الشقة']}</span></td>

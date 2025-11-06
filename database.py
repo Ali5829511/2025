@@ -218,6 +218,23 @@ def init_database():
     )
     ''')
     
+    # Units table (residential units - villas and apartments)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS units (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT,
+        building_number INTEGER NOT NULL,
+        unit_number INTEGER NOT NULL,
+        status TEXT DEFAULT 'vacant',
+        resident_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (resident_id) REFERENCES residents (id)
+    )
+    ''')
+    
     conn.commit()
     
     # Check if default users exist
