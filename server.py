@@ -617,6 +617,58 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
+# ==================== Units/Apartments API ====================
+
+@app.route('/api/data/units', methods=['GET'])
+def get_units():
+    """Get all residential units (villas and apartments)"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT 
+                id,
+                name,
+                type,
+                description,
+                building_number,
+                unit_number,
+                status,
+                resident_id
+            FROM units
+            ORDER BY building_number, unit_number
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        units = []
+        for row in rows:
+            units.append({
+                'id': row[0],
+                'name': row[1],
+                'type': row[2],
+                'description': row[3],
+                'building_number': row[4],
+                'unit_number': row[5],
+                'status': row[6],
+                'resident_id': row[7]
+            })
+        
+        return jsonify({
+            'success': True,
+            'data': units
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get units error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get units data',
+            'error_ar': 'فشل في الحصول على بيانات الوحدات'
+        }), 500
+
 # ==================== Error Handlers ====================
 
 @app.errorhandler(404)
