@@ -15,23 +15,23 @@
         }
 
         :root {
-            --primary-color: #0f3d68;
-            --secondary-color: #2e8bc0;
-            --accent-color: #4a9fd8;
-            --light-bg: #f7fcff;
+            --primary-color: #1a5f7a;
+            --secondary-color: #159895;
+            --accent-color: #57c5b6;
+            --light-bg: #f8fffe;
             --success-color: #51cf66;
             --error-color: #ff6b6b;
             --text-dark: #2c3e50;
             --text-light: #7f8c8d;
             --border-radius: 16px;
-            --shadow-sm: 0 2px 8px rgba(15, 61, 104, 0.08);
-            --shadow-md: 0 8px 24px rgba(15, 61, 104, 0.12);
-            --shadow-lg: 0 16px 48px rgba(15, 61, 104, 0.16);
+            --shadow-sm: 0 2px 8px rgba(26, 95, 122, 0.08);
+            --shadow-md: 0 8px 24px rgba(26, 95, 122, 0.12);
+            --shadow-lg: 0 16px 48px rgba(26, 95, 122, 0.16);
         }
 
         body {
             font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a5f7a 0%, #159895 50%, #57c5b6 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -271,64 +271,6 @@
             margin-left: 8px;
         }
 
-        /* إجراءات سريعة محسنة للجوال */
-        .quick-actions {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 2px solid #f0f3f7;
-        }
-
-        .quick-actions h3 {
-            color: var(--text-dark);
-            margin-bottom: 16px;
-            font-size: clamp(16px, 4vw, 18px);
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .action-btn {
-            padding: 12px 10px;
-            background: linear-gradient(135deg, rgba(46, 139, 192, 0.08) 0%, rgba(46, 139, 192, 0.12) 100%);
-            color: var(--secondary-color);
-            text-decoration: none;
-            border-radius: 12px;
-            text-align: center;
-            font-size: clamp(12px, 3.5vw, 14px);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1.5px solid rgba(46, 139, 192, 0.2);
-            font-family: 'Tajawal', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            touch-action: manipulation;
-        }
-
-        .action-btn i {
-            font-size: 20px;
-        }
-
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-
-        @media (hover: hover) {
-            .action-btn:hover {
-                background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-md);
-                border-color: transparent;
-            }
-        }
-
         /* تذييل محسن */
         .footer {
             text-align: center;
@@ -394,18 +336,7 @@
                 font-size: 16px;
             }
 
-            .action-buttons {
-                gap: 8px;
-            }
 
-            .action-btn {
-                padding: 10px 8px;
-                font-size: 12px;
-            }
-
-            .action-btn i {
-                font-size: 18px;
-            }
         }
 
         /* للشاشات الكبيرة جداً */
@@ -459,11 +390,6 @@
 
             .form-group {
                 margin-bottom: 12px;
-            }
-
-            .quick-actions {
-                margin-top: 16px;
-                padding-top: 16px;
             }
 
             .footer {
@@ -541,10 +467,6 @@
 
             .system-title {
                 font-size: 18px;
-            }
-
-            .action-buttons {
-                grid-template-columns: 1fr;
             }
 
             .university-logo {
@@ -627,28 +549,6 @@
                     </span>
                 </button>
             </form>
-
-            <div class="quick-actions">
-                <h3>الإجراءات السريعة</h3>
-                <div class="action-buttons">
-                    <a href="enhanced_traffic_violations_updated.html" class="action-btn" aria-label="تسجيل مخالفة مرورية">
-                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-                        <span>تسجيل مخالفة</span>
-                    </a>
-                    <a href="complaints_management.html" class="action-btn" aria-label="تسجيل شكوى جديدة">
-                        <i class="fas fa-comment-alt" aria-hidden="true"></i>
-                        <span>تسجيل شكوى</span>
-                    </a>
-                    <a href="residents_management_updated.html" class="action-btn" aria-label="إضافة ساكن جديد">
-                        <i class="fas fa-user-plus" aria-hidden="true"></i>
-                        <span>إضافة ساكن</span>
-                    </a>
-                    <a href="main_dashboard.html" class="action-btn" aria-label="عرض لوحة التحكم والتقارير">
-                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
-                        <span>عرض التقارير</span>
-                    </a>
-                </div>
-            </div>
 
             <div class="footer">
                 <p>جميع الحقوق محفوظة © جامعة الإمام محمد بن سعود الإسلامية 2025</p>
@@ -783,7 +683,13 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage(errorMessage, 'خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.', 'fas fa-times-circle');
+                let errorMsg = 'عذراً، حدث خطأ في الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى.';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMsg = 'تعذر الاتصال بالخادم. يرجى التأكد من أن الخادم يعمل والمحاولة مرة أخرى.';
+                } else if (error.message.includes('NetworkError') || error.message.includes('network')) {
+                    errorMsg = 'خطأ في الشبكة. يرجى التحقق من اتصالك بالإنترنت.';
+                }
+                showMessage(errorMessage, errorMsg, 'fas fa-times-circle');
                 shakeContainer();
                 setButtonLoading(false);
             }
