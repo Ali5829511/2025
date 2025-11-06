@@ -311,7 +311,12 @@ def create_thumbnail(image_path: str, thumbnail_path: str, max_size: Tuple[int, 
     """
     try:
         image = Image.open(image_path)
-        image.thumbnail(max_size, Image.Resampling.LANCZOS)
+        # Use LANCZOS for better quality - try new API first, fallback to old
+        try:
+            resample_filter = Image.Resampling.LANCZOS
+        except AttributeError:
+            resample_filter = Image.LANCZOS
+        image.thumbnail(max_size, resample_filter)
         
         # Ensure directory exists
         os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
