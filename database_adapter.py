@@ -61,9 +61,8 @@ def get_db_connection():
             import psycopg2
             import psycopg2.extras
             
-            conn = psycopg2.connect(params['url'])
-            # Enable dict-like row access
-            conn.cursor_factory = psycopg2.extras.RealDictCursor
+            # Enable dict-like row access by setting cursor_factory during connection
+            conn = psycopg2.connect(params['url'], cursor_factory=psycopg2.extras.RealDictCursor)
             return conn
         except ImportError:
             print("⚠️  Warning: psycopg2 not installed. Falling back to SQLite.")
