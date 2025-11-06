@@ -218,6 +218,52 @@ def init_database():
     )
     ''')
     
+    # Vehicle access log table - comprehensive tracking of all vehicles entering housing
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS vehicle_access_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plate_number TEXT NOT NULL,
+        vehicle_type TEXT NOT NULL,
+        vehicle_category TEXT NOT NULL,
+        entry_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        exit_time TIMESTAMP,
+        purpose TEXT NOT NULL,
+        visitor_name TEXT,
+        visitor_phone TEXT,
+        visitor_id_number TEXT,
+        visiting_resident_id INTEGER,
+        driver_name TEXT,
+        make TEXT,
+        model TEXT,
+        color TEXT,
+        year INTEGER,
+        company_name TEXT,
+        delivery_info TEXT,
+        gate_entry TEXT,
+        gate_exit TEXT,
+        security_officer_entry INTEGER,
+        security_officer_exit INTEGER,
+        notes TEXT,
+        image_path TEXT,
+        confidence REAL,
+        recognized_by_system INTEGER DEFAULT 0,
+        vehicle_id INTEGER,
+        status TEXT DEFAULT 'inside',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (visiting_resident_id) REFERENCES residents (id),
+        FOREIGN KEY (security_officer_entry) REFERENCES users (id),
+        FOREIGN KEY (security_officer_exit) REFERENCES users (id),
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
+    )
+    ''')
+    
+    # Create indexes for better performance
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_vehicle_access_plate ON vehicle_access_log(plate_number)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_vehicle_access_entry ON vehicle_access_log(entry_time)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_vehicle_access_status ON vehicle_access_log(status)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_vehicle_access_category ON vehicle_access_log(vehicle_category)')
+    
     conn.commit()
     
     # Check if default users exist

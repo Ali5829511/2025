@@ -501,6 +501,426 @@ def system_stats():
             'error_ar': 'فشل في الحصول على إحصائيات النظام'
         }), 500
 
+# ==================== Vehicle Tracking API ====================
+
+@app.route('/api/vehicle-tracking/list', methods=['GET'])
+@auth.require_auth
+def list_vehicle_access():
+    """Get list of all vehicle access records"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get query parameters
+        limit = request.args.get('limit', 1000, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        
+        cursor.execute('''
+            SELECT 
+                v.*,
+                r.name as resident_name,
+                r.unit_number,
+                u1.name as entry_officer_name,
+                u2.name as exit_officer_name
+            FROM vehicle_access_log v
+            LEFT JOIN residents r ON v.visiting_resident_id = r.id
+            LEFT JOIN users u1 ON v.security_officer_entry = u1.id
+            LEFT JOIN users u2 ON v.security_officer_exit = u2.id
+            ORDER BY v.entry_time DESC
+            LIMIT ? OFFSET ?
+        ''', (limit, offset))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        vehicles = [dict(row) for row in rows]
+        
+        return jsonify({
+            'success': True,
+            'vehicles': vehicles
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Vehicle tracking list error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في جلب البيانات'
+        }), 500
+
+@app.route('/api/vehicle-tracking/stats', methods=['GET'])
+@auth.require_auth
+def vehicle_tracking_stats():
+    """Get vehicle tracking statistics"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Total vehicles
+        cursor.execute('SELECT COUNT(*) FROM vehicle_access_log')
+        total = cursor.fetchone()[0]
+        
+        # Vehicles currently inside
+        cursor.execute("SELECT COUNT(*) FROM vehicle_access_log WHERE status = 'inside'")
+        inside = cursor.fetchone()[0]
+        
+        # Today's entries
+        cursor.execute("SELECT COUNT(*) FROM vehicle_access_log WHERE DATE(entry_time) = DATE('now')")
+        today = cursor.fetchone()[0]
+        
+        # Recognized by system
+        cursor.execute('SELECT COUNT(*) FROM vehicle_access_log WHERE recognized_by_system = 1')
+        recognized = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total': total,
+                'inside': inside,
+                'today': today,
+                'recognized': recognized
+            }
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Vehicle tracking stats error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في جلب الإحصائيات'
+        }), 500
+
+@app.route('/api/vehicle-tracking/add', methods=['POST'])
+@auth.require_auth
+def add_vehicle_access():
+    """Add new vehicle access record"""
+    try:
+        data = request.get_json()
+        
+        required_fields = ['plate_number', 'vehicle_type', 'vehicle_category', 'purpose']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required field: {field}',
+                    'error_ar': f'حقل مطلوب مفقود: {field}'
+                }), 400
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO vehicle_access_log (
+                plate_number, vehicle_type, vehicle_category, purpose,
+                visitor_name, visitor_phone, visitor_id_number, company_name,
+                make, model, color, year, gate_entry, notes,
+                security_officer_entry, status, entry_time
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'inside', CURRENT_TIMESTAMP)
+        ''', (
+            data['plate_number'].upper(),
+            data['vehicle_type'],
+            data['vehicle_category'],
+            data['purpose'],
+            data.get('visitor_name'),
+            data.get('visitor_phone'),
+            data.get('visitor_id_number'),
+            data.get('company_name'),
+            data.get('make'),
+            data.get('model'),
+            data.get('color'),
+            data.get('year'),
+            data.get('gate_entry'),
+            data.get('notes'),
+            request.user['id']
+        ))
+        
+        vehicle_id = cursor.lastrowid
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f"Added vehicle access record: {data['plate_number']}",
+            ip_address=request.remote_addr
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Vehicle access recorded successfully',
+            'message_ar': 'تم تسجيل دخول السيارة بنجاح',
+            'id': vehicle_id
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Add vehicle access error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تسجيل دخول السيارة'
+        }), 500
+
+@app.route('/api/vehicle-tracking/exit/<int:vehicle_id>', methods=['POST'])
+@auth.require_auth
+def exit_vehicle_access(vehicle_id):
+    """Record vehicle exit"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        data = request.get_json() or {}
+        gate_exit = data.get('gate_exit', 'البوابة الرئيسية')
+        
+        cursor.execute('''
+            UPDATE vehicle_access_log
+            SET exit_time = CURRENT_TIMESTAMP,
+                status = 'exited',
+                gate_exit = ?,
+                security_officer_exit = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND status = 'inside'
+        ''', (gate_exit, request.user['id'], vehicle_id))
+        
+        if cursor.rowcount == 0:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'Vehicle not found or already exited',
+                'error_ar': 'السيارة غير موجودة أو تم تسجيل خروجها مسبقاً'
+            }), 404
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f"Recorded vehicle exit: {vehicle_id}",
+            ip_address=request.remote_addr
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Vehicle exit recorded successfully',
+            'message_ar': 'تم تسجيل خروج السيارة بنجاح'
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Exit vehicle error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تسجيل خروج السيارة'
+        }), 500
+
+@app.route('/api/vehicle-tracking/delete/<int:vehicle_id>', methods=['DELETE'])
+@auth.require_auth
+def delete_vehicle_access(vehicle_id):
+    """Delete vehicle access record"""
+    try:
+        # Only admin can delete
+        if request.user['role'] != 'admin':
+            return jsonify({
+                'success': False,
+                'error': 'Insufficient permissions',
+                'error_ar': 'صلاحيات غير كافية'
+            }), 403
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('DELETE FROM vehicle_access_log WHERE id = ?', (vehicle_id,))
+        
+        if cursor.rowcount == 0:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'Vehicle record not found',
+                'error_ar': 'السجل غير موجود'
+            }), 404
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f"Deleted vehicle access record: {vehicle_id}",
+            ip_address=request.remote_addr
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Vehicle record deleted successfully',
+            'message_ar': 'تم حذف السجل بنجاح'
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Delete vehicle error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في حذف السجل'
+        }), 500
+
+@app.route('/api/vehicle-tracking/export', methods=['GET'])
+@auth.require_auth
+def export_vehicle_data():
+    """Export vehicle tracking data to CSV"""
+    try:
+        import csv
+        from io import StringIO
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT 
+                plate_number, vehicle_type, vehicle_category, purpose,
+                visitor_name, visitor_phone, company_name,
+                make, model, color, year,
+                entry_time, exit_time, status,
+                gate_entry, gate_exit, notes
+            FROM vehicle_access_log
+            ORDER BY entry_time DESC
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # Create CSV
+        output = StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'رقم اللوحة', 'نوع المركبة', 'التصنيف', 'الغرض',
+            'اسم الزائر', 'رقم الهاتف', 'اسم الشركة',
+            'الماركة', 'الموديل', 'اللون', 'السنة',
+            'وقت الدخول', 'وقت الخروج', 'الحالة',
+            'بوابة الدخول', 'بوابة الخروج', 'ملاحظات'
+        ])
+        
+        # Write data
+        for row in rows:
+            writer.writerow(row)
+        
+        # Create response
+        output.seek(0)
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8-sig'
+        response.headers['Content-Disposition'] = f'attachment; filename=vehicle_tracking_{datetime.now().strftime("%Y%m%d")}.csv'
+        
+        return response
+    
+    except Exception as e:
+        app.logger.error(f'Export vehicle data error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تصدير البيانات'
+        }), 500
+
+@app.route('/api/vehicle-tracking/import', methods=['POST'])
+@auth.require_auth
+def import_vehicle_data():
+    """Import vehicle tracking data from CSV"""
+    try:
+        # Only admin can import
+        if request.user['role'] != 'admin':
+            return jsonify({
+                'success': False,
+                'error': 'Insufficient permissions',
+                'error_ar': 'صلاحيات غير كافية'
+            }), 403
+        
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided',
+                'error_ar': 'لم يتم تقديم ملف'
+            }), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected',
+                'error_ar': 'لم يتم اختيار ملف'
+            }), 400
+        
+        # Read CSV
+        import csv
+        from io import StringIO
+        
+        content = file.read().decode('utf-8-sig')
+        reader = csv.DictReader(StringIO(content))
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        imported = 0
+        for row in reader:
+            try:
+                cursor.execute('''
+                    INSERT INTO vehicle_access_log (
+                        plate_number, vehicle_type, vehicle_category, purpose,
+                        visitor_name, visitor_phone, company_name,
+                        make, model, color, year,
+                        entry_time, status, gate_entry, notes,
+                        security_officer_entry
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'inside', ?, ?, ?)
+                ''', (
+                    row.get('رقم اللوحة', ''),
+                    row.get('نوع المركبة', ''),
+                    row.get('التصنيف', ''),
+                    row.get('الغرض', ''),
+                    row.get('اسم الزائر'),
+                    row.get('رقم الهاتف'),
+                    row.get('اسم الشركة'),
+                    row.get('الماركة'),
+                    row.get('الموديل'),
+                    row.get('اللون'),
+                    row.get('السنة'),
+                    row.get('وقت الدخول', datetime.now().isoformat()),
+                    row.get('بوابة الدخول'),
+                    row.get('ملاحظات'),
+                    request.user['id']
+                ))
+                imported += 1
+            except Exception as e:
+                app.logger.error(f'Error importing row: {str(e)}')
+                continue
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f"Imported {imported} vehicle records",
+            ip_address=request.remote_addr
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': f'{imported} records imported successfully',
+            'message_ar': f'تم استيراد {imported} سجل بنجاح',
+            'imported': imported
+        })
+    
+    except Exception as e:
+        app.logger.error(f'Import vehicle data error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في استيراد البيانات'
+        }), 500
+
 # ==================== Health Check ====================
 
 @app.route('/api/health')
