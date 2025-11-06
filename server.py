@@ -512,6 +512,111 @@ def health_check():
         'database': 'connected'
     })
 
+# ==================== Unified Dashboard API ====================
+
+@app.route('/api/statistics')
+def get_statistics():
+    """Get statistics for unified dashboard"""
+    try:
+        conn = database.get_db()
+        cursor = conn.cursor()
+        
+        stats = {}
+        
+        # Total residents
+        cursor.execute('SELECT COUNT(*) FROM residents')
+        stats['total_residents'] = cursor.fetchone()[0]
+        
+        # Total buildings
+        cursor.execute('SELECT COUNT(*) FROM buildings')
+        stats['total_buildings'] = cursor.fetchone()[0]
+        
+        # Total stickers
+        cursor.execute('SELECT COUNT(*) FROM stickers')
+        stats['total_stickers'] = cursor.fetchone()[0]
+        
+        # Total units (apartments)
+        cursor.execute('SELECT COUNT(*) FROM apartments')
+        stats['total_units'] = cursor.fetchone()[0]
+        
+        # Total parking spots
+        cursor.execute('SELECT COUNT(*) FROM parking_spots')
+        stats['total_parking'] = cursor.fetchone()[0]
+        
+        # Active violations
+        cursor.execute("SELECT COUNT(*) FROM traffic_violations WHERE status = 'نشط' OR status = 'active'")
+        stats['active_violations'] = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': stats
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Statistics error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get statistics',
+            'error_ar': 'فشل في الحصول على الإحصائيات'
+        }), 500
+
+@app.route('/api/violation-report')
+def get_violation_report():
+    """Get violation report with resident information"""
+    try:
+        conn = database.get_db()
+        cursor = conn.cursor()
+        
+        # Get violations with resident information
+        query = """
+        SELECT 
+            tv.plate_number,
+            COUNT(tv.id) as violation_count,
+            tv.vehicle_type,
+            tv.processing_date,
+            r.name as resident_name,
+            r.building_number,
+            r.unit_number
+        FROM traffic_violations tv
+        LEFT JOIN stickers s ON tv.plate_number = s.plate_number
+        LEFT JOIN residents r ON s.resident_id = r.id
+        GROUP BY tv.plate_number
+        ORDER BY violation_count DESC, tv.processing_date DESC
+        """
+        
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        # Format the data
+        violations = []
+        for row in rows:
+            violations.append({
+                'plateNumber': row[0],
+                'violationCount': row[1],
+                'vehicleType': row[2],
+                'processingDate': row[3],
+                'residentName': row[4],
+                'buildingNumber': row[5],
+                'unitNumber': row[6]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': violations
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Violation report error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get violation report',
+            'error_ar': 'فشل في الحصول على تقرير المخالفات'
+        }), 500
+
 # ==================== Error Handlers ====================
 
 @app.errorhandler(404)
