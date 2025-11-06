@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استعلام عن الوحدات السكنية - إسكان أعضاء هيئة التدريس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0f3d68;
+            --secondary-color: #2e8bc0;
+            --accent-color: #4a9fd8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --light-bg: #f7fcff;
+            --white: #ffffff;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 2px 8px rgba(15, 61, 104, 0.08);
+            --shadow-md: 0 8px 24px rgba(15, 61, 104, 0.12);
+            --shadow-lg: 0 16px 48px rgba(15, 61, 104, 0.16);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+            padding: 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .university-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+        }
+
+        .header-text h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--secondary-color);
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--secondary-color);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            right: 0;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        /* Search Form */
+        .search-form {
+            background: var(--light-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label i {
+            color: var(--secondary-color);
+        }
+
+        .form-input {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(46, 139, 192, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 139, 192, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-light);
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Results Section */
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .result-card {
+            background: var(--light-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-right: 5px solid var(--secondary-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateX(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-occupied {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-vacant {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-left {
+                flex-direction: column;
+            }
+
+            .header-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .search-form {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <img src="university_logo.png" alt="شعار الجامعة" class="university-logo" onerror="this.style.display='none'">
+                    <div class="header-text">
+                        <h1>استعلام عن الوحدات السكنية</h1>
+                        <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                    </div>
+                </div>
+                <a href="main_dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للوحة التحكم
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2 class="section-title">
+                <i class="fas fa-search"></i>
+                البحث عن وحدة سكنية
+            </h2>
+
+            <!-- Search Form -->
+            <div class="search-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-building"></i>
+                            رقم المبنى / الفلة
+                        </label>
+                        <input type="text" id="building-number" class="form-input" placeholder="أدخل رقم المبنى أو الفلة">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-door-open"></i>
+                            رقم الشقة
+                        </label>
+                        <input type="text" id="unit-number" class="form-input" placeholder="أدخل رقم الشقة">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-home"></i>
+                            نوع الوحدة
+                        </label>
+                        <select id="unit-type" class="form-input">
+                            <option value="">الكل</option>
+                            <option value="فلة">فلة</option>
+                            <option value="شقة">شقة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt"></i>
+                            الوصف
+                        </label>
+                        <select id="description" class="form-input">
+                            <option value="">الكل</option>
+                            <option value="منطقة الفلل">منطقة الفلل</option>
+                            <option value="المباني القديمة">المباني القديمة</option>
+                            <option value="المباني الجديدة">المباني الجديدة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="searchUnits()" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        بحث
+                    </button>
+                    <button onclick="resetSearch()" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i>
+                        إعادة تعيين
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>جاري البحث...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results-section">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i>
+                    نتائج البحث (<span id="results-count">0</span>)
+                </h2>
+                <div id="results-container"></div>
+            </div>
+
+            <!-- No Results -->
+            <div class="no-results" id="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>لم يتم العثور على نتائج</h3>
+                <p>حاول تعديل معايير البحث والمحاولة مرة أخرى</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>جميع الحقوق محفوظة © نظام إدارة إسكان أعضاء هيئة التدريس - 2025</p>
+        </div>
+    </div>
+
+    <script>
+        let allUnits = [];
+
+        // Load units data
+        async function loadUnitsData() {
+            try {
+                const response = await fetch('/api/data/units');
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    allUnits = result.data;
+                    console.log(`Loaded ${allUnits.length} units`);
+                } else {
+                    console.error('Failed to load units data');
+                    allUnits = [];
+                }
+            } catch (error) {
+                console.error('Error loading units data:', error);
+                allUnits = [];
+            }
+        }
+
+        // Search units
+        async function searchUnits() {
+            const buildingNumber = document.getElementById('building-number').value.trim();
+            const unitNumber = document.getElementById('unit-number').value.trim();
+            const unitType = document.getElementById('unit-type').value;
+            const description = document.getElementById('description').value;
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results-section').classList.remove('show');
+            document.getElementById('no-results').style.display = 'none';
+
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Filter units
+            let filteredUnits = allUnits.filter(unit => {
+                let matches = true;
+
+                if (buildingNumber && unit.building_number != buildingNumber) {
+                    matches = false;
+                }
+
+                if (unitNumber && unit.unit_number != unitNumber) {
+                    matches = false;
+                }
+
+                if (unitType) {
+                    const unitTypeArabic = unit.type === 'villa' ? 'فلة' : 'شقة';
+                    if (unitTypeArabic !== unitType) {
+                        matches = false;
+                    }
+                }
+
+                if (description && !unit.description.includes(description)) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            // Hide loading
+            document.getElementById('loading').classList.remove('show');
+
+            // Display results
+            if (filteredUnits.length > 0) {
+                displayResults(filteredUnits);
+            } else {
+                document.getElementById('no-results').style.display = 'block';
+            }
+        }
+
+        // Display results
+        function displayResults(units) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsCount = document.getElementById('results-count');
+            
+            resultsCount.textContent = units.length;
+            
+            resultsContainer.innerHTML = units.map(unit => {
+                const unitTypeArabic = unit.type === 'villa' ? 'فلة' : 'شقة';
+                const statusArabic = unit.status === 'occupied' ? 'مشغولة' : 'شاغرة';
+                const statusClass = unit.status === 'occupied' ? 'status-occupied' : 'status-vacant';
+                
+                return `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-title">
+                                <i class="fas fa-home"></i>
+                                ${unit.name || `${unitTypeArabic} رقم ${unit.building_number}${unit.unit_number ? '-' + unit.unit_number : ''}`}
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusArabic}</span>
+                        </div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">نوع الوحدة</span>
+                                <span class="detail-value">${unitTypeArabic}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">رقم المبنى / الفلة</span>
+                                <span class="detail-value">${unit.building_number}</span>
+                            </div>
+                            ${unit.unit_number ? `
+                            <div class="detail-item">
+                                <span class="detail-label">رقم الشقة</span>
+                                <span class="detail-value">${unit.unit_number}</span>
+                            </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <span class="detail-label">الوصف</span>
+                                <span class="detail-value">${unit.description}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('results-section').classList.add('show');
+        }
+
+        // Reset search
+        function resetSearch() {
+            document.getElementById('building-number').value = '';
+            document.getElementById('unit-number').value = '';
+            document.getElementById('unit-type').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('results-section').classList.remove('show');
+            document.getElementById('no-results').style.display = 'none';
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUnitsData();
+        });
+    </script>
+</body>
+</html>

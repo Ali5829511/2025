@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الوحدات السكنية - إسكان أعضاء هيئة التدريس</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -17,16 +18,38 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             direction: rtl;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(90deg, #0f3d68 0%, #2e8bc0 100%);
             color: white;
             padding: 30px;
             border-radius: 20px;
@@ -58,12 +81,35 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .university-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+        }
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
         }
 
         .header-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .header-subtitle {
@@ -353,18 +399,22 @@
     <div class="container">
         <div class="header">
             <div class="header-content">
-                <div>
-                    <h1 class="header-title">الوحدات السكنية</h1>
-                    <p class="header-subtitle">نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                <div class="header-left">
+                    <img src="university_logo.png" alt="شعار الجامعة" class="university-logo" onerror="this.style.display='none'">
+                    <div class="header-text">
+                        <h1 class="header-title">الوحدات السكنية</h1>
+                        <p class="header-subtitle">نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                    </div>
                 </div>
                 <a href="dashboard.html" class="back-button">
-                    🏠 العودة للوحة التحكم
+                    <i class="fas fa-home"></i>
+                    العودة للوحة التحكم
                 </a>
             </div>
         </div>
 
         <div class="main-content">
-            <h2 class="section-title">📊 إحصائيات الشقق</h2>
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i> إحصائيات الوحدات السكنية</h2>
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -389,7 +439,7 @@
                 </div>
             </div>
 
-            <h2 class="section-title">🔍 البحث والتصفية</h2>
+            <h2 class="section-title"><i class="fas fa-search"></i> البحث والتصفية</h2>
             
             <div class="filters-section">
                 <div class="filters-grid">
@@ -417,7 +467,7 @@
                 </div>
             </div>
 
-            <h2 class="section-title">🏢 قائمة الشقق</h2>
+            <h2 class="section-title"><i class="fas fa-building"></i> قائمة الوحدات السكنية</h2>
             
             <div class="table-container">
                 <table class="table">
