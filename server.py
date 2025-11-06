@@ -721,9 +721,10 @@ def get_comprehensive_reports():
         reports['activeVehicles'] = cursor.fetchone()[0]
         
         # Monthly occupancy trend (last 7 months)
+        # TODO: Calculate from actual residents data when available
         reports['occupancyTrend'] = {
             'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
-            'data': [85, 87, 89, 91, 88, 90, 92]  # Mock data - should be calculated from real data
+            'data': [85, 87, 89, 91, 88, 90, 92]  # Mock data - requires residents data
         }
         
         # Violations by type
@@ -741,16 +742,18 @@ def get_comprehensive_reports():
         }
         
         # Security incidents trend (last 7 months)
+        # TODO: Group by month when sufficient data exists
         reports['securityTrend'] = {
             'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
-            'data': [8, 6, 10, 7, 9, 11, 12]  # Mock data
+            'data': [8, 6, 10, 7, 9, 11, 12]  # Mock data - will be replaced with real aggregation
         }
         
         # Complaints trend
+        # TODO: Calculate from actual complaints data with monthly grouping
         reports['complaintsTrend'] = {
             'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
-            'new': [25, 30, 28, 35, 32, 29, 31],
-            'resolved': [23, 28, 26, 33, 30, 27, 29]
+            'new': [25, 30, 28, 35, 32, 29, 31],  # Mock data
+            'resolved': [23, 28, 26, 33, 30, 27, 29]  # Mock data
         }
         
         # Residents by building

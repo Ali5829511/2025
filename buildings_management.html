@@ -530,7 +530,8 @@
             const totalBuildings = buildingsData.length;
             const totalUnits = buildingsData.reduce((sum, b) => sum + b.totalUnits, 0);
             
-            // حساب الوحدات المشغولة (نفترض 70% إشغال كمثال)
+            // حساب الوحدات المشغولة (نفترض 70% إشغال - سيتم استبداله بالبيانات الفعلية)
+            // TODO: Fetch actual occupancy from residents table
             const occupiedUnits = Math.floor(totalUnits * 0.70);
             const occupancyRate = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : 0;
             

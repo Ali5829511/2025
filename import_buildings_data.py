@@ -66,7 +66,7 @@ buildings_data = [
 
 # Add villas (فلل)
 for i in range(1, 115):  # 1 to 114
-    buildings_data.append((f"فلة {i}", f"V{i}", "منطقة الفلل", "فلة", 1))
+    buildings_data.append((f"فلة {i}", f"V{i}", "منطقة الفلل", "فلة", 1))  # building_type not used in INSERT
 
 def import_buildings():
     """Import buildings data into database"""
