@@ -612,7 +612,7 @@
 
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
-                <span>يمكنك البحث والتصفية حسب اسم الساكن، رقم المبنى، رقم الوحدة، أو حالة الوحدة</span>
+                <span>يمكنك البحث والتصفية حسب اسم الساكن، رقم العمارة، رقم الوحدة، أو حالة الوحدة</span>
             </div>
 
             <h2 class="section-title">
@@ -627,7 +627,7 @@
                             <i class="fas fa-search"></i>
                             البحث
                         </label>
-                        <input type="text" id="search-input" class="filter-input" placeholder="ابحث بالاسم، رقم المبنى، أو رقم الوحدة...">
+                        <input type="text" id="search-input" class="filter-input" placeholder="ابحث بالاسم، رقم العمارة، أو رقم الوحدة...">
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">
@@ -643,10 +643,10 @@
                     <div class="filter-group">
                         <label class="filter-label">
                             <i class="fas fa-building"></i>
-                            المبنى
+                            العمارة
                         </label>
                         <select id="building-filter" class="filter-select">
-                            <option value="">جميع المباني</option>
+                            <option value="">جميع العمارات</option>
                         </select>
                     </div>
                 </div>
@@ -682,7 +682,7 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">رقم المبنى</th>
+                            <th scope="col">رقم العمارة</th>
                             <th scope="col">رقم الوحدة</th>
                             <th scope="col">اسم الساكن</th>
                             <th scope="col">رقم الهوية</th>
@@ -762,11 +762,11 @@
 
             // Populate building filter
             const buildingFilter = document.getElementById('building-filter');
-            buildingFilter.innerHTML = '<option value="">جميع المباني</option>';
+            buildingFilter.innerHTML = '<option value="">جميع العمارات</option>';
             Array.from(buildingsSet).sort().forEach(building => {
                 const option = document.createElement('option');
                 option.value = building;
-                option.textContent = building;
+                option.textContent = `عمارة ${building}`;
                 buildingFilter.appendChild(option);
             });
 
@@ -800,11 +800,11 @@
 
             // Populate building filter
             const buildingFilter = document.getElementById('building-filter');
-            buildingFilter.innerHTML = '<option value="">جميع المباني</option>';
+            buildingFilter.innerHTML = '<option value="">جميع العمارات</option>';
             Array.from(buildingsSet).sort().forEach(building => {
                 const option = document.createElement('option');
                 option.value = building;
-                option.textContent = `مبنى ${building}`;
+                option.textContent = `عمارة ${building}`;
                 buildingFilter.appendChild(option);
             });
 
@@ -890,7 +890,7 @@
                 return `
                     <tr>
                         <td>${unit.id}</td>
-                        <td><span class="building-badge">مبنى ${unit.buildingNumber}</span></td>
+                        <td><span class="building-badge">عمارة ${unit.buildingNumber}</span></td>
                         <td>${unit.unitNumber}</td>
                         <td>${unit.residentName || '-'}</td>
                         <td>${unit.nationalId}</td>
@@ -972,7 +972,7 @@
 تفاصيل الوحدة
 ═══════════════════════════════
 
-المبنى: ${unit.buildingNumber}
+رقم العمارة: ${unit.buildingNumber}
 رقم الوحدة: ${unit.unitNumber}
 الساكن: ${unit.residentName || 'غير محدد'}
 رقم الهوية: ${unit.nationalId}
@@ -995,7 +995,7 @@
         function exportData() {
             // Create CSV content
             let csv = '\uFEFF'; // UTF-8 BOM
-            csv += 'رقم المبنى,رقم الوحدة,اسم الساكن,رقم الهوية,رقم الهاتف,القسم,الحالة,تاريخ الإشغال\n';
+            csv += 'رقم العمارة,رقم الوحدة,اسم الساكن,رقم الهوية,رقم الهاتف,القسم,الحالة,تاريخ الإشغال\n';
             
             filteredUnits.forEach(unit => {
                 const status = unit.status === 'occupied' ? 'مشغولة' : 'شاغرة';

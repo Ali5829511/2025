@@ -562,6 +562,71 @@ def get_statistics():
             'error_ar': 'فشل في الحصول على الإحصائيات'
         }), 500
 
+@app.route('/api/residents')
+def get_residents():
+    """Get all residents with their unit information"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get residents with building information
+        query = """
+        SELECT 
+            r.id,
+            r.name,
+            r.national_id,
+            r.email,
+            r.phone,
+            r.department,
+            r.job_title,
+            r.unit_number,
+            r.move_in_date,
+            r.move_out_date,
+            r.is_active,
+            b.building_number,
+            b.name as building_name
+        FROM residents r
+        LEFT JOIN buildings b ON r.building_id = b.id
+        ORDER BY r.id ASC
+        """
+        
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        # Format the data
+        residents = []
+        for row in rows:
+            residents.append({
+                'id': row[0],
+                'name': row[1],
+                'national_id': row[2],
+                'email': row[3],
+                'phone': row[4],
+                'department': row[5],
+                'job_title': row[6],
+                'unit_number': row[7],
+                'move_in_date': row[8],
+                'move_out_date': row[9],
+                'is_active': row[10],
+                'building_number': row[11],
+                'building_name': row[12]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': residents
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Residents API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get residents',
+            'error_ar': 'فشل في الحصول على بيانات السكان'
+        }), 500
+
 @app.route('/api/violation-report')
 def get_violation_report():
     """Get violation report with resident information"""
