@@ -749,7 +749,8 @@
                     nationalId: resident.national_id || 'غير محدد',
                     phone: resident.phone || 'غير محدد',
                     department: resident.department || 'غير محدد',
-                    status: resident.is_active ? 'occupied' : 'vacant',
+                    // Determine occupancy: if there's a resident with a unit_number and is_active, it's occupied
+                    status: (resident.is_active && resident.unit_number) ? 'occupied' : 'vacant',
                     moveInDate: resident.move_in_date || '-'
                 };
                 
@@ -965,12 +966,30 @@
         function viewUnit(id) {
             const unit = allUnits.find(u => u.id === id);
             if (unit) {
-                alert(`تفاصيل الوحدة:\n\nالمبنى: ${unit.buildingNumber}\nرقم الوحدة: ${unit.unitNumber}\nالساكن: ${unit.residentName || 'شاغرة'}\nالحالة: ${unit.status === 'occupied' ? 'مشغولة' : 'شاغرة'}`);
+                // Create a simple modal-like display using confirm/prompt as a temporary solution
+                // In production, this would use a proper modal component
+                const details = `
+تفاصيل الوحدة
+═══════════════════════════════
+
+المبنى: ${unit.buildingNumber}
+رقم الوحدة: ${unit.unitNumber}
+الساكن: ${unit.residentName || 'غير محدد'}
+رقم الهوية: ${unit.nationalId}
+رقم الهاتف: ${unit.phone}
+القسم: ${unit.department}
+الحالة: ${unit.status === 'occupied' ? 'مشغولة' : 'شاغرة'}
+تاريخ الإشغال: ${unit.moveInDate}
+                `.trim();
+                
+                alert(details);
             }
         }
 
         function editUnit(id) {
-            alert('وظيفة التعديل قيد التطوير');
+            // In production, this would navigate to an edit page or open an edit modal
+            console.log('Edit unit:', id);
+            alert('وظيفة التعديل قيد التطوير\nسيتم إضافتها في التحديث القادم');
         }
 
         function exportData() {
@@ -989,7 +1008,11 @@
             const url = URL.createObjectURL(blob);
             link.href = url;
             link.download = `residential_units_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            // Append to DOM before clicking for better browser compatibility
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
             
             // Clean up the URL to prevent memory leaks
             setTimeout(() => URL.revokeObjectURL(url), 100);
