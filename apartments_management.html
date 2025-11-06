@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة الشقق - إسكان أعضاء هيئة التدريس</title>
+    <title>الوحدات السكنية - إسكان أعضاء هيئة التدريس</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -354,7 +354,7 @@
         <div class="header">
             <div class="header-content">
                 <div>
-                    <h1 class="header-title">إدارة الشقق</h1>
+                    <h1 class="header-title">الوحدات السكنية</h1>
                     <p class="header-subtitle">نظام إدارة إسكان أعضاء هيئة التدريس</p>
                 </div>
                 <a href="dashboard.html" class="back-button">
@@ -423,7 +423,6 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>اسم الساكن</th>
                             <th>نوع الوحدة</th>
                             <th>وصف المبنى</th>
                             <th>حالة الشقة</th>
@@ -433,7 +432,7 @@
                     </thead>
                     <tbody id="apartments-table-body">
                         <tr>
-                            <td colspan="6" class="loading">جاري تحميل البيانات...</td>
+                            <td colspan="5" class="loading">جاري تحميل البيانات...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -452,16 +451,30 @@
         // تحميل البيانات
         async function loadApartmentsData() {
             try {
-                const response = await fetch('apartments_data.json');
-                apartmentsData = await response.json();
-                filteredData = [...apartmentsData];
-                
-                updateStats();
-                updateTable();
+                const response = await fetch('/api/data/units');
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    // تحويل الحقول من الإنجليزية إلى العربية حسب الجدول
+                    apartmentsData = result.data.map(function(unit) {
+                        return {
+                            'نوع الوحدة': unit.type === 'villa' ? 'فلة' : 'شقة',
+                            'وصف المبنى': unit.description || '',
+                            'حالة الشقة': unit.status === 'occupied' ? 'مشغولة' : (unit.status === 'vacant' ? 'شاغرة' : unit.status),
+                            'رقم المبنى': unit.building_number ? unit.building_number.toString() : '',
+                            'رقم الشقة': unit.unit_number || ''
+                        };
+                    });
+                    filteredData = [...apartmentsData];
+                    updateStats();
+                    updateTable();
+                } else {
+                    document.getElementById('apartments-table-body').innerHTML = 
+                        '<tr><td colspan="5" class="no-data">خطأ في تحميل البيانات من قاعدة البيانات</td></tr>';
+                }
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
                 document.getElementById('apartments-table-body').innerHTML = 
-                    '<tr><td colspan="6" class="no-data">خطأ في تحميل البيانات</td></tr>';
+                    '<tr><td colspan="5" class="no-data">خطأ في تحميل البيانات</td></tr>';
             }
         }
 
@@ -488,7 +501,6 @@
             
             filteredData = apartmentsData.filter(apartment => {
                 const matchesSearch = !searchTerm || 
-                    apartment['اسم_الساكن'].toLowerCase().includes(searchTerm) ||
                     apartment['نوع الوحدة'].toLowerCase().includes(searchTerm) ||
                     apartment['رقم المبنى'].includes(searchTerm) ||
                     apartment['رقم الشقة'].includes(searchTerm);
@@ -507,17 +519,15 @@
             const tbody = document.getElementById('apartments-table-body');
             
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="no-data">لا توجد بيانات مطابقة للبحث</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data">لا توجد بيانات مطابقة للبحث</td></tr>';
                 return;
             }
 
             const rows = filteredData.map(apartment => {
                 const statusClass = apartment['حالة الشقة'] === 'مشغولة' ? 'status-occupied' : 'status-vacant';
                 const buildingClass = apartment['وصف المبنى'] === 'المباني القديمة' ? 'building-old' : 'building-new';
-                
                 return `
                     <tr>
-                        <td>${apartment['اسم_الساكن']}</td>
                         <td>${apartment['نوع الوحدة']}</td>
                         <td><span class="building-type ${buildingClass}">${apartment['وصف المبنى']}</span></td>
                         <td><span class="status-badge ${statusClass}">${apartment['حالة الشقة']}</span></td>
