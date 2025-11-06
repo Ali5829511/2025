@@ -617,6 +617,76 @@ def get_violation_report():
             'error_ar': 'فشل في الحصول على تقرير المخالفات'
         }), 500
 
+@app.route('/api/residents')
+def get_residents():
+    """Get all residents with building info"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        building_id = request.args.get('building_id', type=int)
+        is_active = request.args.get('is_active', type=int)
+        
+        query = '''
+            SELECT r.id, r.name, r.national_id, r.email, r.phone, r.department, 
+                   r.job_title, r.unit_number, r.move_in_date, r.move_out_date, 
+                   r.is_active, b.name as building_name, b.building_number
+            FROM residents r
+            LEFT JOIN buildings b ON r.building_id = b.id
+        '''
+        
+        conditions = []
+        params = []
+        
+        if building_id:
+            conditions.append('r.building_id = ?')
+            params.append(building_id)
+        
+        if is_active is not None:
+            conditions.append('r.is_active = ?')
+            params.append(is_active)
+        
+        if conditions:
+            query += ' WHERE ' + ' AND '.join(conditions)
+        
+        query += ' ORDER BY b.building_number, r.unit_number, r.name'
+        
+        cursor.execute(query, params)
+        
+        residents = []
+        for row in cursor.fetchall():
+            residents.append({
+                'id': row[0],
+                'name': row[1],
+                'national_id': row[2],
+                'email': row[3],
+                'phone': row[4],
+                'department': row[5],
+                'job_title': row[6],
+                'unit_number': row[7],
+                'move_in_date': row[8],
+                'move_out_date': row[9],
+                'is_active': row[10],
+                'building_name': row[11],
+                'building_number': row[12]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': residents,
+            'total': len(residents)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Residents API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load residents data',
+            'error_ar': 'فشل في تحميل بيانات السكان'
+        }), 500
+
 @app.route('/api/apartments')
 def get_apartments():
     """Get all apartments with building info"""
