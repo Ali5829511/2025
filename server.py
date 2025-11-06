@@ -1468,8 +1468,8 @@ def upload_car_images():
         app.logger.error(f'Car image upload error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': f'Failed to upload images: {str(e)}',
-            'error_ar': f'فشل في رفع الصور: {str(e)}'
+            'error': 'Failed to upload images. Please check the logs for details.',
+            'error_ar': 'فشل في رفع الصور. يرجى التحقق من السجلات للحصول على التفاصيل.'
         }), 500
 
 
@@ -1601,8 +1601,8 @@ def export_car_analysis(format):
         app.logger.error(f'Export car analysis error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': f'Failed to export data: {str(e)}',
-            'error_ar': f'فشل في تصدير البيانات: {str(e)}'
+            'error': 'Failed to export data. Please check the logs for details.',
+            'error_ar': 'فشل في تصدير البيانات. يرجى التحقق من السجلات للحصول على التفاصيل.'
         }), 500
 
 
