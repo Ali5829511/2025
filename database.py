@@ -7,22 +7,37 @@ import sqlite3
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import database_adapter
 
 DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'housing.db')
 
 def get_db_connection():
     """Create and return a database connection"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return database_adapter.get_db_connection()
+
+
+def _execute_query(cursor, query, params=None):
+    """Execute query with appropriate placeholder for database type"""
+    placeholder = database_adapter.get_placeholder()
+    if placeholder == '%s' and '?' in query:
+        # Replace ? with %s for PostgreSQL
+        query = query.replace('?', '%s')
+    if params:
+        cursor.execute(query, params)
+    else:
+        cursor.execute(query)
+    return cursor
 
 def init_database():
     """Initialize the database with required tables"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    # Get placeholder for SQL queries
+    placeholder = database_adapter.get_placeholder()
+    
     # Users table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
@@ -36,10 +51,10 @@ def init_database():
         last_login TIMESTAMP,
         is_active INTEGER DEFAULT 1
     )
-    ''')
+    '''))
     
     # Sessions table for managing user sessions
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -50,10 +65,10 @@ def init_database():
         user_agent TEXT,
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     )
-    ''')
+    '''))
     
     # Buildings table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS buildings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -64,10 +79,10 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-    ''')
+    '''))
     
     # Residents table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS residents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -85,10 +100,10 @@ def init_database():
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (building_id) REFERENCES buildings (id)
     )
-    ''')
+    '''))
     
     # Vehicles table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS vehicles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         plate_number TEXT UNIQUE NOT NULL,
@@ -106,10 +121,10 @@ def init_database():
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_id) REFERENCES residents (id) ON DELETE CASCADE
     )
-    ''')
+    '''))
     
     # Traffic violations table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS traffic_violations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         vehicle_id INTEGER NOT NULL,
@@ -125,10 +140,10 @@ def init_database():
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
         FOREIGN KEY (reported_by) REFERENCES users (id)
     )
-    ''')
+    '''))
     
     # Complaints table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS complaints (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         resident_id INTEGER NOT NULL,
@@ -145,10 +160,10 @@ def init_database():
         FOREIGN KEY (resident_id) REFERENCES residents (id),
         FOREIGN KEY (assigned_to) REFERENCES users (id)
     )
-    ''')
+    '''))
     
     # Visitors log table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS visitors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         visitor_name TEXT NOT NULL,
@@ -164,10 +179,10 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (visiting_resident_id) REFERENCES residents (id)
     )
-    ''')
+    '''))
     
     # Security incidents table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS security_incidents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         incident_type TEXT NOT NULL,
@@ -185,10 +200,10 @@ def init_database():
         FOREIGN KEY (reported_by) REFERENCES users (id),
         FOREIGN KEY (resolved_by) REFERENCES users (id)
     )
-    ''')
+    '''))
     
     # Audit log table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS audit_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
@@ -201,10 +216,10 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id)
     )
-    ''')
+    '''))
     
     # Plate recognition log table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS plate_recognition_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -216,10 +231,10 @@ def init_database():
         FOREIGN KEY (user_id) REFERENCES users (id),
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
     )
-    ''')
+    '''))
     
     # Apartments table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS apartments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         building_id INTEGER NOT NULL,
@@ -232,10 +247,10 @@ def init_database():
         FOREIGN KEY (building_id) REFERENCES buildings (id),
         UNIQUE(building_id, unit_number)
     )
-    ''')
+    '''))
     
     # Parking spots table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS parking_spots (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         spot_number TEXT UNIQUE NOT NULL,
@@ -248,10 +263,10 @@ def init_database():
         FOREIGN KEY (building_id) REFERENCES buildings (id),
         FOREIGN KEY (apartment_id) REFERENCES apartments (id)
     )
-    ''')
+    '''))
     
     # Car images table for uploaded car images
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS car_images (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         original_filename TEXT NOT NULL,
@@ -262,10 +277,10 @@ def init_database():
         processed INTEGER DEFAULT 0,
         FOREIGN KEY (uploaded_by) REFERENCES users (id)
     )
-    ''')
+    '''))
     
     # Car analysis results table
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS car_analysis (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         car_image_id INTEGER NOT NULL,
@@ -280,10 +295,10 @@ def init_database():
         FOREIGN KEY (car_image_id) REFERENCES car_images (id) ON DELETE CASCADE,
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
     )
-    ''')
+    '''))
     
     # Car violations mapping table - links car analysis to violations
-    cursor.execute('''
+    cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS car_violations_mapping (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         car_analysis_id INTEGER NOT NULL,
@@ -295,12 +310,12 @@ def init_database():
         FOREIGN KEY (linked_by) REFERENCES users (id),
         UNIQUE(car_analysis_id, violation_id)
     )
-    ''')
+    '''))
     
     conn.commit()
     
     # Check if default users exist
-    cursor.execute('SELECT COUNT(*) FROM users')
+    _execute_query(cursor, 'SELECT COUNT(*) FROM users')
     user_count = cursor.fetchone()[0]
     
     if user_count == 0:
@@ -345,7 +360,7 @@ def init_database():
         
         for user in default_users:
             password_hash = generate_password_hash(user['password'])
-            cursor.execute('''
+            _execute_query(cursor, '''
                 INSERT INTO users (username, password_hash, name, role, email)
                 VALUES (?, ?, ?, ?, ?)
             ''', (user['username'], password_hash, user['name'], user['role'], user['email']))
@@ -373,7 +388,7 @@ def create_user(username, password, name, role, email=None):
     password_hash = generate_password_hash(password)
     
     try:
-        cursor.execute('''
+        _execute_query(cursor, '''
             INSERT INTO users (username, password_hash, name, role, email)
             VALUES (?, ?, ?, ?, ?)
         ''', (username, password_hash, name, role, email))
@@ -381,7 +396,8 @@ def create_user(username, password, name, role, email=None):
         user_id = cursor.lastrowid
         conn.close()
         return user_id
-    except sqlite3.IntegrityError:
+    except Exception as e:
+        # Handle IntegrityError for both SQLite and PostgreSQL
         conn.close()
         return None
 
@@ -390,12 +406,12 @@ def verify_user(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM users WHERE username = ? AND is_active = 1', (username,))
+    _execute_query(cursor, 'SELECT * FROM users WHERE username = ? AND is_active = 1', (username,))
     user = cursor.fetchone()
     
     if user and check_password_hash(user['password_hash'], password):
         # Update last login
-        cursor.execute('UPDATE users SET last_login = ? WHERE id = ?', 
+        _execute_query(cursor, 'UPDATE users SET last_login = ? WHERE id = ?', 
                       (datetime.now(), user['id']))
         conn.commit()
         conn.close()
@@ -421,7 +437,7 @@ def update_user_password(user_id, new_password):
     cursor = conn.cursor()
     
     password_hash = generate_password_hash(new_password)
-    cursor.execute('''
+    _execute_query(cursor, '''
         UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?
     ''', (password_hash, datetime.now(), user_id))
     
@@ -436,7 +452,7 @@ def log_audit(user_id, action, table_name=None, record_id=None, old_values=None,
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('''
+    _execute_query(cursor, '''
         INSERT INTO audit_log (user_id, action, table_name, record_id, old_values, new_values, ip_address)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', (user_id, action, table_name, record_id, old_values, new_values, ip_address))
