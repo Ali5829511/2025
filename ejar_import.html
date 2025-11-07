@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استيراد بيانات إيجار - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+
+        .header-text h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .info-card h2 {
+            color: #0f3d68;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card h3 {
+            color: #2e8bc0;
+            margin: 20px 0 10px;
+            font-size: 1.2em;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-right: 4px solid #2e8bc0;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .info-box.success {
+            border-right-color: #28a745;
+            background: #f0fdf4;
+        }
+
+        .info-box.warning {
+            border-right-color: #ffc107;
+            background: #fffbeb;
+        }
+
+        .info-box.danger {
+            border-right-color: #dc3545;
+            background: #fef2f2;
+        }
+
+        .file-format-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-format-table th,
+        .file-format-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .file-format-table th {
+            background: #0f3d68;
+            color: white;
+            font-weight: bold;
+        }
+
+        .file-format-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .file-format-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .steps {
+            counter-reset: step;
+            margin: 20px 0;
+        }
+
+        .step {
+            counter-increment: step;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            position: relative;
+            padding-right: 60px;
+        }
+
+        .step::before {
+            content: counter(step);
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: #2e8bc0;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .download-btn,
+        .action-btn {
+            display: inline-block;
+            background: #2e8bc0;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .download-btn:hover,
+        .action-btn:hover {
+            background: #0f3d68;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+        }
+
+        .download-btn i,
+        .action-btn i {
+            margin-left: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .command-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .ejar-logo {
+            max-width: 200px;
+            margin: 20px 0;
+        }
+
+        .platform-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .platform-link:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .note {
+            background: #fff9e6;
+            border-right: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .note strong {
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <img src="university_logo.png" alt="شعار الجامعة" class="university-logo" onerror="this.style.display='none'">
+                <div class="header-text">
+                    <h1>استيراد بيانات منصة إيجار</h1>
+                    <p>Ejar Platform Data Import</p>
+                </div>
+            </div>
+            <a href="import_data.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                رجوع
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- About Ejar -->
+        <div class="info-card">
+            <h2><i class="fas fa-building"></i> عن منصة إيجار</h2>
+            <p>
+                منصة إيجار هي منصة إلكترونية وطنية سعودية لتوثيق وتنظيم عقود الإيجار السكنية والتجارية.
+                تُمكّن المنصة من استيراد بيانات العقارات، المستأجرين، الملاك، والعقود بشكل منظم.
+            </p>
+            <a href="https://eservices.ejar.sa/ar/dashboard" target="_blank" class="platform-link">
+                <i class="fas fa-external-link-alt"></i>
+                زيارة منصة إيجار
+            </a>
+
+            <div class="note">
+                <strong><i class="fas fa-info-circle"></i> ملاحظة:</strong>
+                هذه الأداة تتيح لك استيراد بيانات العقارات المصدّرة من منصة إيجار إلى نظام إدارة الإسكان.
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="info-card">
+            <h2><i class="fas fa-star"></i> المميزات</h2>
+            <ul class="feature-list">
+                <li>استيراد بيانات العقارات (فلل وعمارات)</li>
+                <li>استيراد بيانات المستأجرين وأصحاب العقارات</li>
+                <li>ربط العقود بالمستأجرين تلقائياً</li>
+                <li>كشف وتجاهل السجلات المكررة</li>
+                <li>إنشاء المباني والوحدات تلقائياً</li>
+                <li>معالجة آمنة للأخطاء</li>
+                <li>تقارير مفصلة بعد الاستيراد</li>
+                <li>دعم صيغ CSV و TSV و Excel</li>
+            </ul>
+        </div>
+
+        <!-- File Format -->
+        <div class="info-card">
+            <h2><i class="fas fa-file-alt"></i> تنسيق الملف المطلوب</h2>
+            
+            <div class="info-box">
+                <strong>صيغة الملف:</strong> CSV أو TSV (مفصول بفاصلة أو تاب)<br>
+                <strong>الترميز:</strong> UTF-8<br>
+                <strong>الصف الأول:</strong> أسماء الأعمدة
+            </div>
+
+            <h3>الأعمدة المطلوبة:</h3>
+            <table class="file-format-table">
+                <thead>
+                    <tr>
+                        <th>اسم العمود</th>
+                        <th>الوصف</th>
+                        <th>مثال</th>
+                        <th>إلزامي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>نوع_العقار</td>
+                        <td>نوع العقار (فلة/عمارة)</td>
+                        <td>فلة</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td>رقم_العقار</td>
+                        <td>رقم العقار أو الوحدة</td>
+                        <td>1 أو 101</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td>اسم_المالك</td>
+                        <td>اسم مالك العقار</td>
+                        <td>إدارة الجامعة</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>رقم_هوية_المالك</td>
+                        <td>رقم هوية المالك</td>
+                        <td>1000000001</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>اسم_المستأجر</td>
+                        <td>اسم المستأجر الكامل</td>
+                        <td>أحمد بن محمد</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td>رقم_هوية_المستأجر</td>
+                        <td>رقم الهوية الوطنية</td>
+                        <td>1234567890</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td>جوال_المستأجر</td>
+                        <td>رقم الجوال</td>
+                        <td>0501234567</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>بريد_المستأجر</td>
+                        <td>البريد الإلكتروني</td>
+                        <td>example@email.com</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>تاريخ_بدء_العقد</td>
+                        <td>تاريخ بدء الإيجار</td>
+                        <td>2024-01-01</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>تاريخ_انتهاء_العقد</td>
+                        <td>تاريخ انتهاء الإيجار</td>
+                        <td>2025-12-31</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>قيمة_الإيجار_السنوي</td>
+                        <td>قيمة الإيجار السنوي (ريال)</td>
+                        <td>60000</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>حالة_العقد</td>
+                        <td>حالة العقد (نشط/منتهي)</td>
+                        <td>نشط</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>ملاحظات</td>
+                        <td>ملاحظات إضافية</td>
+                        <td>عضو هيئة التدريس</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>مثال على الملف:</h3>
+            <div class="code-block">
+نوع_العقار	رقم_العقار	اسم_المالك	رقم_هوية_المالك	اسم_المستأجر	رقم_هوية_المستأجر	جوال_المستأجر	بريد_المستأجر	تاريخ_بدء_العقد	تاريخ_انتهاء_العقد	قيمة_الإيجار_السنوي	حالة_العقد	ملاحظات
+فلة	1	إدارة الجامعة	1000000001	أحمد بن محمد	1234567890	0501234567	ahmed@email.com	2024-01-01	2025-12-31	60000	نشط	عضو هيئة التدريس
+عمارة	101	إدارة الجامعة	1000000001	خالد بن سعود	1234567891	0502345678	khaled@email.com	2024-01-15	2025-12-31	48000	نشط	عضو هيئة التدريس
+            </div>
+        </div>
+
+        <!-- How to Export from Ejar -->
+        <div class="info-card">
+            <h2><i class="fas fa-download"></i> كيفية تصدير البيانات من إيجار</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <strong>تسجيل الدخول إلى منصة إيجار:</strong><br>
+                    قم بزيارة <a href="https://eservices.ejar.sa" target="_blank">https://eservices.ejar.sa</a> وسجل الدخول بحسابك
+                </div>
+                
+                <div class="step">
+                    <strong>الانتقال إلى قسم العقارات:</strong><br>
+                    من لوحة التحكم، انتقل إلى قسم "عقاراتي" أو "العقود"
+                </div>
+                
+                <div class="step">
+                    <strong>تصدير البيانات:</strong><br>
+                    ابحث عن خيار "تصدير" أو "Export" واختر صيغة CSV أو Excel
+                </div>
+                
+                <div class="step">
+                    <strong>حفظ الملف:</strong><br>
+                    احفظ الملف المُصدّر في جهازك
+                </div>
+                
+                <div class="step">
+                    <strong>استيراد البيانات:</strong><br>
+                    استخدم السكريبت أدناه لاستيراد البيانات إلى النظام
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Methods -->
+        <div class="info-card">
+            <h2><i class="fas fa-upload"></i> طرق الاستيراد</h2>
+
+            <h3><i class="fas fa-file"></i> الطريقة 1: استيراد من ملف</h3>
+            <div class="command-box">
+python3 import_ejar_data.py ejar_export.csv
+            </div>
+
+            <h3><i class="fas fa-database"></i> الطريقة 2: استيراد البيانات النموذجية</h3>
+            <p>لاختبار النظام، يمكنك استيراد بيانات نموذجية:</p>
+            <div class="command-box">
+python3 import_ejar_data.py --sample
+            </div>
+
+            <div class="info-box success">
+                <strong><i class="fas fa-check-circle"></i> نصيحة:</strong>
+                يُنصح بتجربة البيانات النموذجية أولاً للتأكد من أن النظام يعمل بشكل صحيح قبل استيراد البيانات الفعلية.
+            </div>
+        </div>
+
+        <!-- Import Report -->
+        <div class="info-card">
+            <h2><i class="fas fa-chart-bar"></i> تقرير الاستيراد</h2>
+            <p>بعد الاستيراد، سيعرض النظام تقريراً مفصلاً يتضمن:</p>
+            
+            <div class="code-block">
+======================================================================
+📊 Ejar Import Summary / ملخص استيراد بيانات إيجار:
+======================================================================
+   ✅ Successfully imported / تم الاستيراد بنجاح: 10
+   ⏭️  Skipped (duplicates) / تم التخطي (مكرر): 0
+   ❌ Errors / أخطاء: 0
+   📝 Total processed / إجمالي المعالج: 10
+======================================================================
+            </div>
+
+            <ul class="feature-list">
+                <li>عدد السجلات المستوردة بنجاح</li>
+                <li>عدد السجلات المتخطاة (المكررة)</li>
+                <li>عدد الأخطاء في البيانات</li>
+                <li>إجمالي السجلات المعالجة</li>
+            </ul>
+        </div>
+
+        <!-- Verification -->
+        <div class="info-card">
+            <h2><i class="fas fa-check-double"></i> التحقق من البيانات</h2>
+            <p>بعد الاستيراد، يمكنك التحقق من البيانات بعدة طرق:</p>
+
+            <h3>1. عرض التقرير الشامل:</h3>
+            <a href="housing_report.html" class="action-btn" target="_blank">
+                <i class="fas fa-chart-line"></i>
+                عرض التقرير الشامل
+            </a>
+
+            <h3>2. إدارة السكان:</h3>
+            <a href="residents_management_updated.html" class="action-btn" target="_blank">
+                <i class="fas fa-users"></i>
+                إدارة السكان
+            </a>
+
+            <h3>3. إدارة المباني:</h3>
+            <a href="buildings_management_updated.html" class="action-btn" target="_blank">
+                <i class="fas fa-building"></i>
+                إدارة المباني
+            </a>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="info-card">
+            <h2><i class="fas fa-tools"></i> استكشاف الأخطاء</h2>
+
+            <div class="info-box warning">
+                <strong>خطأ: قاعدة البيانات غير موجودة</strong><br>
+                الحل: قم بتشغيل <code>python3 database.py</code> لإنشاء قاعدة البيانات
+            </div>
+
+            <div class="info-box warning">
+                <strong>خطأ: ملف البيانات غير موجود</strong><br>
+                الحل: تأكد من وجود الملف في المجلد الصحيح وأن المسار صحيح
+            </div>
+
+            <div class="info-box warning">
+                <strong>تحذير: سجل مكرر</strong><br>
+                هذا طبيعي - النظام يتخطى السجلات المكررة تلقائياً لحماية البيانات
+            </div>
+
+            <div class="info-box danger">
+                <strong>خطأ: صيغة التاريخ غير صحيحة</strong><br>
+                الحل: تأكد من أن التواريخ بصيغة YYYY-MM-DD (مثال: 2024-01-01)
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <div class="info-card">
+            <h2><i class="fas fa-book"></i> موارد إضافية</h2>
+            <ul class="feature-list">
+                <li><a href="IMPORT_GUIDE.md" target="_blank">دليل الاستيراد الشامل</a></li>
+                <li><a href="DATABASE.md" target="_blank">وثائق قاعدة البيانات</a></li>
+                <li><a href="README.md" target="_blank">دليل المستخدم</a></li>
+                <li><a href="import_data.html">صفحة الاستيراد الرئيسية</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Log page load
+        console.log('Ejar Import Page loaded successfully');
+        console.log('Ready to import data from Ejar platform');
+    </script>
+</body>
+</html>
