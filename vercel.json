@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.py"
+    }
+  ],
+  "env": {
+    "PLATE_RECOGNIZER_API_TOKEN": "22ba3cf7155a1ea730a0b64787f98ab5f9a3de94",
+    "PLATE_RECOGNIZER_API_URL": "https://api.platerecognizer.com/v1/plate-reader/",
+    "FLASK_ENV": "production"
+  }
+}
