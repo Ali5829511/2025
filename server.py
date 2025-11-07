@@ -869,7 +869,7 @@ def health_check():
 def get_statistics():
     """Get statistics for unified dashboard"""
     try:
-        conn = database.get_db()
+        conn = database.get_db_connection()
         cursor = conn.cursor()
         
         stats = {}
@@ -982,24 +982,26 @@ def get_residents():
 def get_violation_report():
     """Get violation report with resident information"""
     try:
-        conn = database.get_db()
+        conn = database.get_db_connection()
         cursor = conn.cursor()
         
         # Get violations with resident information
         query = """
         SELECT 
-            tv.plate_number,
+            v.plate_number,
             COUNT(tv.id) as violation_count,
-            tv.vehicle_type,
-            tv.processing_date,
+            v.vehicle_type,
+            MAX(tv.violation_date) as latest_violation,
             r.name as resident_name,
-            r.building_number,
+            b.building_number,
             r.unit_number
         FROM traffic_violations tv
-        LEFT JOIN stickers s ON tv.plate_number = s.plate_number
-        LEFT JOIN residents r ON s.resident_id = r.id
-        GROUP BY tv.plate_number
-        ORDER BY violation_count DESC, tv.processing_date DESC
+        LEFT JOIN vehicles v ON tv.vehicle_id = v.id
+        LEFT JOIN residents r ON v.owner_id = r.id
+        LEFT JOIN buildings b ON r.building_id = b.id
+        WHERE v.plate_number IS NOT NULL
+        GROUP BY v.plate_number
+        ORDER BY violation_count DESC, latest_violation DESC
         """
         
         cursor.execute(query)
