@@ -27,8 +27,8 @@ RUN useradd -m -u 1000 housing && \
 
 USER housing
 
-# Expose port
-EXPOSE 8000
+# Expose port (can be overridden by PORT env var in gunicorn_config.py)
+EXPOSE 8000 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
