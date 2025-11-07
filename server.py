@@ -2695,55 +2695,38 @@ def immobilized_car_detail(immobilized_id):
             cursor = conn.cursor()
             
             # Update immobilized car
+            allowed_fields = {
+                'location': str,
+                'outstanding_fines': float,
+                'towing_fee': float,
+                'storage_fee': float,
+                'total_fees': float,
+                'payment_status': str,
+                'status': str,
+                'notes': str
+            }
+            
             update_fields = []
             params = []
             
-            if 'location' in data:
-                update_fields.append('location = ?')
-                params.append(data['location'])
+            for field, field_type in allowed_fields.items():
+                if field in data:
+                    update_fields.append(f'{field} = ?')
+                    params.append(data[field])
             
-            if 'outstanding_fines' in data:
-                update_fields.append('outstanding_fines = ?')
-                params.append(data['outstanding_fines'])
+            if 'payment_status' in data and data['payment_status'] == 'paid':
+                update_fields.append('payment_date = CURRENT_TIMESTAMP')
             
-            if 'towing_fee' in data:
-                update_fields.append('towing_fee = ?')
-                params.append(data['towing_fee'])
-            
-            if 'storage_fee' in data:
-                update_fields.append('storage_fee = ?')
-                params.append(data['storage_fee'])
-            
-            if 'total_fees' in data:
-                update_fields.append('total_fees = ?')
-                params.append(data['total_fees'])
-            
-            if 'payment_status' in data:
-                update_fields.append('payment_status = ?')
-                params.append(data['payment_status'])
-                if data['payment_status'] == 'paid':
-                    update_fields.append('payment_date = CURRENT_TIMESTAMP')
-            
-            if 'status' in data:
-                update_fields.append('status = ?')
-                params.append(data['status'])
-                if data['status'] == 'released':
-                    update_fields.append('release_date = CURRENT_TIMESTAMP')
-                    update_fields.append('released_by = ?')
-                    params.append(user['id'])
-            
-            if 'notes' in data:
-                update_fields.append('notes = ?')
-                params.append(data['notes'])
+            if 'status' in data and data['status'] == 'released':
+                update_fields.append('release_date = CURRENT_TIMESTAMP')
+                update_fields.append('released_by = ?')
+                params.append(user['id'])
             
             update_fields.append('updated_at = CURRENT_TIMESTAMP')
             params.append(immobilized_id)
             
-            cursor.execute(f'''
-                UPDATE immobilized_cars 
-                SET {', '.join(update_fields)}
-                WHERE id = ?
-            ''', params)
+            query = 'UPDATE immobilized_cars SET ' + ', '.join(update_fields) + ' WHERE id = ?'
+            cursor.execute(query, params)
             
             conn.commit()
             

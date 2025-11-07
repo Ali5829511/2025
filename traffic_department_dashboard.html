@@ -720,7 +720,14 @@
             document.querySelectorAll('.recent-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            // Find and activate clicked tab
+            const clickedTab = Array.from(document.querySelectorAll('.recent-tab')).find(tab => 
+                tab.textContent.includes(tabName === 'violations' ? 'المخالفات' : 'الحوادث')
+            );
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
 
             // Update content
             document.querySelectorAll('.recent-list').forEach(list => {
