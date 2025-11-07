@@ -614,8 +614,12 @@
                         setTimeout(() => {
                             if (data.user.role === 'violation_entry') {
                                 window.location.href = 'enhanced_traffic_violations_updated.html';
+                            } else if (data.user.role === 'traffic_entry') {
+                                window.location.href = 'enhanced_traffic_violations_updated.html';
+                            } else if (data.user.role === 'inquiry_user') {
+                                window.location.href = 'inquiry_page.html';
                             } else {
-                                window.location.href = 'main_dashboard.html';
+                                window.location.href = 'welcome_portal.html';
                             }
                         }, 1500);
                     }
@@ -671,9 +675,15 @@
                         if (data.user.role === 'violation_entry') {
                             // مستخدم تسجيل المخالفات يذهب مباشرة لنموذج المخالفة
                             window.location.href = 'enhanced_traffic_violations_updated.html';
+                        } else if (data.user.role === 'traffic_entry') {
+                            // مستخدم تسجيل المرور يذهب مباشرة لنموذج المخالفة
+                            window.location.href = 'enhanced_traffic_violations_updated.html';
+                        } else if (data.user.role === 'inquiry_user') {
+                            // مستخدم الاستعلام يذهب مباشرة لصفحة الاستعلام
+                            window.location.href = 'inquiry_page.html';
                         } else {
-                            // باقي المستخدمين يذهبون للوحة التحكم
-                            window.location.href = 'main_dashboard.html';
+                            // باقي المستخدمين يذهبون لصفحة الترحيب
+                            window.location.href = 'welcome_portal.html';
                         }
                     }, 1500);
                 } else {
