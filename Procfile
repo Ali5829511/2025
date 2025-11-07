@@ -1,2 +1,2 @@
-web: gunicorn --config gunicorn_config.py server:app
-release: python init_db.py
+web: gunicorn server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+release: python database.py && python add_traffic_roles.py
