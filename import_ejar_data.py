@@ -41,17 +41,21 @@ SAMPLE_EJAR_DATA = """نوع_العقار	رقم_العقار	اسم_المال�
 عمارة	301	إدارة الجامعة	1000000001	وليد بن عبدالعزيز الجندل	1234567899	505473949	waleed@example.com	2024-01-25	2025-12-31	48000	نشط	عضو هيئة تدريس"""
 
 
+# Constants
+DEFAULT_PHONE_NUMBER = '0000000000'  # Default phone when not provided
+
+
 def parse_ejar_date(date_str):
     """Parse date from Ejar format (YYYY-MM-DD)."""
     if not date_str or date_str.strip() == '':
         return None
     try:
         return datetime.strptime(date_str.strip(), '%Y-%m-%d').date()
-    except:
+    except ValueError:
         try:
             # Try alternative format
             return datetime.strptime(date_str.strip(), '%d/%m/%Y').date()
-        except:
+        except ValueError:
             return None
 
 
@@ -69,9 +73,10 @@ def create_building_if_not_exists(conn, property_type, property_number):
         building_name = "فلة"
         building_number = str(property_number)
     else:
-        # For apartments, extract building number from unit number
-        # e.g., 101 -> Building A, 201 -> Building B, etc.
-        floor = str(property_number)[0] if len(str(property_number)) > 1 else "1"
+        # For apartments, extract building floor from unit number
+        # e.g., 101 -> Floor 1, 201 -> Floor 2, 301 -> Floor 3
+        property_num = int(property_number) if property_number.isdigit() else 1
+        floor = property_num // 100 if property_num >= 100 else 1
         building_name = "عمارة"
         building_number = f"A{floor}"  # Use A1, A2, etc. for apartment buildings
     
@@ -174,7 +179,7 @@ def import_ejar_property(conn, row_data, stats):
             tenant_name,
             tenant_id,
             tenant_email if tenant_email else None,
-            tenant_phone if tenant_phone else '0000000000',
+            tenant_phone if tenant_phone else DEFAULT_PHONE_NUMBER,
             'عضو هيئة التدريس' if 'هيئة' in notes else None,
             notes if notes else None,
             building_id,
@@ -193,13 +198,20 @@ def import_ejar_property(conn, row_data, stats):
         
     except Exception as e:
         print(f"  ❌ Error importing row: {e}")
+        print(f"     Property: {property_type} {property_number}, Tenant: {tenant_name}")
         stats['errors'] += 1
         conn.rollback()
         return False
 
 
-def import_from_csv_text(text_data, db_path='housing.db'):
-    """Import Ejar data from CSV text format."""
+def import_from_csv_text(text_data, db_path='housing.db', delimiter='\t'):
+    """Import Ejar data from CSV text format.
+    
+    Args:
+        text_data: CSV text data
+        db_path: Path to database file
+        delimiter: Field delimiter ('\t' for tab, ',' for comma)
+    """
     
     # Check if database exists
     if not os.path.exists(db_path):
@@ -217,7 +229,7 @@ def import_from_csv_text(text_data, db_path='housing.db'):
         return
     
     # Parse header
-    header = lines[0].split('\t')
+    header = lines[0].split(delimiter)
     print(f"📋 Found {len(header)} columns: {', '.join(header[:5])}...")
     print(f"📊 Processing {len(lines)-1} property records...\n")
     
@@ -233,7 +245,7 @@ def import_from_csv_text(text_data, db_path='housing.db'):
         if not line.strip():
             continue
         
-        values = line.split('\t')
+        values = line.split(delimiter)
         if len(values) != len(header):
             print(f"  ⚠️  Row {i}: Column count mismatch, skipping...")
             stats['errors'] += 1
@@ -267,18 +279,13 @@ def import_from_file(filename, db_path='housing.db'):
     with open(filename, 'r', encoding='utf-8-sig') as f:
         content = f.read()
     
-    # Check if it's tab-separated or comma-separated
+    # Detect delimiter
     if '\t' in content:
-        import_from_csv_text(content, db_path)
+        delimiter = '\t'
     else:
-        # Convert comma-separated to tab-separated
-        lines = content.strip().split('\n')
-        csv_reader = csv.reader(lines)
-        rows = list(csv_reader)
-        
-        # Convert to tab-separated format
-        text_data = '\n'.join(['\t'.join(row) for row in rows])
-        import_from_csv_text(text_data, db_path)
+        delimiter = ','
+    
+    import_from_csv_text(content, db_path, delimiter=delimiter)
 
 
 def import_sample_data(db_path='housing.db'):
