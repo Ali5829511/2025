@@ -149,8 +149,7 @@ def init_database():
     cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS traffic_violations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vehicle_id INTEGER,
-        plate_number TEXT,
+        vehicle_id INTEGER NOT NULL,
         violation_type TEXT NOT NULL,
         violation_date TIMESTAMP NOT NULL,
         location TEXT,
@@ -332,100 +331,6 @@ def init_database():
         FOREIGN KEY (violation_id) REFERENCES traffic_violations (id) ON DELETE CASCADE,
         FOREIGN KEY (linked_by) REFERENCES users (id),
         UNIQUE(car_analysis_id, violation_id)
-    )
-    '''))
-    
-    # Traffic accidents table
-    cursor.execute(database_adapter.adapt_sql('''
-    CREATE TABLE IF NOT EXISTS traffic_accidents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        accident_number TEXT UNIQUE NOT NULL,
-        accident_date TIMESTAMP NOT NULL,
-        location TEXT NOT NULL,
-        description TEXT NOT NULL,
-        severity TEXT DEFAULT 'minor',
-        weather_conditions TEXT,
-        road_conditions TEXT,
-        vehicles_involved INTEGER DEFAULT 1,
-        injuries_count INTEGER DEFAULT 0,
-        fatalities_count INTEGER DEFAULT 0,
-        damage_estimate DECIMAL(10, 2),
-        police_report_number TEXT,
-        insurance_claim_number TEXT,
-        status TEXT DEFAULT 'reported',
-        reported_by INTEGER NOT NULL,
-        investigated_by INTEGER,
-        resolution TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        resolved_at TIMESTAMP,
-        FOREIGN KEY (reported_by) REFERENCES users (id),
-        FOREIGN KEY (investigated_by) REFERENCES users (id)
-    )
-    '''))
-    
-    # Accident vehicles mapping table - links accidents to vehicles
-    cursor.execute(database_adapter.adapt_sql('''
-    CREATE TABLE IF NOT EXISTS accident_vehicles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        accident_id INTEGER NOT NULL,
-        vehicle_id INTEGER,
-        plate_number TEXT NOT NULL,
-        driver_name TEXT,
-        driver_phone TEXT,
-        driver_license TEXT,
-        vehicle_owner_id INTEGER,
-        damage_description TEXT,
-        at_fault INTEGER DEFAULT 0,
-        insurance_info TEXT,
-        notes TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (accident_id) REFERENCES traffic_accidents (id) ON DELETE CASCADE,
-        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
-        FOREIGN KEY (vehicle_owner_id) REFERENCES residents (id)
-    )
-    '''))
-    
-    # Immobilized cars table (cars that are impounded/booted)
-    cursor.execute(database_adapter.adapt_sql('''
-    CREATE TABLE IF NOT EXISTS immobilized_cars (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vehicle_id INTEGER,
-        plate_number TEXT NOT NULL,
-        immobilization_type TEXT NOT NULL,
-        reason TEXT NOT NULL,
-        location TEXT NOT NULL,
-        immobilized_date TIMESTAMP NOT NULL,
-        release_date TIMESTAMP,
-        immobilized_by INTEGER NOT NULL,
-        released_by INTEGER,
-        outstanding_fines DECIMAL(10, 2) DEFAULT 0,
-        towing_fee DECIMAL(10, 2) DEFAULT 0,
-        storage_fee DECIMAL(10, 2) DEFAULT 0,
-        total_fees DECIMAL(10, 2) DEFAULT 0,
-        payment_status TEXT DEFAULT 'unpaid',
-        payment_date TIMESTAMP,
-        status TEXT DEFAULT 'immobilized',
-        violation_count INTEGER DEFAULT 0,
-        notes TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
-        FOREIGN KEY (immobilized_by) REFERENCES users (id),
-        FOREIGN KEY (released_by) REFERENCES users (id)
-    )
-    '''))
-    
-    # Immobilized car violations mapping - links immobilized cars to their violations
-    cursor.execute(database_adapter.adapt_sql('''
-    CREATE TABLE IF NOT EXISTS immobilized_car_violations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        immobilized_car_id INTEGER NOT NULL,
-        violation_id INTEGER NOT NULL,
-        linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (immobilized_car_id) REFERENCES immobilized_cars (id) ON DELETE CASCADE,
-        FOREIGN KEY (violation_id) REFERENCES traffic_violations (id),
-        UNIQUE(immobilized_car_id, violation_id)
     )
     '''))
     
