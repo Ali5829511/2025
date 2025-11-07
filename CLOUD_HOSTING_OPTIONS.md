@@ -15,7 +15,38 @@ This guide shows different cloud hosting options that support deploying the Hous
 
 ## 🌟 الخيارات الموصى بها / Recommended Options
 
-### 1. ⭐ Render.com (موصى به بشدة / Highly Recommended)
+### 1. 🚀 Fly.io (خيار جديد - موصى به / New Option - Recommended) ⭐ NEW!
+
+**الفترة التجريبية / Trial Period:** فترة مجانية دائمة / Permanent Free Tier
+
+**المميزات / Advantages:**
+- ✅ **فترة مجانية دائمة / Permanent free tier** - $5 رصيد شهري مجاني
+- ✅ نشر سريع جداً / Very fast deployment
+- ✅ SSL مجاني / Free SSL
+- ✅ قاعدة بيانات PostgreSQL مُدارة / Managed PostgreSQL
+- ✅ **لا توقف تلقائي / No auto-sleep** - التطبيق يعمل دائماً
+- ✅ خوادم عالمية (30+ منطقة) / Global servers (30+ regions)
+- ✅ أداء ممتاز / Excellent performance
+- ✅ دعم كامل لـ Docker / Full Docker support
+
+**السلبيات / Disadvantages:**
+- ⚠️ قد يتطلب بطاقة ائتمانية للتحقق / May require credit card for verification
+- ⚠️ يحتاج CLI للنشر / Requires CLI for deployment
+- ⚠️ 256 MB RAM في الخطة المجانية / Only 256 MB RAM in free tier
+
+**التكلفة بعد الفترة التجريبية / Cost After Trial:**
+- Free tier: دائم / Permanent (3 VMs, 160GB bandwidth)
+- Pro: $1.94/month per VM (512MB RAM)
+- High Memory: $5.83/month per VM (1GB RAM)
+
+**الوثائق / Documentation:**
+- [دليل النشر على Fly.io](FLY_DEPLOYMENT.md) ⭐ NEW!
+
+**رابط التسجيل / Sign Up:** https://fly.io
+
+---
+
+### 2. ⭐ Render.com (موصى به بشدة / Highly Recommended)
 
 **الفترة التجريبية / Trial Period:** 90 يوم قاعدة بيانات مجانية / 90-day free database
 
@@ -42,7 +73,7 @@ This guide shows different cloud hosting options that support deploying the Hous
 
 ---
 
-### 2. 🚂 Railway.app
+### 3. 🚂 Railway.app
 
 **الفترة التجريبية / Trial Period:** $5 رصيد مجاني شهرياً / $5 free credit monthly
 
@@ -74,7 +105,7 @@ This guide shows different cloud hosting options that support deploying the Hous
 
 ---
 
-### 3. 🔷 Heroku (خيار تقليدي / Traditional Option)
+### 4. 🔷 Heroku (خيار تقليدي / Traditional Option)
 
 **الفترة التجريبية / Trial Period:** لم يعد يوفر خطة مجانية / No longer offers free tier
 
@@ -91,7 +122,7 @@ Heroku discontinued free tier in November 2022. Now requires paid subscription.
 
 ---
 
-### 4. 🔵 DigitalOcean App Platform
+### 5. 🔵 DigitalOcean App Platform
 
 **الفترة التجريبية / Trial Period:** $200 رصيد مجاني (60 يوم) / $200 free credit (60 days)
 
@@ -123,7 +154,7 @@ Heroku discontinued free tier in November 2022. Now requires paid subscription.
 
 ---
 
-### 5. 🟦 Microsoft Azure App Service
+### 6. 🟦 Microsoft Azure App Service
 
 **الفترة التجريبية / Trial Period:** $200 رصيد مجاني (30 يوم) / $200 free credit (30 days)
 
@@ -147,7 +178,7 @@ Heroku discontinued free tier in November 2022. Now requires paid subscription.
 
 ---
 
-### 6. 🟩 Google Cloud Platform (Cloud Run)
+### 7. 🟩 Google Cloud Platform (Cloud Run)
 
 **الفترة التجريبية / Trial Period:** $300 رصيد مجاني (90 يوم) / $300 free credit (90 days)
 
@@ -170,7 +201,7 @@ Heroku discontinued free tier in November 2022. Now requires paid subscription.
 
 ---
 
-### 7. 🟠 AWS Free Tier (Amazon Web Services)
+### 8. 🟠 AWS Free Tier (Amazon Web Services)
 
 **الفترة التجريبية / Trial Period:** 12 شهر مجاني (محدود) / 12 months free (limited)
 
@@ -198,6 +229,7 @@ Heroku discontinued free tier in November 2022. Now requires paid subscription.
 
 | المنصة / Platform | فترة تجريبية / Trial | سهولة الاستخدام / Ease | الأداء / Performance | التكلفة بعد / Cost After |
 |-------------------|---------------------|----------------------|---------------------|------------------------|
+| **Fly.io** 🚀 ⭐ NEW! | دائمة / Permanent | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | مجاني / Free |
 | **Render** ⭐ | 90 يوم قاعدة بيانات | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | $7/month |
 | **Railway** | $5 شهرياً | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | $5-20/month |
 | **Heroku** | ❌ لا يوجد | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | $12/month |
@@ -211,11 +243,13 @@ Heroku discontinued free tier in November 2022. Now requires paid subscription.
 ## 🎯 التوصيات / Recommendations
 
 ### للبدء والتجربة / For Getting Started & Testing:
-1. **Render.com** ⭐ - الأفضل والأسهل / Best & Easiest
-2. **Railway.app** - بديل ممتاز / Excellent alternative
+1. **Fly.io** 🚀 - فترة مجانية دائمة، لا توقف تلقائي / Permanent free tier, no auto-sleep ⭐ NEW!
+2. **Render.com** ⭐ - الأسهل / Easiest
+3. **Railway.app** - بديل ممتاز / Excellent alternative
 
 ### للاستخدام الرسمي / For Production Use:
-1. **DigitalOcean** - موثوق وبسعر معقول / Reliable & affordable
+1. **Fly.io** - أداء ممتاز وفترة مجانية دائمة / Excellent performance & permanent free tier ⭐
+2. **DigitalOcean** - موثوق وبسعر معقول / Reliable & affordable
 2. **Azure** - للمؤسسات / For enterprises
 3. **Google Cloud** - أداء عالي / High performance
 
