@@ -2131,6 +2131,778 @@ def import_violations_data():
         }), 500
 
 
+# ==================== Traffic Accidents Management ====================
+
+@app.route('/api/traffic-accidents', methods=['GET', 'POST'])
+def traffic_accidents():
+    """Get or create traffic accidents"""
+    user = auth.get_current_user(request)
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized', 'error_ar': 'غير مصرح'}), 401
+    
+    if request.method == 'GET':
+        try:
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            # Get filter parameters
+            status = request.args.get('status')
+            severity = request.args.get('severity')
+            from_date = request.args.get('from_date')
+            to_date = request.args.get('to_date')
+            
+            # Build query
+            query = '''
+                SELECT a.*, 
+                       u1.name as reported_by_name,
+                       u2.name as investigated_by_name
+                FROM traffic_accidents a
+                LEFT JOIN users u1 ON a.reported_by = u1.id
+                LEFT JOIN users u2 ON a.investigated_by = u2.id
+                WHERE 1=1
+            '''
+            params = []
+            
+            if status:
+                query += ' AND a.status = ?'
+                params.append(status)
+            
+            if severity:
+                query += ' AND a.severity = ?'
+                params.append(severity)
+            
+            if from_date:
+                query += ' AND DATE(a.accident_date) >= ?'
+                params.append(from_date)
+            
+            if to_date:
+                query += ' AND DATE(a.accident_date) <= ?'
+                params.append(to_date)
+            
+            query += ' ORDER BY a.accident_date DESC'
+            
+            cursor.execute(query, params)
+            accidents = [dict(row) for row in cursor.fetchall()]
+            
+            # Get involved vehicles for each accident
+            for accident in accidents:
+                cursor.execute('''
+                    SELECT av.*, v.make, v.model, v.color, r.name as owner_name
+                    FROM accident_vehicles av
+                    LEFT JOIN vehicles v ON av.vehicle_id = v.id
+                    LEFT JOIN residents r ON av.vehicle_owner_id = r.id
+                    WHERE av.accident_id = ?
+                ''', (accident['id'],))
+                accident['vehicles'] = [dict(row) for row in cursor.fetchall()]
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'accidents': accidents
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Get accidents error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to fetch accidents',
+                'error_ar': 'فشل في جلب بيانات الحوادث'
+            }), 500
+    
+    elif request.method == 'POST':
+        # Check permission
+        if user['role'] not in ['admin', 'violations']:
+            return jsonify({'success': False, 'error': 'Insufficient permissions', 'error_ar': 'صلاحيات غير كافية'}), 403
+        
+        try:
+            data = request.json
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            # Generate accident number
+            cursor.execute('SELECT COUNT(*) FROM traffic_accidents')
+            count = cursor.fetchone()[0]
+            accident_number = f'ACC-{datetime.now().year}-{count + 1:05d}'
+            
+            # Insert accident
+            cursor.execute('''
+                INSERT INTO traffic_accidents 
+                (accident_number, accident_date, location, description, severity,
+                 weather_conditions, road_conditions, vehicles_involved, injuries_count,
+                 fatalities_count, damage_estimate, police_report_number, 
+                 insurance_claim_number, status, reported_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                accident_number,
+                data.get('accident_date'),
+                data.get('location'),
+                data.get('description'),
+                data.get('severity', 'minor'),
+                data.get('weather_conditions'),
+                data.get('road_conditions'),
+                data.get('vehicles_involved', 1),
+                data.get('injuries_count', 0),
+                data.get('fatalities_count', 0),
+                data.get('damage_estimate', 0),
+                data.get('police_report_number'),
+                data.get('insurance_claim_number'),
+                'reported',
+                user['id']
+            ))
+            
+            accident_id = cursor.lastrowid
+            
+            # Insert involved vehicles if provided
+            if 'vehicles' in data and data['vehicles']:
+                for vehicle in data['vehicles']:
+                    cursor.execute('''
+                        INSERT INTO accident_vehicles
+                        (accident_id, vehicle_id, plate_number, driver_name, driver_phone,
+                         driver_license, damage_description, at_fault, insurance_info, notes)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        accident_id,
+                        vehicle.get('vehicle_id'),
+                        vehicle.get('plate_number'),
+                        vehicle.get('driver_name'),
+                        vehicle.get('driver_phone'),
+                        vehicle.get('driver_license'),
+                        vehicle.get('damage_description'),
+                        vehicle.get('at_fault', 0),
+                        vehicle.get('insurance_info'),
+                        vehicle.get('notes')
+                    ))
+            
+            conn.commit()
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                f'Created traffic accident: {accident_number}',
+                'traffic_accidents',
+                accident_id,
+                ip_address=request.remote_addr
+            )
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Accident reported successfully',
+                'message_ar': 'تم تسجيل الحادث بنجاح',
+                'accident_id': accident_id,
+                'accident_number': accident_number
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Create accident error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to create accident',
+                'error_ar': 'فشل في تسجيل الحادث'
+            }), 500
+
+
+@app.route('/api/traffic-accidents/<int:accident_id>', methods=['GET', 'PUT', 'DELETE'])
+def traffic_accident_detail(accident_id):
+    """Get, update or delete a specific traffic accident"""
+    user = auth.get_current_user(request)
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized', 'error_ar': 'غير مصرح'}), 401
+    
+    if request.method == 'GET':
+        try:
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT a.*, 
+                       u1.name as reported_by_name,
+                       u2.name as investigated_by_name
+                FROM traffic_accidents a
+                LEFT JOIN users u1 ON a.reported_by = u1.id
+                LEFT JOIN users u2 ON a.investigated_by = u2.id
+                WHERE a.id = ?
+            ''', (accident_id,))
+            
+            accident = cursor.fetchone()
+            if not accident:
+                return jsonify({'success': False, 'error': 'Accident not found', 'error_ar': 'الحادث غير موجود'}), 404
+            
+            accident = dict(accident)
+            
+            # Get involved vehicles
+            cursor.execute('''
+                SELECT av.*, v.make, v.model, v.color, r.name as owner_name
+                FROM accident_vehicles av
+                LEFT JOIN vehicles v ON av.vehicle_id = v.id
+                LEFT JOIN residents r ON av.vehicle_owner_id = r.id
+                WHERE av.accident_id = ?
+            ''', (accident_id,))
+            accident['vehicles'] = [dict(row) for row in cursor.fetchall()]
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'accident': accident
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Get accident detail error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to fetch accident details',
+                'error_ar': 'فشل في جلب تفاصيل الحادث'
+            }), 500
+    
+    elif request.method == 'PUT':
+        # Check permission
+        if user['role'] not in ['admin', 'violations']:
+            return jsonify({'success': False, 'error': 'Insufficient permissions', 'error_ar': 'صلاحيات غير كافية'}), 403
+        
+        try:
+            data = request.json
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            # Update accident
+            cursor.execute('''
+                UPDATE traffic_accidents 
+                SET location = ?, description = ?, severity = ?,
+                    weather_conditions = ?, road_conditions = ?, 
+                    vehicles_involved = ?, injuries_count = ?, fatalities_count = ?,
+                    damage_estimate = ?, police_report_number = ?,
+                    insurance_claim_number = ?, status = ?,
+                    investigated_by = ?, resolution = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (
+                data.get('location'),
+                data.get('description'),
+                data.get('severity'),
+                data.get('weather_conditions'),
+                data.get('road_conditions'),
+                data.get('vehicles_involved'),
+                data.get('injuries_count'),
+                data.get('fatalities_count'),
+                data.get('damage_estimate'),
+                data.get('police_report_number'),
+                data.get('insurance_claim_number'),
+                data.get('status'),
+                data.get('investigated_by') or user['id'],
+                data.get('resolution'),
+                accident_id
+            ))
+            
+            # Update resolved_at if status changed to resolved
+            if data.get('status') in ['resolved', 'closed']:
+                cursor.execute('''
+                    UPDATE traffic_accidents 
+                    SET resolved_at = CURRENT_TIMESTAMP
+                    WHERE id = ? AND resolved_at IS NULL
+                ''', (accident_id,))
+            
+            conn.commit()
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                f'Updated traffic accident ID: {accident_id}',
+                'traffic_accidents',
+                accident_id,
+                ip_address=request.remote_addr
+            )
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Accident updated successfully',
+                'message_ar': 'تم تحديث الحادث بنجاح'
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Update accident error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update accident',
+                'error_ar': 'فشل في تحديث الحادث'
+            }), 500
+    
+    elif request.method == 'DELETE':
+        # Check permission - only admin can delete
+        if user['role'] != 'admin':
+            return jsonify({'success': False, 'error': 'Insufficient permissions', 'error_ar': 'صلاحيات غير كافية'}), 403
+        
+        try:
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('DELETE FROM traffic_accidents WHERE id = ?', (accident_id,))
+            conn.commit()
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                f'Deleted traffic accident ID: {accident_id}',
+                'traffic_accidents',
+                accident_id,
+                ip_address=request.remote_addr
+            )
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Accident deleted successfully',
+                'message_ar': 'تم حذف الحادث بنجاح'
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Delete accident error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to delete accident',
+                'error_ar': 'فشل في حذف الحادث'
+            }), 500
+
+
+# ==================== Immobilized Cars Management ====================
+
+@app.route('/api/immobilized-cars', methods=['GET', 'POST'])
+def immobilized_cars():
+    """Get or create immobilized cars"""
+    user = auth.get_current_user(request)
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized', 'error_ar': 'غير مصرح'}), 401
+    
+    if request.method == 'GET':
+        try:
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            # Get filter parameters
+            status = request.args.get('status', 'immobilized')
+            payment_status = request.args.get('payment_status')
+            from_date = request.args.get('from_date')
+            to_date = request.args.get('to_date')
+            
+            # Build query
+            query = '''
+                SELECT i.*, 
+                       v.make, v.model, v.color, v.owner_id,
+                       r.name as owner_name, r.phone as owner_phone,
+                       u1.name as immobilized_by_name,
+                       u2.name as released_by_name
+                FROM immobilized_cars i
+                LEFT JOIN vehicles v ON i.vehicle_id = v.id
+                LEFT JOIN residents r ON v.owner_id = r.id
+                LEFT JOIN users u1 ON i.immobilized_by = u1.id
+                LEFT JOIN users u2 ON i.released_by = u2.id
+                WHERE 1=1
+            '''
+            params = []
+            
+            if status:
+                query += ' AND i.status = ?'
+                params.append(status)
+            
+            if payment_status:
+                query += ' AND i.payment_status = ?'
+                params.append(payment_status)
+            
+            if from_date:
+                query += ' AND DATE(i.immobilized_date) >= ?'
+                params.append(from_date)
+            
+            if to_date:
+                query += ' AND DATE(i.immobilized_date) <= ?'
+                params.append(to_date)
+            
+            query += ' ORDER BY i.immobilized_date DESC'
+            
+            cursor.execute(query, params)
+            immobilized = [dict(row) for row in cursor.fetchall()]
+            
+            # Get associated violations for each immobilized car
+            for car in immobilized:
+                cursor.execute('''
+                    SELECT tv.*, v.plate_number
+                    FROM immobilized_car_violations icv
+                    JOIN traffic_violations tv ON icv.violation_id = tv.id
+                    JOIN vehicles v ON tv.vehicle_id = v.id
+                    WHERE icv.immobilized_car_id = ?
+                ''', (car['id'],))
+                car['violations'] = [dict(row) for row in cursor.fetchall()]
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'immobilized_cars': immobilized
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Get immobilized cars error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to fetch immobilized cars',
+                'error_ar': 'فشل في جلب بيانات السيارات المحجوزة'
+            }), 500
+    
+    elif request.method == 'POST':
+        # Check permission
+        if user['role'] not in ['admin', 'violations']:
+            return jsonify({'success': False, 'error': 'Insufficient permissions', 'error_ar': 'صلاحيات غير كافية'}), 403
+        
+        try:
+            data = request.json
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            # Insert immobilized car
+            cursor.execute('''
+                INSERT INTO immobilized_cars 
+                (vehicle_id, plate_number, immobilization_type, reason, location,
+                 immobilized_date, immobilized_by, outstanding_fines, towing_fee,
+                 storage_fee, total_fees, payment_status, status, violation_count, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                data.get('vehicle_id'),
+                data.get('plate_number'),
+                data.get('immobilization_type', 'boot'),
+                data.get('reason'),
+                data.get('location'),
+                data.get('immobilized_date', datetime.now()),
+                user['id'],
+                data.get('outstanding_fines', 0),
+                data.get('towing_fee', 0),
+                data.get('storage_fee', 0),
+                data.get('total_fees', 0),
+                'unpaid',
+                'immobilized',
+                data.get('violation_count', 0),
+                data.get('notes')
+            ))
+            
+            immobilized_id = cursor.lastrowid
+            
+            # Link violations if provided
+            if 'violation_ids' in data and data['violation_ids']:
+                for violation_id in data['violation_ids']:
+                    cursor.execute('''
+                        INSERT INTO immobilized_car_violations
+                        (immobilized_car_id, violation_id)
+                        VALUES (?, ?)
+                    ''', (immobilized_id, violation_id))
+            
+            conn.commit()
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                f'Immobilized vehicle: {data.get("plate_number")}',
+                'immobilized_cars',
+                immobilized_id,
+                ip_address=request.remote_addr
+            )
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Vehicle immobilized successfully',
+                'message_ar': 'تم حجز المركبة بنجاح',
+                'immobilized_id': immobilized_id
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Create immobilized car error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to immobilize vehicle',
+                'error_ar': 'فشل في حجز المركبة'
+            }), 500
+
+
+@app.route('/api/immobilized-cars/<int:immobilized_id>', methods=['GET', 'PUT', 'DELETE'])
+def immobilized_car_detail(immobilized_id):
+    """Get, update or delete a specific immobilized car"""
+    user = auth.get_current_user(request)
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized', 'error_ar': 'غير مصرح'}), 401
+    
+    if request.method == 'GET':
+        try:
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT i.*, 
+                       v.make, v.model, v.color, v.owner_id,
+                       r.name as owner_name, r.phone as owner_phone,
+                       u1.name as immobilized_by_name,
+                       u2.name as released_by_name
+                FROM immobilized_cars i
+                LEFT JOIN vehicles v ON i.vehicle_id = v.id
+                LEFT JOIN residents r ON v.owner_id = r.id
+                LEFT JOIN users u1 ON i.immobilized_by = u1.id
+                LEFT JOIN users u2 ON i.released_by = u2.id
+                WHERE i.id = ?
+            ''', (immobilized_id,))
+            
+            car = cursor.fetchone()
+            if not car:
+                return jsonify({'success': False, 'error': 'Immobilized car not found', 'error_ar': 'السيارة المحجوزة غير موجودة'}), 404
+            
+            car = dict(car)
+            
+            # Get associated violations
+            cursor.execute('''
+                SELECT tv.*, v.plate_number
+                FROM immobilized_car_violations icv
+                JOIN traffic_violations tv ON icv.violation_id = tv.id
+                JOIN vehicles v ON tv.vehicle_id = v.id
+                WHERE icv.immobilized_car_id = ?
+            ''', (immobilized_id,))
+            car['violations'] = [dict(row) for row in cursor.fetchall()]
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'immobilized_car': car
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Get immobilized car detail error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to fetch details',
+                'error_ar': 'فشل في جلب التفاصيل'
+            }), 500
+    
+    elif request.method == 'PUT':
+        # Check permission
+        if user['role'] not in ['admin', 'violations']:
+            return jsonify({'success': False, 'error': 'Insufficient permissions', 'error_ar': 'صلاحيات غير كافية'}), 403
+        
+        try:
+            data = request.json
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            # Update immobilized car
+            update_fields = []
+            params = []
+            
+            if 'location' in data:
+                update_fields.append('location = ?')
+                params.append(data['location'])
+            
+            if 'outstanding_fines' in data:
+                update_fields.append('outstanding_fines = ?')
+                params.append(data['outstanding_fines'])
+            
+            if 'towing_fee' in data:
+                update_fields.append('towing_fee = ?')
+                params.append(data['towing_fee'])
+            
+            if 'storage_fee' in data:
+                update_fields.append('storage_fee = ?')
+                params.append(data['storage_fee'])
+            
+            if 'total_fees' in data:
+                update_fields.append('total_fees = ?')
+                params.append(data['total_fees'])
+            
+            if 'payment_status' in data:
+                update_fields.append('payment_status = ?')
+                params.append(data['payment_status'])
+                if data['payment_status'] == 'paid':
+                    update_fields.append('payment_date = CURRENT_TIMESTAMP')
+            
+            if 'status' in data:
+                update_fields.append('status = ?')
+                params.append(data['status'])
+                if data['status'] == 'released':
+                    update_fields.append('release_date = CURRENT_TIMESTAMP')
+                    update_fields.append('released_by = ?')
+                    params.append(user['id'])
+            
+            if 'notes' in data:
+                update_fields.append('notes = ?')
+                params.append(data['notes'])
+            
+            update_fields.append('updated_at = CURRENT_TIMESTAMP')
+            params.append(immobilized_id)
+            
+            cursor.execute(f'''
+                UPDATE immobilized_cars 
+                SET {', '.join(update_fields)}
+                WHERE id = ?
+            ''', params)
+            
+            conn.commit()
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                f'Updated immobilized car ID: {immobilized_id}',
+                'immobilized_cars',
+                immobilized_id,
+                ip_address=request.remote_addr
+            )
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Updated successfully',
+                'message_ar': 'تم التحديث بنجاح'
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Update immobilized car error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update',
+                'error_ar': 'فشل في التحديث'
+            }), 500
+    
+    elif request.method == 'DELETE':
+        # Check permission - only admin can delete
+        if user['role'] != 'admin':
+            return jsonify({'success': False, 'error': 'Insufficient permissions', 'error_ar': 'صلاحيات غير كافية'}), 403
+        
+        try:
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('DELETE FROM immobilized_cars WHERE id = ?', (immobilized_id,))
+            conn.commit()
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                f'Deleted immobilized car ID: {immobilized_id}',
+                'immobilized_cars',
+                immobilized_id,
+                ip_address=request.remote_addr
+            )
+            
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Deleted successfully',
+                'message_ar': 'تم الحذف بنجاح'
+            })
+            
+        except Exception as e:
+            app.logger.error(f'Delete immobilized car error: {str(e)}')
+            return jsonify({
+                'success': False,
+                'error': 'Failed to delete',
+                'error_ar': 'فشل في الحذف'
+            }), 500
+
+
+# ==================== Traffic Department Statistics ====================
+
+@app.route('/api/traffic-department/statistics', methods=['GET'])
+def traffic_department_statistics():
+    """Get comprehensive statistics for traffic department"""
+    user = auth.get_current_user(request)
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized', 'error_ar': 'غير مصرح'}), 401
+    
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Traffic violations statistics
+        cursor.execute('''
+            SELECT 
+                COUNT(*) as total_violations,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_violations,
+                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved_violations,
+                SUM(fine_amount) as total_fines
+            FROM traffic_violations
+        ''')
+        violations_stats = dict(cursor.fetchone())
+        
+        # Traffic accidents statistics
+        cursor.execute('''
+            SELECT 
+                COUNT(*) as total_accidents,
+                SUM(CASE WHEN status = 'reported' THEN 1 ELSE 0 END) as reported_accidents,
+                SUM(CASE WHEN status = 'investigated' THEN 1 ELSE 0 END) as investigated_accidents,
+                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved_accidents,
+                SUM(injuries_count) as total_injuries,
+                SUM(fatalities_count) as total_fatalities,
+                SUM(damage_estimate) as total_damage
+            FROM traffic_accidents
+        ''')
+        accidents_stats = dict(cursor.fetchone())
+        
+        # Immobilized cars statistics
+        cursor.execute('''
+            SELECT 
+                COUNT(*) as total_immobilized,
+                SUM(CASE WHEN status = 'immobilized' THEN 1 ELSE 0 END) as currently_immobilized,
+                SUM(CASE WHEN status = 'released' THEN 1 ELSE 0 END) as released,
+                SUM(CASE WHEN payment_status = 'unpaid' THEN 1 ELSE 0 END) as unpaid,
+                SUM(total_fees) as total_fees_collected
+            FROM immobilized_cars
+        ''')
+        immobilized_stats = dict(cursor.fetchone())
+        
+        # Recent violations
+        cursor.execute('''
+            SELECT tv.*, v.plate_number, r.name as owner_name
+            FROM traffic_violations tv
+            JOIN vehicles v ON tv.vehicle_id = v.id
+            LEFT JOIN residents r ON v.owner_id = r.id
+            ORDER BY tv.violation_date DESC
+            LIMIT 10
+        ''')
+        recent_violations = [dict(row) for row in cursor.fetchall()]
+        
+        # Recent accidents
+        cursor.execute('''
+            SELECT * FROM traffic_accidents
+            ORDER BY accident_date DESC
+            LIMIT 10
+        ''')
+        recent_accidents = [dict(row) for row in cursor.fetchall()]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'statistics': {
+                'violations': violations_stats,
+                'accidents': accidents_stats,
+                'immobilized_cars': immobilized_stats
+            },
+            'recent': {
+                'violations': recent_violations,
+                'accidents': recent_accidents
+            }
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get traffic statistics error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to fetch statistics',
+            'error_ar': 'فشل في جلب الإحصائيات'
+        }), 500
+
+
 # ==================== Error Handlers ====================
 
 @app.errorhandler(404)
