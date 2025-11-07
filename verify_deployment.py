@@ -9,8 +9,13 @@ This script verifies that the project is ready for deployment.
 
 import sys
 import os
-import subprocess
 from pathlib import Path
+
+# Ensure we're running from the project root directory
+# للتأكد من أننا نعمل من المجلد الرئيسي للمشروع
+script_dir = Path(__file__).parent.absolute()
+os.chdir(script_dir)
+sys.path.insert(0, str(script_dir))
 
 # Colors for terminal output
 class Colors:
