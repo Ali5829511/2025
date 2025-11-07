@@ -1,5 +1,10 @@
 version: '3.8'
 
+# ملف Docker Compose لاستخدام الصورة المنشورة على Docker Hub
+# Docker Compose file for using the published Docker Hub image
+# استخدم هذا الملف للنشر السريع بدون الحاجة للبناء المحلي
+# Use this file for quick deployment without local building
+
 services:
   # PostgreSQL Database
   db:
@@ -20,16 +25,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # Flask Application
+  # Flask Application from Docker Hub
   web:
-    # للبناء المحلي / For local build:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # استخدام الصورة المنشورة من Docker Hub
+    # Using published image from Docker Hub
+    image: ali517/housing-management:latest
     
-    # لاستخدام الصورة من Docker Hub، علق على سطور build أعلاه وألغ تعليق السطر التالي:
-    # To use image from Docker Hub, comment out the build lines above and uncomment the line below:
-    # image: ali517/housing-management:latest
+    # لاستخدام إصدار محدد / To use a specific version:
+    # image: ali517/housing-management:v2.0.1
+    # image: ali517/housing-management:stable
     
     container_name: housing_web
     restart: always
@@ -44,9 +48,6 @@ services:
       - DATABASE_USER=housing_user
       - DATABASE_PASSWORD=${DB_PASSWORD:-ChangeThisPassword123!}
       - SECRET_KEY=${SECRET_KEY:-generate-a-strong-secret-key-here}
-    volumes:
-      - ./:/app
-      - static_files:/app/static
     ports:
       - "8000:8000"
     depends_on:
@@ -54,7 +55,6 @@ services:
         condition: service_healthy
     networks:
       - housing_network
-    command: gunicorn --config gunicorn_config.py server:app
 
   # Nginx Reverse Proxy
   nginx:
@@ -65,9 +65,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # إذا لم يكن لديك ملف nginx.conf، استخدم التكوين الافتراضي
+      # If you don't have nginx.conf, use default configuration
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
-      - static_files:/var/www/static:ro
     depends_on:
       - web
     networks:
@@ -75,7 +76,6 @@ services:
 
 volumes:
   postgres_data:
-  static_files:
 
 networks:
   housing_network:

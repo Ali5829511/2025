@@ -1,0 +1,107 @@
+# Git files
+.git
+.github
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+*.pdf
+*.docx
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+housing.db
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Test files
+test_*.py
+*_test.py
+tests/
+.pytest_cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# SSL certificates (use secrets/volumes instead)
+*.pem
+*.key
+*.crt
+ssl/
+
+# Backup files
+*.bak
+*.backup
+
+# Sample data
+*sample*.py
+create_sample_data.py
+create_traffic_sample_data.py
+
+# User manuals
+user_manual*.pdf
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
