@@ -16,6 +16,11 @@ def get_db_connection():
     return database_adapter.get_db_connection()
 
 
+def get_db():
+    """Alias for get_db_connection() for backward compatibility"""
+    return get_db_connection()
+
+
 def _execute_query(cursor, query, params=None):
     """Execute query with appropriate placeholder for database type"""
     placeholder = database_adapter.get_placeholder()
@@ -120,6 +125,23 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_id) REFERENCES residents (id) ON DELETE CASCADE
+    )
+    '''))
+    
+    # Stickers table - for vehicle sticker management
+    cursor.execute(database_adapter.adapt_sql('''
+    CREATE TABLE IF NOT EXISTS stickers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sticker_number TEXT UNIQUE NOT NULL,
+        resident_id INTEGER NOT NULL,
+        plate_number TEXT NOT NULL,
+        vehicle_type TEXT,
+        issue_date DATE NOT NULL,
+        expiry_date DATE,
+        status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (resident_id) REFERENCES residents (id) ON DELETE CASCADE
     )
     '''))
     
