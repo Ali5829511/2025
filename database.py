@@ -149,7 +149,8 @@ def init_database():
     cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS traffic_violations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vehicle_id INTEGER NOT NULL,
+        vehicle_id INTEGER,
+        plate_number TEXT,
         violation_type TEXT NOT NULL,
         violation_date TIMESTAMP NOT NULL,
         location TEXT,
