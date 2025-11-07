@@ -17,6 +17,8 @@ primary_region = "dfw"  # Dallas, closest to Saudi Arabia
 [http_service]
   internal_port = 8080
   force_https = true
+  # For free tier: auto-stop after inactivity to save costs
+  # For paid tier: set min_machines_running = 1 for always-on
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
@@ -25,6 +27,7 @@ primary_region = "dfw"  # Dallas, closest to Saudi Arabia
 [[services]]
   internal_port = 8080
   protocol = "tcp"
+  # These settings match http_service for consistency
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
