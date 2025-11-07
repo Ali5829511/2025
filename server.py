@@ -1220,6 +1220,61 @@ def get_parking_spots():
             'error_ar': 'فشل في تحميل بيانات المواقف'
         }), 500
 
+@app.route('/api/stickers')
+def get_stickers():
+    """Get all stickers data with resident information"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT s.id, s.sticker_number, s.plate_number, s.vehicle_type, 
+                   s.issue_date, s.expiry_date, s.status,
+                   r.name as resident_name, r.national_id, r.phone,
+                   r.department, r.job_title, r.unit_number,
+                   b.name as building_name, b.building_number
+            FROM stickers s
+            LEFT JOIN residents r ON s.resident_id = r.id
+            LEFT JOIN buildings b ON r.building_id = b.id
+            ORDER BY s.sticker_number
+        ''')
+        
+        stickers = []
+        for row in cursor.fetchall():
+            stickers.append({
+                'id': row[0],
+                'sticker_number': row[1],
+                'plate_number': row[2],
+                'vehicle_type': row[3],
+                'issue_date': row[4],
+                'expiry_date': row[5],
+                'status': row[6],
+                'resident_name': row[7],
+                'national_id': row[8],
+                'phone': row[9],
+                'department': row[10],
+                'job_title': row[11],
+                'unit_number': row[12],
+                'building_name': row[13],
+                'building_number': row[14]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': stickers,
+            'total': len(stickers)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Stickers API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load stickers data',
+            'error_ar': 'فشل في تحميل بيانات الملصقات'
+        }), 500
+
 @app.route('/api/buildings')
 def get_buildings():
     """Get all buildings data"""
