@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import random
 
 def create_sample_data():
-    """Create sample vehicles and violations"""
+    """Create sample buildings, residents, apartments, vehicles, stickers and violations"""
     conn = database.get_db_connection()
     cursor = conn.cursor()
     
@@ -34,14 +34,50 @@ def create_sample_data():
         'الشارع الداخلي'
     ]
     
+    print("Creating sample buildings...")
+    
+    # Create sample buildings
+    building_data = [
+        ('المبنى A', 'A', 5, 20, 'شارع الجامعة - الجانب الشرقي'),
+        ('المبنى B', 'B', 5, 20, 'شارع الجامعة - الجانب الغربي'),
+        ('الفلل', 'V', 1, 10, 'منطقة الفلل')
+    ]
+    
+    building_ids = []
+    for name, number, floors, units, address in building_data:
+        cursor.execute('''
+            INSERT INTO buildings (name, building_number, total_floors, total_units, address)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (name, number, floors, units, address))
+        building_ids.append(cursor.lastrowid)
+    
+    print("Creating sample apartments...")
+    
+    # Create apartments for each building
+    apartment_count = 0
+    for building_id, (name, number, floors, units, _) in zip(building_ids, building_data):
+        for floor in range(1, floors + 1):
+            units_per_floor = units // floors
+            for unit in range(1, units_per_floor + 1):
+                unit_number = f"{floor}{unit:02d}"
+                cursor.execute('''
+                    INSERT INTO apartments (building_id, unit_number, floor_number, unit_type, is_occupied)
+                    VALUES (?, ?, ?, ?, 0)
+                ''', (building_id, unit_number, floor, 'شقة'))
+                apartment_count += 1
+    
     print("Creating sample residents and vehicles...")
     
     # Create sample residents and vehicles
     for i in range(1, 11):
+        # Assign to a building and unit
+        building_id = building_ids[i % len(building_ids)]
+        unit_number = f"{(i % 5) + 1}{(i % 4) + 1:02d}"
+        
         # Create resident
         cursor.execute('''
-            INSERT INTO residents (name, national_id, phone, email, department, job_title, unit_number, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+            INSERT INTO residents (name, national_id, phone, email, department, job_title, building_id, unit_number, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
         ''', (
             f'أ.د. محمد أحمد {i}',
             f'10{i:08d}',
@@ -49,9 +85,16 @@ def create_sample_data():
             f'user{i}@university.edu.sa',
             'كلية الهندسة',
             'أستاذ',
-            f'A-{i:03d}'
+            building_id,
+            unit_number
         ))
         resident_id = cursor.lastrowid
+        
+        # Mark apartment as occupied
+        cursor.execute('''
+            UPDATE apartments SET is_occupied = 1 
+            WHERE building_id = ? AND unit_number = ?
+        ''', (building_id, unit_number))
         
         # Create 1-2 vehicles per resident
         num_vehicles = random.randint(1, 2)
@@ -75,6 +118,25 @@ def create_sample_data():
                 (datetime.now() - timedelta(days=random.randint(30, 365))).date()
             ))
             vehicle_id = cursor.lastrowid
+            
+            # Create sticker for this vehicle
+            sticker_number = f'STK-{i:04d}{v}'
+            issue_date = (datetime.now() - timedelta(days=random.randint(30, 365))).date()
+            expiry_date = (datetime.now() + timedelta(days=random.randint(30, 365))).date()
+            
+            cursor.execute('''
+                INSERT INTO stickers (
+                    sticker_number, resident_id, plate_number, vehicle_type, 
+                    issue_date, expiry_date, status
+                ) VALUES (?, ?, ?, ?, ?, ?, 'active')
+            ''', (
+                sticker_number,
+                resident_id,
+                plate_number,
+                random.choice(vehicle_types),
+                issue_date,
+                expiry_date
+            ))
             
             # Create random violations (0-3 per vehicle)
             num_violations = random.randint(0, 3)
@@ -100,8 +162,11 @@ def create_sample_data():
     conn.close()
     
     print("✅ Sample data created successfully!")
+    print(f"   - {len(building_ids)} buildings")
+    print(f"   - {apartment_count} apartments")
     print("   - 10 residents")
     print("   - 10-20 vehicles")
+    print("   - 10-20 stickers")
     print("   - Random violations")
 
 if __name__ == '__main__':
