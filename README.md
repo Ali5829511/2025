@@ -10,6 +10,7 @@ A comprehensive system for managing faculty housing at Imam Mohammad Ibn Saud Is
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](https://github.com/Ali5829511/2025)
 [![Version](https://img.shields.io/badge/Version-2.0.1-blue)](https://github.com/Ali5829511/2025)
 [![Security](https://img.shields.io/badge/Security-Hardened-green)](SECURITY.md)
+[![Docker](https://img.shields.io/badge/Docker-Hub-blue?logo=docker)](https://hub.docker.com/r/ali517/housing-management)
 
 ## المميزات / Features
 
@@ -34,6 +35,27 @@ A comprehensive system for managing faculty housing at Imam Mohammad Ibn Saud Is
 - متصفح حديث يدعم HTML5 و CSS3 / Modern browser with HTML5 and CSS3 support
 
 ## التثبيت / Installation
+
+### 🐳 النشر باستخدام Docker Hub (الطريقة الأسرع) / Using Docker Hub (Fastest)
+
+**الطريقة الموصى بها للنشر السريع!** / **Recommended for quick deployment!**
+
+```bash
+# سحب الصورة من Docker Hub / Pull image from Docker Hub
+docker pull ali517/housing-management:latest
+
+# تشغيل مع docker-compose / Run with docker-compose
+curl -O https://raw.githubusercontent.com/Ali5829511/2025/main/docker-compose.hub.yml
+docker-compose -f docker-compose.hub.yml up -d
+
+# الوصول للنظام / Access the system
+# افتح المتصفح على / Open browser at: http://localhost
+```
+
+📖 **دليل كامل**: راجع [دليل Docker Hub](DOCKER_HUB_GUIDE.md) للتفاصيل  
+📖 **Complete Guide**: See [Docker Hub Guide](DOCKER_HUB_GUIDE.md) for details
+
+### 📦 التثبيت التقليدي / Traditional Installation
 
 1. استنساخ المستودع / Clone the repository:
 ```bash
@@ -192,6 +214,7 @@ http://localhost:5000
 - [تقرير التحقق من النظام (صفحة ويب)](system_validation_report.html) - أداة تفاعلية لمراجعة البيانات
 
 ### النشر والتثبيت / Deployment & Installation
+- 🐳 **[دليل Docker Hub](DOCKER_HUB_GUIDE.md)** - نشر ومشاركة الصور على Docker Hub ⭐ **NEW!**
 - 🌟 **[دليل النشر السحابي السريع](دليل_النشر_السحابي.md)** - ابدأ هنا! النشر في 10 دقائق ⭐ NEW!
 - ☁️ **[خيارات الاستضافة السحابية](CLOUD_HOSTING_OPTIONS.md)** - مقارنة شاملة للمنصات مع فترة تجريبية ⭐ NEW!
 - 🎯 **[النشر على Render.com](RENDER_DEPLOYMENT.md)** - الطريقة الموصى بها (لا يحتاج بطاقة ائتمانية) ⭐ NEW!
