@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صور النظام - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        html, body { 
+            direction: rtl !important; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            font-family: 'Tajawal', Arial, sans-serif; 
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%); 
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 26px 0 20px 0;
+            margin-bottom: 36px;
+            border-radius: 0 0 32px 32px;
+            box-shadow: 0 6px 16px #2e8bc055;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .university-logo-header {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+        }
+        
+        .header-text {
+            text-align: center;
+        }
+        
+        .header-title { 
+            font-size: 2.4em; 
+            font-weight: bold; 
+            margin: 0; 
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-subtitle { 
+            margin: 5px 0 0 0; 
+            font-size: 1.25em; 
+            font-weight: 400; 
+            color: #e2eaf3; 
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .intro-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .intro-section h2 {
+            color: #0f3d68;
+            font-size: 1.8em;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .intro-section p {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin: 0;
+        }
+        
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .image-card h3 {
+            color: #0f3d68;
+            font-size: 1.4em;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .image-card h3 i {
+            color: #2e8bc0;
+        }
+        
+        .image-card p {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .image-container {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f5f5f5;
+            border: 2px solid #e0e7ef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fcff;
+            border-radius: 8px;
+            border-right: 4px solid #2e8bc0;
+        }
+        
+        .image-info p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #555;
+        }
+        
+        .image-info strong {
+            color: #0f3d68;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+        }
+        
+        .download-btn i {
+            margin-left: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-title {
+                font-size: 1.8em;
+            }
+            
+            .header-subtitle {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="main_dashboard.html" class="back-btn">
+            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+        </a>
+        <div class="header-content">
+            <img src="university_logo.png" alt="شعار الجامعة" class="university-logo-header" onerror="this.style.display='none'">
+            <div class="header-text">
+                <div class="header-title">صور النظام</div>
+                <div class="header-subtitle">الشعارات والهوية البصرية</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="intro-section">
+            <h2><i class="fas fa-images"></i> صور النظام والهوية البصرية</h2>
+            <p>
+                هذه الصفحة تعرض جميع الصور والشعارات المستخدمة في نظام إدارة إسكان أعضاء هيئة التدريس 
+                بجامعة الإمام محمد بن سعود الإسلامية. تشمل الصور شعار الجامعة، شعار الوحدة، والهوية البصرية 
+                لواجهة الدخول.
+            </p>
+        </div>
+
+        <div class="images-grid">
+            <!-- University Logo -->
+            <div class="image-card">
+                <h3>
+                    <i class="fas fa-university"></i>
+                    شعار جامعة الإمام محمد بن سعود الإسلامية
+                </h3>
+                <p>
+                    الشعار الرسمي للجامعة المستخدم في جميع صفحات النظام. يظهر في رأس كل صفحة ويمثل 
+                    الهوية المؤسسية للجامعة.
+                </p>
+                <div class="image-container">
+                    <img src="IMG_1093.png" alt="شعار الجامعة" loading="lazy">
+                </div>
+                <div class="image-info">
+                    <p><strong>اسم الملف:</strong> IMG_1093.png</p>
+                    <p><strong>الاستخدام:</strong> رأس جميع صفحات النظام</p>
+                    <p><strong>الملف المرتبط:</strong> university_logo.png</p>
+                </div>
+                <a href="IMG_1093.png" download class="download-btn">
+                    <i class="fas fa-download"></i> تحميل الصورة
+                </a>
+            </div>
+
+            <!-- Logo Variant -->
+            <div class="image-card">
+                <h3>
+                    <i class="fas fa-building"></i>
+                    شعار وحدة الإسكان
+                </h3>
+                <p>
+                    شعار خاص بوحدة إسكان أعضاء هيئة التدريس. يستخدم في الوثائق الرسمية والمراسلات 
+                    الخاصة بالوحدة.
+                </p>
+                <div class="image-container">
+                    <img src="شعار.jpg" alt="شعار وحدة الإسكان" loading="lazy">
+                </div>
+                <div class="image-info">
+                    <p><strong>اسم الملف:</strong> شعار.jpg</p>
+                    <p><strong>الاستخدام:</strong> الوثائق والمراسلات الرسمية</p>
+                    <p><strong>النوع:</strong> صورة JPEG</p>
+                </div>
+                <a href="شعار.jpg" download class="download-btn">
+                    <i class="fas fa-download"></i> تحميل الصورة
+                </a>
+            </div>
+
+            <!-- Visual Identity -->
+            <div class="image-card">
+                <h3>
+                    <i class="fas fa-palette"></i>
+                    الهوية البصرية لنافذة الدخول
+                </h3>
+                <p>
+                    تصميم الهوية البصرية المستخدم في واجهة تسجيل الدخول للنظام. يعكس الطابع المؤسسي 
+                    ويوفر تجربة مستخدم احترافية.
+                </p>
+                <div class="image-container">
+                    <img src="هوية بصرية لنافذه الدخول.jpeg" alt="الهوية البصرية لنافذة الدخول" loading="lazy">
+                </div>
+                <div class="image-info">
+                    <p><strong>اسم الملف:</strong> هوية بصرية لنافذه الدخول.jpeg</p>
+                    <p><strong>الاستخدام:</strong> واجهة تسجيل الدخول</p>
+                    <p><strong>النوع:</strong> صورة JPEG</p>
+                </div>
+                <a href="هوية بصرية لنافذه الدخول.jpeg" download class="download-btn">
+                    <i class="fas fa-download"></i> تحميل الصورة
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
