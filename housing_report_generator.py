@@ -30,7 +30,8 @@ def get_report_data():
                 'report_date': datetime.now().strftime('%Y-%m-%d'),
                 'report_time': datetime.now().strftime('%H:%M:%S'),
                 'report_title': 'تقرير تفصيلي شامل - وحدة إسكان هيئة التدريس',
-                'version': '1.0'
+                'version': '2.0',
+                'status': 'معتمد'
             },
             'overview': {},
             'buildings': {},
@@ -258,7 +259,8 @@ def generate_pdf_report(report_data):
         metadata_data = [
             ['التاريخ:', report_data['metadata']['report_date']],
             ['الوقت:', report_data['metadata']['report_time']],
-            ['النسخة:', report_data['metadata']['version']]
+            ['النسخة:', report_data['metadata']['version']],
+            ['الحالة:', report_data['metadata']['status']]
         ]
         
         metadata_table = Table(metadata_data, colWidths=[2*inch, 3*inch])
@@ -428,6 +430,7 @@ def generate_word_report(report_data):
         metadata.add_run(f"تاريخ التقرير: {report_data['metadata']['report_date']}\n").bold = True
         metadata.add_run(f"وقت الإنشاء: {report_data['metadata']['report_time']}\n").bold = True
         metadata.add_run(f"النسخة: {report_data['metadata']['version']}\n").bold = True
+        metadata.add_run(f"الحالة: {report_data['metadata']['status']}\n").bold = True
         
         doc.add_paragraph()
         
