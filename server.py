@@ -1278,6 +1278,90 @@ def get_stickers():
             'error_ar': 'فشل في تحميل بيانات الملصقات'
         }), 500
 
+@app.route('/api/stickers/verify')
+def verify_stickers():
+    """
+    Verify if stickers data exists and get status information
+    التحقق من وجود بيانات الملصقات والحصول على معلومات الحالة
+    """
+    try:
+        import verify_stickers_data
+        
+        # Get stickers data status
+        status_info = verify_stickers_data.get_stickers_data_status()
+        
+        # Get additional statistics
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Count by status
+        cursor.execute("""
+            SELECT status, COUNT(*) as count 
+            FROM stickers 
+            GROUP BY status
+        """)
+        status_counts = {}
+        for status, count in cursor.fetchall():
+            status_counts[status if status else 'unknown'] = count
+        
+        # Count by vehicle type
+        cursor.execute("""
+            SELECT vehicle_type, COUNT(*) as count 
+            FROM stickers 
+            WHERE vehicle_type IS NOT NULL
+            GROUP BY vehicle_type
+            ORDER BY count DESC
+            LIMIT 5
+        """)
+        vehicle_types = {}
+        for vehicle_type, count in cursor.fetchall():
+            vehicle_types[vehicle_type] = count
+        
+        # Check for issues
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM stickers 
+            WHERE expiry_date < date('now') AND status = 'active'
+        """)
+        expired_active = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM stickers s
+            LEFT JOIN residents r ON s.resident_id = r.id
+            WHERE r.id IS NULL
+        """)
+        orphaned = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'has_data': status_info['has_data'],
+            'status': status_info['status'],
+            'total_count': status_info['total_count'],
+            'active_count': status_info['active_count'],
+            'status_counts': status_counts,
+            'vehicle_types': vehicle_types,
+            'issues': {
+                'expired_active': expired_active,
+                'orphaned': orphaned
+            },
+            'message': 'توجد بيانات ملصقات في النظام' if status_info['has_data'] else 'لا توجد بيانات ملصقات',
+            'message_en': 'Stickers data exists' if status_info['has_data'] else 'No stickers data found'
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Stickers verification API error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'has_data': False,
+            'status': 'error',
+            'error': str(e),
+            'message': 'حدث خطأ أثناء التحقق من بيانات الملصقات',
+            'message_en': 'Error verifying stickers data'
+        }), 500
+
 @app.route('/api/buildings')
 def get_buildings():
     """Get all buildings data"""
