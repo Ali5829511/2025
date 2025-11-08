@@ -1,0 +1,38 @@
+# Fly.io Configuration for Faculty Housing Management System
+# ملف تكوين Fly.io لنظام إدارة إسكان أعضاء هيئة التدريس
+
+app = "housing-management-system"
+primary_region = "iad" # Washington, D.C. - or change to your preferred region
+kill_signal = "SIGINT"
+kill_timeout = "5s"
+
+[experimental]
+  auto_rollback = true
+
+[build]
+
+[deploy]
+  release_command = "python database.py"
+
+[env]
+  FLASK_ENV = "production"
+  FLASK_DEBUG = "false"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256

@@ -15,7 +15,39 @@ This guide shows different cloud hosting options that support deploying the Hous
 
 ## 🌟 الخيارات الموصى بها / Recommended Options
 
-### 1. ⭐ Render.com (موصى به بشدة / Highly Recommended)
+### 1. ✈️ Fly.io (موصى به بشدة / Highly Recommended) ⭐ **NEW!**
+
+**الفترة التجريبية / Trial Period:** طبقة مجانية دائمة / Permanent free tier
+
+**المميزات / Advantages:**
+- ✅ طبقة مجانية سخية جداً / Very generous free tier
+- ✅ 3 آلات افتراضية مشتركة مجانية / 3 free shared VMs
+- ✅ 3 GB تخزين دائم مجاني / 3 GB free persistent storage
+- ✅ 160 GB نقل بيانات شهرياً / 160 GB monthly data transfer
+- ✅ نشر سريع جداً (أقل من دقيقة) / Very fast deployment (under 1 min)
+- ✅ SSL مجاني / Free SSL
+- ✅ PostgreSQL مُدار مجاناً / Free managed PostgreSQL
+- ✅ شبكة عالمية (30+ موقع) / Global network (30+ locations)
+- ✅ لا ينام التطبيق! / App doesn't sleep!
+- ✅ لا يتطلب بطاقة ائتمانية / No credit card required
+- ✅ دعم Docker الكامل / Full Docker support
+
+**السلبيات / Disadvantages:**
+- ⚠️ واجهة سطر الأوامر قد تكون معقدة للمبتدئين / CLI might be complex for beginners
+- ⚠️ يتطلب بعض المعرفة التقنية / Requires some technical knowledge
+
+**التكلفة بعد الحد المجاني / Cost After Free Tier:**
+- Shared CPU VM: $1.94/month (إذا تجاوزت 3 VMs / if you exceed 3 VMs)
+- الطبقة المجانية كافية لمعظم الاستخدامات / Free tier sufficient for most uses
+
+**الوثائق / Documentation:**
+- [دليل النشر على Fly.io](FLY_IO_DEPLOYMENT.md) ⭐ **NEW!**
+
+**رابط التسجيل / Sign Up:** https://fly.io/app/sign-up
+
+---
+
+### 2. ⭐ Render.com (موصى به بشدة / Highly Recommended)
 
 **الفترة التجريبية / Trial Period:** 90 يوم قاعدة بيانات مجانية / 90-day free database
 
@@ -42,7 +74,7 @@ This guide shows different cloud hosting options that support deploying the Hous
 
 ---
 
-### 2. 🚂 Railway.app
+### 3. 🚂 Railway.app
 
 **الفترة التجريبية / Trial Period:** $5 رصيد مجاني شهرياً / $5 free credit monthly
 
