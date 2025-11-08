@@ -627,6 +627,9 @@
                 <button class="btn btn-primary" onclick="exportToPDF()">
                     📄 تصدير PDF
                 </button>
+                <button class="btn btn-primary" onclick="exportToWord()">
+                    📝 تصدير Word
+                </button>
                 <button class="btn btn-secondary" onclick="refreshReport()">
                     🔄 تحديث البيانات
                 </button>
@@ -651,6 +654,82 @@
 
         // Load sample data (in production, this would fetch from API)
         function loadReportData() {
+            // Try to fetch real data from API
+            fetch('/api/housing-report/data')
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success && result.data) {
+                        updateReportWithData(result.data);
+                    } else {
+                        // Fallback to sample data
+                        loadSampleData();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading report data:', error);
+                    // Fallback to sample data
+                    loadSampleData();
+                });
+        }
+
+        // Update report with actual data
+        function updateReportWithData(data) {
+            // Overview Statistics
+            document.getElementById('totalBuildings').textContent = data.overview.total_buildings.toLocaleString();
+            document.getElementById('totalUnits').textContent = data.overview.total_units.toLocaleString();
+            document.getElementById('totalResidents').textContent = data.overview.total_residents.toLocaleString();
+            document.getElementById('occupancyRate').textContent = data.overview.occupancy_rate + '%';
+            
+            // Animate progress bar
+            setTimeout(() => {
+                document.getElementById('occupancyProgress').style.width = data.overview.occupancy_rate + '%';
+                document.getElementById('occupancyProgress').textContent = data.overview.occupancy_rate + '%';
+            }, 500);
+
+            // Buildings Statistics
+            document.getElementById('apartmentCount').textContent = data.buildings.apartment_count;
+            document.getElementById('villaCount').textContent = data.buildings.villa_count;
+            document.getElementById('oldBuildingCount').textContent = data.buildings.old_building_count;
+            document.getElementById('newBuildingCount').textContent = data.buildings.new_building_count;
+
+            // Parking Statistics
+            document.getElementById('totalParking').textContent = data.parking.total_parking.toLocaleString();
+            document.getElementById('occupiedParking').textContent = data.parking.occupied_parking.toLocaleString();
+            document.getElementById('vacantParking').textContent = data.parking.vacant_parking.toLocaleString();
+            document.getElementById('parkingUtilization').textContent = data.parking.utilization + '%';
+
+            // Violations Statistics
+            document.getElementById('totalViolations').textContent = data.violations.total_violations.toLocaleString();
+            document.getElementById('openViolations').textContent = data.violations.open_violations.toLocaleString();
+            document.getElementById('closedViolations').textContent = data.violations.closed_violations.toLocaleString();
+            document.getElementById('violationClosureRate').textContent = data.violations.closure_rate + '%';
+
+            // Visitors Statistics
+            document.getElementById('todayVisitors').textContent = data.visitors.today_visitors.toLocaleString();
+            document.getElementById('monthVisitors').textContent = data.visitors.month_visitors.toLocaleString();
+            document.getElementById('yearVisitors').textContent = '0';
+            document.getElementById('avgDailyVisitors').textContent = '0';
+
+            // Complaints Statistics
+            document.getElementById('totalComplaints').textContent = data.complaints.total_complaints.toLocaleString();
+            document.getElementById('openComplaints').textContent = data.complaints.open_complaints.toLocaleString();
+            document.getElementById('closedComplaints').textContent = data.complaints.closed_complaints.toLocaleString();
+            document.getElementById('complaintResolutionRate').textContent = data.complaints.resolution_rate + '%';
+
+            // Summary
+            const vacantUnits = data.overview.total_units - data.overview.total_residents;
+            document.getElementById('summaryOccupancy').textContent = data.overview.occupancy_rate + '%';
+            document.getElementById('summaryVacant').textContent = vacantUnits + ' وحدة';
+            document.getElementById('summaryParkingAvailable').textContent = data.parking.vacant_parking + ' موقف';
+            document.getElementById('summaryOpenViolations').textContent = data.violations.open_violations + ' مخالفة';
+            document.getElementById('summaryOpenComplaints').textContent = data.complaints.open_complaints + ' شكوى';
+
+            // Load buildings table
+            loadBuildingsTableWithData(data.buildings_detail);
+        }
+
+        // Load sample data as fallback
+        function loadSampleData() {
             // Overview Statistics
             document.getElementById('totalBuildings').textContent = '165';
             document.getElementById('totalUnits').textContent = '1,134';
@@ -704,6 +783,32 @@
             loadBuildingsTable();
         }
 
+        // Load buildings table with actual data
+        function loadBuildingsTableWithData(buildingsData) {
+            const tbody = document.getElementById('buildingsTableBody');
+            tbody.innerHTML = ''; // Clear loading message
+
+            if (!buildingsData || buildingsData.length === 0) {
+                loadBuildingsTable();
+                return;
+            }
+
+            buildingsData.forEach(building => {
+                const row = document.createElement('tr');
+                const statusBadge = building.status === 'نشط' ? 'badge-success' : 'badge-warning';
+                
+                row.innerHTML = `
+                    <td><strong>${building.type} ${building.number}</strong></td>
+                    <td>${building.type}</td>
+                    <td>${building.units}</td>
+                    <td>${building.residents}</td>
+                    <td>${building.occupancy}%</td>
+                    <td><span class="badge ${statusBadge}">${building.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         // Load buildings table with sample data
         function loadBuildingsTable() {
             const tbody = document.getElementById('buildingsTableBody');
@@ -747,7 +852,78 @@
 
         // Export to PDF function
         function exportToPDF() {
-            alert('ميزة تصدير PDF ستكون متاحة قريباً!\n\nللطباعة الآن، استخدم زر "طباعة التقرير" ثم اختر "حفظ كـ PDF" من خيارات الطابعة.');
+            // Show loading message
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
+            loadingMsg.innerHTML = '<h3>جارِ تصدير التقرير...</h3><p>الرجاء الانتظار</p>';
+            document.body.appendChild(loadingMsg);
+
+            // Download PDF
+            fetch('/api/housing-report/export/pdf')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate PDF');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `housing_report_${new Date().getTime()}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    // Remove loading message
+                    document.body.removeChild(loadingMsg);
+                    alert('تم تصدير التقرير بصيغة PDF بنجاح!');
+                })
+                .catch(error => {
+                    console.error('PDF export error:', error);
+                    document.body.removeChild(loadingMsg);
+                    alert('حدث خطأ أثناء تصدير التقرير.\n\nيمكنك استخدام زر "طباعة التقرير" ثم اختيار "حفظ كـ PDF" من خيارات الطابعة.');
+                });
+        }
+
+        // Export to Word function
+        function exportToWord() {
+            // Show loading message
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
+            loadingMsg.innerHTML = '<h3>جارِ تصدير التقرير...</h3><p>الرجاء الانتظار</p>';
+            document.body.appendChild(loadingMsg);
+
+            // Download Word document
+            fetch('/api/housing-report/export/word')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate Word document');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `housing_report_${new Date().getTime()}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    // Remove loading message
+                    document.body.removeChild(loadingMsg);
+                    alert('تم تصدير التقرير بصيغة Word بنجاح!');
+                })
+                .catch(error => {
+                    console.error('Word export error:', error);
+                    document.body.removeChild(loadingMsg);
+                    alert('حدث خطأ أثناء تصدير التقرير بصيغة Word.');
+                });
         }
 
         // Initialize on page load

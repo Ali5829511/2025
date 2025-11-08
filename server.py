@@ -16,6 +16,7 @@ import car_image_analyzer
 import car_data_exporter
 import vehicle_report_exporter
 import import_historical_vehicles
+import housing_report_generator
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -2185,6 +2186,108 @@ def handle_exception(error):
         'error_ar': 'حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.',
         'status': 500
     }), 500
+
+# ==================== Housing Report API ====================
+
+@app.route('/api/housing-report/data')
+def get_housing_report_data():
+    """Get housing report data"""
+    try:
+        report_data = housing_report_generator.get_report_data()
+        if report_data:
+            return jsonify({
+                'success': True,
+                'data': report_data
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to get report data'
+            }), 500
+    except Exception as e:
+        app.logger.error(f'Housing report data error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/housing-report/export/pdf')
+def export_housing_report_pdf():
+    """Export housing report as PDF"""
+    try:
+        # Get report data
+        report_data = housing_report_generator.get_report_data()
+        if not report_data:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to get report data'
+            }), 500
+        
+        # Generate PDF
+        pdf_buffer = housing_report_generator.generate_pdf_report(report_data)
+        if not pdf_buffer:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to generate PDF'
+            }), 500
+        
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'housing_report_{timestamp}.pdf'
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        app.logger.error(f'PDF export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/housing-report/export/word')
+def export_housing_report_word():
+    """Export housing report as Word document"""
+    try:
+        # Get report data
+        report_data = housing_report_generator.get_report_data()
+        if not report_data:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to get report data'
+            }), 500
+        
+        # Generate Word document
+        docx_buffer = housing_report_generator.generate_word_report(report_data)
+        if not docx_buffer:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to generate Word document'
+            }), 500
+        
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'housing_report_{timestamp}.docx'
+        
+        return send_file(
+            docx_buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        app.logger.error(f'Word export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 # ==================== Startup ====================
 
