@@ -1433,43 +1433,119 @@
             window.print();
         }
 
-        // تحميل البيانات الحقيقية
+        // تحميل البيانات الحقيقية من API
         async function loadRealData() {
             try {
-                const response = await fetch('stickers_data.json');
-                const realData = await response.json();
+                const response = await fetch('/api/stickers');
+                const result = await response.json();
                 
-                // تحويل البيانات للتنسيق المطلوب
-                const formattedData = realData.map(item => ({
-                    idNumber: item['رقم الهوية'] || 'غير محدد',
-                    residentName: item['اسم الساكن'] || 'غير محدد',
-                    status: (item['حالة'] === 'فعال' || item['حالة'] === 'نشط') ? 'فعال' : 'ملغي',
-                    issueDate: item['تاريخ الملصق'] || '2025-01-01',
-                    plateNumber: item['رقم لوحة السيارة'] || 'غير محدد',
-                    vehicleType: item['نوع المركبة'] || 'غير محدد',
-                    unitType: item['نوع الوحدة'] || 'غير محدد',
-                    building: item['المبنى '] || item['المبنى'] || 'غير محدد',
-                    apartment: item['شقة'] || item['الشقة'] || 'غير محدد',
-                    deliveryImage: '',
-                    notes: item['ملاحظات'] || ''
-                }));
-                
-                // دمج البيانات الحقيقية مع البيانات الموجودة
-                stickersData = [...formattedData, ...stickersData];
-                filteredStickers = [...stickersData];
-                
-                // تحديث العرض
-                setTimeout(() => {
+                if (result.success && result.data) {
+                    // تحويل البيانات للتنسيق المطلوب
+                    const formattedData = result.data.map(item => ({
+                        idNumber: item.national_id || 'غير محدد',
+                        residentName: item.resident_name || 'غير محدد',
+                        status: item.status === 'active' ? 'فعال' : item.status === 'inactive' ? 'غير فعال' : 'ملغي',
+                        issueDate: item.issue_date || '2025-01-01',
+                        plateNumber: item.plate_number || 'غير محدد',
+                        vehicleType: item.vehicle_type || 'غير محدد',
+                        unitType: item.building_number || 'غير محدد',
+                        building: item.building_number || 'غير محدد',
+                        apartment: item.unit_number || 'غير محدد',
+                        deliveryImage: '',
+                        notes: ''
+                    }));
+                    
+                    // استبدال البيانات الموجودة بالبيانات الحقيقية من API
+                    stickersData = formattedData;
+                    filteredStickers = [...stickersData];
+                    
+                    // تحديث العرض
                     loadStickers();
                     updateStats();
-                }, 100);
-                
-                console.log(`تم تحميل ${formattedData.length} سجل من البيانات الحقيقية`);
+                    
+                    console.log(`تم تحميل ${formattedData.length} سجل من API`);
+                } else {
+                    console.log('لم يتم العثور على بيانات من API');
+                }
             } catch (error) {
-                console.error('خطأ في تحميل البيانات الحقيقية:', error);
-                // في حالة فشل تحميل البيانات الحقيقية، استخدم البيانات الافتراضية
+                console.error('خطأ في تحميل البيانات من API:', error);
+                // في حالة فشل تحميل البيانات من API، استخدم البيانات الافتراضية
                 loadStickers();
                 updateStats();
+            }
+        }
+
+        // التحقق من وجود بيانات الملصقات
+        async function verifyStickersData() {
+            try {
+                const response = await fetch('/api/stickers/verify');
+                const data = await response.json();
+                
+                // Create status banner
+                const banner = document.createElement('div');
+                banner.style.cssText = 'padding: 15px; margin: 20px; border-radius: 10px; text-align: center; font-weight: 600;';
+                
+                if (data.success && data.has_data) {
+                    banner.style.background = 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)';
+                    banner.style.color = '#155724';
+                    banner.style.border = '2px solid #c3e6cb';
+                    banner.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        ${data.message}
+                        <br>
+                        <small style="font-size: 0.9em; opacity: 0.8;">
+                            إجمالي الملصقات: ${data.total_count} | الملصقات النشطة: ${data.active_count}
+                        </small>
+                    `;
+                    
+                    // Update stats if we have real data
+                    if (data.status_counts) {
+                        const activeElement = document.getElementById('activeStickers');
+                        const inactiveElement = document.getElementById('inactiveStickers');
+                        const canceledElement = document.getElementById('canceledStickers');
+                        
+                        if (activeElement) activeElement.textContent = data.status_counts.active || 0;
+                        if (inactiveElement) inactiveElement.textContent = data.status_counts.inactive || 0;
+                        if (canceledElement) canceledElement.textContent = data.status_counts.canceled || 0;
+                    }
+                    
+                    // Show issues if any
+                    if (data.issues && (data.issues.expired_active > 0 || data.issues.orphaned > 0)) {
+                        const issuesDiv = document.createElement('div');
+                        issuesDiv.style.cssText = 'margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 0.85em;';
+                        issuesDiv.innerHTML = `
+                            <i class="fas fa-exclamation-triangle" style="color: #856404;"></i>
+                            ${data.issues.expired_active > 0 ? `ملصقات منتهية الصلاحية: ${data.issues.expired_active} | ` : ''}
+                            ${data.issues.orphaned > 0 ? `ملصقات بدون ساكن: ${data.issues.orphaned}` : ''}
+                        `;
+                        banner.appendChild(issuesDiv);
+                    }
+                } else {
+                    banner.style.background = 'linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)';
+                    banner.style.color = '#856404';
+                    banner.style.border = '2px solid #ffeaa7';
+                    banner.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        ${data.message || 'لا توجد بيانات ملصقات في النظام'}
+                        <br>
+                        <small style="font-size: 0.9em; opacity: 0.8;">
+                            يمكنك إضافة ملصقات جديدة من تبويب "إضافة ملصق جديد"
+                        </small>
+                    `;
+                }
+                
+                // Insert banner at the top of the container
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.insertBefore(banner, container.firstChild);
+                }
+                
+                console.log('تم التحقق من بيانات الملصقات:', data);
+                return data;
+                
+            } catch (error) {
+                console.error('خطأ في التحقق من بيانات الملصقات:', error);
+                return null;
             }
         }
 
@@ -1486,6 +1562,9 @@
             // التأكد من تحميل الصفحة بالكامل قبل تنفيذ الوظائف
             setTimeout(() => {
                 try {
+                    // التحقق من وجود بيانات الملصقات أولاً
+                    verifyStickersData();
+                    
                     loadStickers();
                     updateStats();
                     
