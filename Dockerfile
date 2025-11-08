@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy application files
 COPY . .
 
+# Make start script executable
+RUN chmod +x start.sh
+
 # Create logs directory
 RUN mkdir -p logs
 
@@ -36,4 +39,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
 # Initialize database and start server
-CMD python3 database.py && gunicorn --config gunicorn_config.py server:app
+CMD ["./start.sh"]
