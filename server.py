@@ -2208,7 +2208,7 @@ def get_housing_report_data():
         app.logger.error(f'Housing report data error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': 'Failed to retrieve report data. Please try again later.'
         }), 500
 
 
@@ -2247,7 +2247,7 @@ def export_housing_report_pdf():
         app.logger.error(f'PDF export error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': 'Failed to generate PDF report. Please try again later.'
         }), 500
 
 
@@ -2286,7 +2286,7 @@ def export_housing_report_word():
         app.logger.error(f'Word export error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': 'Failed to generate Word report. Please try again later.'
         }), 500
 
 # ==================== Startup ====================
