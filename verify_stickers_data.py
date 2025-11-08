@@ -178,12 +178,14 @@ def get_stickers_data_status():
             'status': 'ok' if total_count > 0 else 'empty'
         }
     except Exception as e:
+        # Log error but don't expose details to caller
+        import sys
+        print(f"Error getting stickers status: {str(e)}", file=sys.stderr)
         return {
             'has_data': False,
             'total_count': 0,
             'active_count': 0,
-            'status': 'error',
-            'error': str(e)
+            'status': 'error'
         }
 
 

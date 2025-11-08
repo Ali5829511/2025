@@ -1357,7 +1357,6 @@ def verify_stickers():
             'success': False,
             'has_data': False,
             'status': 'error',
-            'error': str(e),
             'message': 'حدث خطأ أثناء التحقق من بيانات الملصقات',
             'message_en': 'Error verifying stickers data'
         }), 500
