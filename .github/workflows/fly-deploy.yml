@@ -42,14 +42,14 @@ jobs:
       - name: Deploy to Fly.io
         if: steps.check_token.outputs.token_exists == 'true'
         run: |
-          flyctl deploy --remote-only --app housing-management-system
+          flyctl deploy --remote-only --app 2025-hk100q
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify deployment
         if: steps.check_token.outputs.token_exists == 'true'
         run: |
-          flyctl status --app housing-management-system
+          flyctl status --app 2025-hk100q
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -63,7 +63,7 @@ jobs:
             echo "   2. Add secret at: https://github.com/${{ github.repository }}/settings/secrets/actions"
           elif [ "${{ job.status }}" == "success" ]; then
             echo "✅ Successfully deployed to Fly.io!"
-            echo "🌐 Application URL: https://housing-management-system.fly.dev"
+            echo "🌐 Application URL: https://2025-hk100q.fly.dev"
           else
             echo "❌ Deployment to Fly.io failed!"
           fi
