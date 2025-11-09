@@ -9,6 +9,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
@@ -18,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 
 # Copy application files
 COPY . .
+
+# Make start script executable
+RUN chmod +x start.sh
 
 # Create logs directory
 RUN mkdir -p logs

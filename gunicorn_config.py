@@ -6,10 +6,7 @@ import multiprocessing
 import os
 
 # Server socket
-# For Fly.io deployment, use port 8000 as default (matching fly.toml internal_port)
-# للنشر على Fly.io، استخدم المنفذ 8000 كافتراضي (يطابق internal_port في fly.toml)
-port = os.environ.get("PORT", "8000")
-bind = f"0.0.0.0:{port}"
+bind = "0.0.0.0:" + str(os.environ.get("PORT", "8000"))
 backlog = 2048
 
 # Worker processes
