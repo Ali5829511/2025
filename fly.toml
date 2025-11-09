@@ -1,18 +1,28 @@
-# fly.toml app configuration file generated for 2025-hk100q on 2025-11-08T18:03:13Z
+# fly.toml app configuration file
+# ملف تكوين تطبيق Fly.io
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = '2025-hk100q'
+app = 'housing-management-system'
 primary_region = 'iad'
 
+# Build configuration
+# تكوين البناء
 [build]
-  dockerfile = "Dockerfile"
+  # Use Dockerfile in root directory
+  # استخدم Dockerfile في المجلد الجذر
 
+# Environment variables
+# متغيرات البيئة
 [env]
   PORT = "8000"
-  FLASK_DEBUG = "false"
+  FLASK_DEBUG = "False"
+  FLASK_ENV = "production"
+  HOST = "0.0.0.0"
 
+# HTTP service configuration
+# تكوين خدمة HTTP
 [http_service]
   internal_port = 8000
   force_https = true
@@ -20,8 +30,21 @@ primary_region = 'iad'
   auto_start_machines = true
   min_machines_running = 0
   processes = ['app']
+  
+  # Health check configuration
+  # تكوين فحص الصحة
+  [http_service.checks]
+    [http_service.checks.health]
+      grace_period = "30s"
+      interval = "15s"
+      method = "GET"
+      path = "/api/health"
+      timeout = "10s"
+      type = "http"
 
+# VM configuration
+# تكوين الجهاز الافتراضي
 [[vm]]
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512  # Increased from 256MB for better stability

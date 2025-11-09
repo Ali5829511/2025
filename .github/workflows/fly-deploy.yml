@@ -22,16 +22,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check Fly API Token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets.FLY_API_TOKEN }}" ]; then
+            echo "token_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ FLY_API_TOKEN secret is not configured"
+            echo "ℹ️ To enable Fly.io deployment, add FLY_API_TOKEN to repository secrets"
+            echo "ℹ️ Visit: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "ℹ️ Get your token from: https://fly.io/dashboard/personal/tokens"
+          else
+            echo "token_exists=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Fly.io CLI
+        if: steps.check_token.outputs.token_exists == 'true'
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io
+        if: steps.check_token.outputs.token_exists == 'true'
         run: |
           flyctl deploy --remote-only --app 2025-hk100q
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify deployment
+        if: steps.check_token.outputs.token_exists == 'true'
         run: |
           flyctl status --app 2025-hk100q
         env:
@@ -40,7 +56,12 @@ jobs:
       - name: Send notification
         if: always()
         run: |
-          if [ "${{ job.status }}" == "success" ]; then
+          if [ "${{ steps.check_token.outputs.token_exists }}" != "true" ]; then
+            echo "⚠️ Fly.io deployment skipped - FLY_API_TOKEN not configured"
+            echo "ℹ️ To enable deployment:"
+            echo "   1. Get token from: https://fly.io/dashboard/personal/tokens"
+            echo "   2. Add secret at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+          elif [ "${{ job.status }}" == "success" ]; then
             echo "✅ Successfully deployed to Fly.io!"
             echo "🌐 Application URL: https://2025-hk100q.fly.dev"
           else
