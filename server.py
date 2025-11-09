@@ -168,6 +168,7 @@ def login():
         # Create response
         response = make_response(jsonify({
             'success': True,
+            'session_token': session_token,
             'user': {
                 'id': user['id'],
                 'username': user['username'],
