@@ -1065,11 +1065,12 @@ def health_check():
             'database': 'connected'
         })
     except Exception as e:
+        # Log the error for debugging but don't expose details to users
+        app.logger.error(f'Health check failed: {str(e)}')
         return jsonify({
             'status': 'unhealthy',
             'timestamp': datetime.now().isoformat(),
-            'database': 'disconnected',
-            'error': str(e)
+            'database': 'disconnected'
         }), 503
 
 # ==================== Unified Dashboard API ====================
