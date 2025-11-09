@@ -1047,12 +1047,30 @@ def system_stats():
 
 @app.route('/api/health')
 def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'database': 'connected'
-    })
+    """
+    Health check endpoint - Verifies database connectivity
+    نقطة فحص الصحة - تتحقق من الاتصال بقاعدة البيانات
+    """
+    try:
+        # Test database connection
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1')
+        cursor.fetchone()
+        conn.close()
+        
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'database': 'connected'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'timestamp': datetime.now().isoformat(),
+            'database': 'disconnected',
+            'error': str(e)
+        }), 503
 
 # ==================== Unified Dashboard API ====================
 
