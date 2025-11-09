@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import database
 import auth
 import plate_recognizer
+import parkpow_integration
 import car_image_analyzer
 import car_data_exporter
 import vehicle_report_exporter
@@ -762,6 +763,194 @@ def export_plate_recognition_excel():
             'error': 'Failed to export report. Please contact system administrator.',
             'error_ar': 'فشل تصدير التقرير. يرجى الاتصال بمسؤول النظام.'
         }), 500
+
+# ==================== ParkPow API Integration ====================
+
+@app.route('/api/parkpow/status', methods=['GET'])
+@auth.require_auth
+def parkpow_status():
+    """Get ParkPow API status"""
+    try:
+        status = parkpow_integration.get_api_status()
+        return jsonify(status)
+    except Exception as e:
+        app.logger.error(f'ParkPow status error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في التحقق من حالة خدمة ParkPow'
+        }), 500
+
+
+@app.route('/api/parkpow/recognize', methods=['POST'])
+@auth.require_auth
+def parkpow_recognize():
+    """Recognize license plate using ParkPow API"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'image' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'No image provided',
+                'error_ar': 'لم يتم تقديم صورة'
+            }), 400
+        
+        image_data = data.get('image')
+        camera_id = data.get('camera_id')
+        
+        # Recognize plate
+        result = parkpow_integration.recognize_plate(image_data, camera_id)
+        
+        # If recognition was successful, find vehicle and log
+        if result.get('success') and result.get('results'):
+            for plate_data in result['results']:
+                plate_number = plate_data.get('plate') or plate_data.get('plate_number')
+                
+                if plate_number:
+                    # Find vehicle in database
+                    vehicle = parkpow_integration.find_vehicle_by_plate(plate_number)
+                    
+                    # Add vehicle info to result
+                    plate_data['vehicle_info'] = vehicle
+                    
+                    # Log event
+                    parkpow_integration.log_parkpow_event(
+                        request.user['id'],
+                        'recognition',
+                        plate_number,
+                        f"Confidence: {plate_data.get('confidence', 0)}"
+                    )
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            'ParkPow plate recognition performed',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow recognition error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تمييز اللوحة'
+        }), 500
+
+
+@app.route('/api/parkpow/record-violation', methods=['POST'])
+@auth.require_auth
+@auth.require_write_permission
+def parkpow_record_violation():
+    """Record a traffic violation"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'plate_number' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Plate number is required',
+                'error_ar': 'رقم اللوحة مطلوب'
+            }), 400
+        
+        plate_number = data.get('plate_number')
+        violation_data = {
+            'violation_type': data.get('violation_type', 'غير محدد'),
+            'violation_date': data.get('violation_date', datetime.now().isoformat()),
+            'location': data.get('location', ''),
+            'description': data.get('description', ''),
+            'fine_amount': data.get('fine_amount', 0)
+        }
+        
+        # Record violation
+        result = parkpow_integration.record_violation(
+            plate_number,
+            violation_data,
+            request.user['id']
+        )
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f'ParkPow violation recorded for plate: {plate_number}',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow record violation error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في تسجيل المخالفة'
+        }), 500
+
+
+@app.route('/api/parkpow/repeat-offenders', methods=['GET'])
+@auth.require_auth
+def parkpow_repeat_offenders():
+    """Get list of repeat offenders"""
+    try:
+        min_violations = request.args.get('min_violations', 3, type=int)
+        
+        offenders = parkpow_integration.get_repeat_offenders(min_violations)
+        
+        return jsonify({
+            'success': True,
+            'offenders': offenders,
+            'count': len(offenders),
+            'min_violations': min_violations
+        })
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow repeat offenders error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في جلب قائمة المخالفين المتكررين'
+        }), 500
+
+
+@app.route('/api/parkpow/webhook', methods=['POST'])
+def parkpow_webhook():
+    """Receive webhook data from ParkPow"""
+    try:
+        # Verify webhook token if configured
+        token = request.headers.get('Authorization')
+        expected_token = os.environ.get('PARKPOW_WEBHOOK_TOKEN', '')
+        
+        if expected_token and token != f'Token {expected_token}':
+            return jsonify({
+                'success': False,
+                'error': 'Invalid webhook token',
+                'error_ar': 'رمز webhook غير صالح'
+            }), 401
+        
+        webhook_data = request.get_json()
+        
+        if not webhook_data:
+            return jsonify({
+                'success': False,
+                'error': 'No data received',
+                'error_ar': 'لم يتم استقبال بيانات'
+            }), 400
+        
+        # Process webhook data
+        result = parkpow_integration.process_webhook_data(webhook_data)
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow webhook error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_ar': 'خطأ في معالجة webhook'
+        }), 500
+
 
 # ==================== Static File Serving ====================
 
