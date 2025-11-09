@@ -777,7 +777,7 @@ def parkpow_status():
         app.logger.error(f'ParkPow status error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Failed to check ParkPow status',
             'error_ar': 'خطأ في التحقق من حالة خدمة ParkPow'
         }), 500
 
@@ -835,7 +835,7 @@ def parkpow_recognize():
         app.logger.error(f'ParkPow recognition error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Failed to recognize plate',
             'error_ar': 'خطأ في تمييز اللوحة'
         }), 500
 
@@ -884,7 +884,7 @@ def parkpow_record_violation():
         app.logger.error(f'ParkPow record violation error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Failed to record violation',
             'error_ar': 'خطأ في تسجيل المخالفة'
         }), 500
 
@@ -909,7 +909,7 @@ def parkpow_repeat_offenders():
         app.logger.error(f'ParkPow repeat offenders error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Failed to get repeat offenders list',
             'error_ar': 'خطأ في جلب قائمة المخالفين المتكررين'
         }), 500
 
@@ -947,7 +947,7 @@ def parkpow_webhook():
         app.logger.error(f'ParkPow webhook error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
+            'error': 'Failed to process webhook',
             'error_ar': 'خطأ في معالجة webhook'
         }), 500
 
