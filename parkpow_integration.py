@@ -85,11 +85,13 @@ def get_api_status() -> Dict:
             'message_ar': 'انتهت مهلة طلب الخدمة'
         }
     except Exception as e:
+        # Log the actual error but don't expose it to user
+        print(f"ParkPow API error: {str(e)}")
         return {
             'success': False,
             'configured': True,
-            'message': f'Error connecting to API: {str(e)}',
-            'message_ar': f'خطأ في الاتصال بالخدمة: {str(e)}'
+            'message': 'Error connecting to API',
+            'message_ar': 'خطأ في الاتصال بالخدمة'
         }
 
 
@@ -148,10 +150,12 @@ def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
             }
     
     except Exception as e:
+        # Log the actual error but don't expose it to user
+        print(f"ParkPow recognition error: {str(e)}")
         return {
             'success': False,
-            'error': f'Error during recognition: {str(e)}',
-            'error_ar': f'خطأ أثناء التمييز: {str(e)}'
+            'error': 'Error during recognition',
+            'error_ar': 'خطأ أثناء التمييز'
         }
 
 
@@ -251,10 +255,12 @@ def record_violation(plate_number: str, violation_data: Dict, user_id: int) -> D
         }
     
     except Exception as e:
+        # Log the actual error but don't expose it to user
+        print(f"ParkPow violation recording error: {str(e)}")
         return {
             'success': False,
-            'error': f'Error recording violation: {str(e)}',
-            'error_ar': f'خطأ في تسجيل المخالفة: {str(e)}'
+            'error': 'Error recording violation',
+            'error_ar': 'خطأ في تسجيل المخالفة'
         }
 
 
@@ -389,8 +395,10 @@ def process_webhook_data(webhook_data: Dict) -> Dict:
         }
     
     except Exception as e:
+        # Log the actual error but don't expose it to user
+        print(f"ParkPow webhook processing error: {str(e)}")
         return {
             'success': False,
-            'error': f'Error processing webhook: {str(e)}',
-            'error_ar': f'خطأ في معالجة البيانات: {str(e)}'
+            'error': 'Error processing webhook',
+            'error_ar': 'خطأ في معالجة البيانات'
         }
