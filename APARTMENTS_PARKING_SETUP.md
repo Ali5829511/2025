@@ -27,6 +27,18 @@ This will automatically:
 - استيراد 70 شقة في 4 مباني
 - استيراد 70 موقف في منطقتين للوقوف
 
+### Clear Database / مسح قاعدة البيانات
+
+To clear all data and start fresh:
+لمسح جميع البيانات والبدء من جديد:
+
+```bash
+./clear_database.sh
+```
+
+This will delete the database file. You can then run the setup script again to add fresh data.
+سيحذف هذا ملف قاعدة البيانات. يمكنك بعد ذلك تشغيل برنامج الإعداد مرة أخرى لإضافة بيانات جديدة.
+
 ### Option 2: Manual Setup / الخيار 2: الإعداد اليدوي
 
 ```bash
@@ -113,6 +125,16 @@ apartments (1) ──→ (1) parking_spots
 - جميع البيانات تستخدم الترميز العربي الصحيح
 
 ## Troubleshooting / استكشاف الأخطاء
+
+### Problem: Need to clear all data and start fresh
+### المشكلة: الحاجة إلى مسح جميع البيانات والبدء من جديد
+
+**Solution / الحل**: Use the clear database script
+```bash
+./clear_database.sh
+```
+Then run the setup script again to add fresh data.
+ثم قم بتشغيل برنامج الإعداد مرة أخرى لإضافة بيانات جديدة.
 
 ### Problem: Database is empty
 ### المشكلة: قاعدة البيانات فارغة
