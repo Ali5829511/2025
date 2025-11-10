@@ -358,6 +358,12 @@ def init_database():
     
     if user_count == 0:
         # Create default users
+        # ⚠️ SECURITY WARNING: These are default credentials for initial setup only
+        # ⚠️ تحذير أمني: هذه بيانات افتراضية للإعداد الأولي فقط
+        # For production deployment:
+        # 1. Change all passwords immediately after first login
+        # 2. Consider using environment variables for initial admin password
+        # 3. Disable or remove default users before production deployment
         default_users = [
             {
                 'username': 'admin',

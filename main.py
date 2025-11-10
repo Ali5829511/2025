@@ -48,6 +48,8 @@ def serve_static(filename):
     return send_from_directory('.', filename)
 
 if __name__ == '__main__':
-    # Disable debug mode in production
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Get debug mode from environment variable (default: False for security)
+    # Set FLASK_DEBUG=True explicitly for development
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
 

@@ -25,6 +25,10 @@ def add_violation_entry_user():
         return
     
     # Create violation entry user
+    # ⚠️ SECURITY WARNING: These are default credentials for initial setup only
+    # ⚠️ تحذير أمني: هذه بيانات افتراضية للإعداد الأولي فقط
+    # Change the password immediately after first login in production
+    # غيّر كلمة المرور فوراً بعد أول تسجيل دخول في بيئة الإنتاج
     username = 'violation_entry'
     password = 'Violation@2025'
     name = 'مسجل المخالفات'
