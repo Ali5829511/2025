@@ -141,11 +141,10 @@ def generate_apartments_data():
     
     # Buildings 76-79: G.L.P-(76-77-78-79)
     print("📦 Generating data for buildings 76-79 (New Buildings)...")
-    # Building 79 has missing apartment 21, so add all except that one
+    # Add all apartments including 79-21 (completing the missing one)
     for building_num in range(76, 80):
         for apt_num in new_apt_numbers:
-            if not (building_num == 79 and apt_num == '21'):  # Skip 79-21 as it's missing
-                data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 76- 77 - 78 - 79)", f"{building_num}-{apt_num}"))
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 76- 77 - 78 - 79)", f"{building_num}-{apt_num}"))
     
     return data
 
