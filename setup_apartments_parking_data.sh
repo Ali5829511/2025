@@ -34,7 +34,10 @@ echo "✅ التحقق من البيانات..."
 sqlite3 housing.db "
 SELECT '📊 Buildings: ' || COUNT(*) FROM buildings; 
 SELECT '📊 Apartments: ' || COUNT(*) FROM apartments; 
-SELECT '📊 Parking Spots: ' || COUNT(*) FROM parking_spots;
+SELECT '📊 Total Parking: ' || COUNT(*) FROM parking_spots;
+SELECT '   • Apartment parking: ' || COUNT(*) FROM parking_spots WHERE apartment_id IS NOT NULL;
+SELECT '   • Special needs: ' || COUNT(*) FROM parking_spots WHERE special_needs = 1;
+SELECT '   • Public parking: ' || COUNT(*) FROM parking_spots WHERE special_needs = 0 AND apartment_id IS NULL;
 "
 echo ""
 
@@ -44,7 +47,10 @@ echo "============================================================"
 echo "Data summary / ملخص البيانات:"
 echo "  • 165 buildings (مبنى)"
 echo "  • 1020 apartments (شقة)"
-echo "  • 1020 parking spots (موقف)"
+echo "  • 1300 parking spots (موقف):"
+echo "    - 1020 apartment parking (مواقف الشقق)"
+echo "    - 39 special needs parking (مواقف احتياجات خاصة)"
+echo "    - 241 public parking (مواقف عامة)"
 echo ""
 echo "Each apartment has its own parking spot!"
 echo "كل شقة لها موقف خاص برقم العمارة ورقم الشقة!"

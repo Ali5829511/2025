@@ -32,7 +32,7 @@ def create_tables():
     )
     ''')
     
-    # Create parking_spots table
+    # Create parking_spots table with special_needs field
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS parking_spots (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,12 +41,21 @@ def create_tables():
         building_id INTEGER,
         apartment_id INTEGER,
         is_occupied INTEGER DEFAULT 0,
+        special_needs INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (building_id) REFERENCES buildings (id),
         FOREIGN KEY (apartment_id) REFERENCES apartments (id)
     )
     ''')
+    
+    # Add special_needs column if it doesn't exist (for existing databases)
+    try:
+        cursor.execute('ALTER TABLE parking_spots ADD COLUMN special_needs INTEGER DEFAULT 0')
+        print("✅ Added special_needs column to parking_spots table")
+    except sqlite3.OperationalError:
+        # Column already exists
+        pass
     
     conn.commit()
     conn.close()
@@ -210,6 +219,137 @@ def import_apartments_and_parking():
         traceback.print_exc()
         return False
 
+def add_special_needs_parking():
+    """Add special needs parking spots
+    18 spots for old buildings (1-30)
+    21 spots for new buildings (53-56, 61-68, 71-79)
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        special_parking_added = 0
+        
+        print("\n" + "=" * 60)
+        print("Adding Special Needs Parking Spots")
+        print("إضافة مواقف الاحتياجات الخاصة")
+        print("=" * 60)
+        
+        # 18 special needs spots for old buildings (1-30)
+        print("\n📍 Adding 18 special needs spots for old buildings (1-30)...")
+        old_building_spots = []
+        for i in range(1, 19):
+            building_num = ((i - 1) % 30) + 1  # Distribute across buildings 1-30
+            spot_number = f"S-OLD-{i}"
+            old_building_spots.append((spot_number, "G . L . P - 7 (احتياجات خاصة)", str(building_num)))
+        
+        for spot_number, parking_area, building_num in old_building_spots:
+            building_id = get_building_id(cursor, building_num)
+            if building_id:
+                try:
+                    cursor.execute('''
+                        INSERT INTO parking_spots (spot_number, parking_area, building_id, special_needs)
+                        VALUES (?, ?, ?, 1)
+                    ''', (spot_number, parking_area, building_id))
+                    special_parking_added += 1
+                except sqlite3.IntegrityError:
+                    pass  # Skip duplicates
+        
+        # 21 special needs spots for new buildings (53-56, 61-68, 71-79)
+        print("📍 Adding 21 special needs spots for new buildings (53-56, 61-68, 71-79)...")
+        new_buildings = list(range(53, 57)) + list(range(61, 69)) + list(range(71, 80))
+        new_building_spots = []
+        for i in range(1, 22):
+            building_num = new_buildings[(i - 1) % len(new_buildings)]
+            spot_number = f"S-NEW-{i}"
+            new_building_spots.append((spot_number, "G . L . P - 8 (احتياجات خاصة)", str(building_num)))
+        
+        for spot_number, parking_area, building_num in new_building_spots:
+            building_id = get_building_id(cursor, building_num)
+            if building_id:
+                try:
+                    cursor.execute('''
+                        INSERT INTO parking_spots (spot_number, parking_area, building_id, special_needs)
+                        VALUES (?, ?, ?, 1)
+                    ''', (spot_number, parking_area, building_id))
+                    special_parking_added += 1
+                except sqlite3.IntegrityError:
+                    pass  # Skip duplicates
+        
+        conn.commit()
+        
+        print("\n" + "=" * 60)
+        print("✅ Special needs parking added successfully!")
+        print("✅ تم إضافة مواقف الاحتياجات الخاصة بنجاح!")
+        print("=" * 60)
+        print(f"📊 Special needs parking spots added: {special_parking_added}")
+        print(f"   - Old buildings (1-30): 18 spots")
+        print(f"   - New buildings (53-56, 61-68, 71-79): 21 spots")
+        print("=" * 60)
+        
+        conn.close()
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error adding special needs parking: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def add_public_parking():
+    """Add public parking spots
+    241 public parking spots for old buildings (1-30)
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        public_parking_added = 0
+        
+        print("\n" + "=" * 60)
+        print("Adding Public Parking Spots")
+        print("إضافة مواقف عامة")
+        print("=" * 60)
+        
+        # 241 public parking spots for old buildings (1-30)
+        print("\n📍 Adding 241 public parking spots for old buildings (1-30)...")
+        old_buildings = list(range(1, 31))
+        
+        for i in range(1, 242):
+            building_num = old_buildings[(i - 1) % len(old_buildings)]
+            spot_number = f"P-OLD-{i}"
+            parking_area = "G . L . P - 7 (مواقف عامة)"
+            
+            building_id = get_building_id(cursor, str(building_num))
+            if building_id:
+                try:
+                    cursor.execute('''
+                        INSERT INTO parking_spots (spot_number, parking_area, building_id, special_needs)
+                        VALUES (?, ?, ?, 0)
+                    ''', (spot_number, parking_area, building_id))
+                    public_parking_added += 1
+                except sqlite3.IntegrityError:
+                    pass  # Skip duplicates
+        
+        conn.commit()
+        
+        print("\n" + "=" * 60)
+        print("✅ Public parking added successfully!")
+        print("✅ تم إضافة المواقف العامة بنجاح!")
+        print("=" * 60)
+        print(f"📊 Public parking spots added: {public_parking_added}")
+        print(f"   - Old buildings (1-30): 241 spots")
+        print("=" * 60)
+        
+        conn.close()
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error adding public parking: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 if __name__ == '__main__':
     print("=" * 60)
     print("Comprehensive Apartments and Parking Import Script")
@@ -217,3 +357,5 @@ if __name__ == '__main__':
     print("=" * 60)
     create_tables()
     import_apartments_and_parking()
+    add_special_needs_parking()
+    add_public_parking()

@@ -3,15 +3,17 @@
 
 ## Overview / نظرة عامة
 
-This document explains how to set up the apartments and parking management system with comprehensive initial data for **1020 apartments and 1020 parking spots**.
+This document explains how to set up the apartments and parking management system with comprehensive initial data for **1020 apartments and 1300 parking spots**.
 
-يشرح هذا المستند كيفية إعداد نظام إدارة الشقق والمواقف مع بيانات أولية شاملة لـ **1020 شقة و 1020 موقف**.
+يشرح هذا المستند كيفية إعداد نظام إدارة الشقق والمواقف مع بيانات أولية شاملة لـ **1020 شقة و 1300 موقف**.
 
-**Important Note / ملاحظة مهمة:**
-- Each apartment has its own dedicated parking spot
-- Parking spot number follows the format: Building-Apartment (e.g., 1-11, 25-42)
-- كل شقة لها موقف خاص بها برقم العمارة ورقم الشقة
-- رقم الموقف يتبع النمط: رقم المبنى-رقم الشقة (مثال: 1-11، 25-42)
+**Important Notes / ملاحظات مهمة:**
+- Each apartment has its own dedicated parking spot (1020 spots)
+- Special needs parking: 39 spots (18 in old buildings, 21 in new buildings)
+- Public parking: 241 spots in old buildings
+- كل شقة لها موقف خاص بها (1020 موقف)
+- مواقف احتياجات خاصة: 39 موقف (18 في المباني القديمة، 21 في المباني الجديدة)
+- مواقف عامة: 241 موقف في المباني القديمة
 
 ## Quick Setup / الإعداد السريع
 
@@ -79,10 +81,17 @@ python3 import_apartments_parking.py
 - **New Buildings (71-79)**: 180 apartments (20 apartments × 9 buildings)
 
 ### Parking Spots / المواقف
-- **Total / الإجمالي**: 1020 parking spots
-- **Each apartment has its own parking spot**
-- **Parking spot number format**: Building-Apartment (e.g., 1-11, 5-23, 71-42)
-- **Parking areas**: G.L.P-7 (old buildings), G.L.P-8, G.L.P-9, G.L.P-10 (new buildings)
+- **Total / الإجمالي**: 1300 parking spots
+- **Apartment parking / مواقف الشقق**: 1020 spots (each apartment has dedicated parking)
+- **Special needs parking / مواقف احتياجات خاصة**: 39 spots
+  - Old buildings (1-30): 18 spots
+  - New buildings (53-56, 61-68, 71-79): 21 spots
+- **Public parking / مواقف عامة**: 241 spots (old buildings only)
+- **Parking spot number formats**:
+  - Apartment parking: Building-Apartment (e.g., 1-11, 5-23, 71-42)
+  - Special needs: S-OLD-1 to S-OLD-18, S-NEW-1 to S-NEW-21
+  - Public parking: P-OLD-1 to P-OLD-241
+- **Parking areas**: G.L.P-7, G.L.P-8, G.L.P-9, G.L.P-10
 
 ## Accessing the Page / الوصول إلى الصفحة
 
