@@ -393,7 +393,15 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showError('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى');
+                // More detailed error message
+                let errorMsg = 'حدث خطأ غير متوقع. يرجى المحاولة لاحقاً';
+                if (error.message) {
+                    console.error('Error details:', error.message);
+                }
+                if (!navigator.onLine) {
+                    errorMsg = 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى';
+                }
+                showError(errorMsg);
                 setFormState(true);
             }
         });

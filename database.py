@@ -334,6 +334,22 @@ def init_database():
     )
     '''))
     
+    # ParkPow detections table
+    cursor.execute(database_adapter.adapt_sql('''
+    CREATE TABLE IF NOT EXISTS parkpow_detections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plate_number TEXT NOT NULL,
+        vehicle_id INTEGER,
+        detection_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        camera_id TEXT,
+        confidence REAL,
+        raw_data TEXT,
+        processed BOOLEAN DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE SET NULL
+    )
+    '''))
+    
     conn.commit()
     
     # Check if default users exist

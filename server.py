@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import database
 import auth
 import plate_recognizer
+import parkpow_integration
 import car_image_analyzer
 import car_data_exporter
 import vehicle_report_exporter
@@ -168,6 +169,7 @@ def login():
         # Create response
         response = make_response(jsonify({
             'success': True,
+            'session_token': session_token,
             'user': {
                 'id': user['id'],
                 'username': user['username'],
@@ -766,430 +768,193 @@ def export_plate_recognition_excel():
             'error_ar': 'فشل تصدير التقرير. يرجى الاتصال بمسؤول النظام.'
         }), 500
 
-@app.route('/api/plate-recognizer/export-pdf', methods=['GET'])
+# ==================== ParkPow API Integration ====================
+
+@app.route('/api/parkpow/status', methods=['GET'])
 @auth.require_auth
-def export_plate_recognition_pdf():
-    """Export plate recognition history to PDF"""
+def parkpow_status():
+    """Get ParkPow API status"""
     try:
-        from reportlab.lib import colors
-        from reportlab.lib.pagesizes import A4, landscape
-        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import cm
-        from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
-        from reportlab.lib.enums import TA_CENTER, TA_RIGHT
-        
-        # Get query parameters
-        start_date = request.args.get('start_date', '')
-        end_date = request.args.get('end_date', '')
-        
-        conn = database.get_db_connection()
-        cursor = conn.cursor()
-        
-        # Build query
-        query = '''
-            SELECT 
-                p.plate_number,
-                p.confidence,
-                p.recognized_at,
-                v.plate_number as registered_plate,
-                r.name as owner_name,
-                r.department,
-                v.make,
-                v.model
-            FROM plate_recognition_log p
-            LEFT JOIN vehicles v ON p.vehicle_id = v.id
-            LEFT JOIN residents r ON v.owner_id = r.id
-        '''
-        
-        params = []
-        if start_date and end_date:
-            query += ' WHERE DATE(p.recognized_at) BETWEEN ? AND ?'
-            params.extend([start_date, end_date])
-        elif start_date:
-            query += ' WHERE DATE(p.recognized_at) >= ?'
-            params.append(start_date)
-        elif end_date:
-            query += ' WHERE DATE(p.recognized_at) <= ?'
-            params.append(end_date)
-        
-        query += ' ORDER BY p.recognized_at DESC LIMIT 100'
-        
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-        conn.close()
-        
-        # Create PDF
-        pdf_buffer = BytesIO()
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
-        elements = []
-        
-        # Title
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=18,
-            textColor=colors.HexColor('#1A5F7A'),
-            alignment=TA_CENTER,
-            spaceAfter=20
-        )
-        
-        title_text = "تقرير تمييز لوحات السيارات<br/>Plate Recognition Report"
-        elements.append(Paragraph(title_text, title_style))
-        elements.append(Spacer(1, 0.5*cm))
-        
-        # Date range if provided
-        if start_date or end_date:
-            date_text = f"من {start_date or 'البداية'} إلى {end_date or 'النهاية'}"
-            elements.append(Paragraph(date_text, styles['Normal']))
-            elements.append(Spacer(1, 0.3*cm))
-        
-        # Table data
-        table_data = [['#', 'Plate Number\nرقم اللوحة', 'Confidence\nالدقة', 'Owner\nالمالك', 
-                      'Department\nالقسم', 'Make/Model\nالماركة/الموديل', 'Date/Time\nالتاريخ']]
-        
-        for idx, row in enumerate(rows, 1):
-            confidence = f"{float(row['confidence'])*100:.1f}%" if row['confidence'] else '-'
-            owner = row['owner_name'] or 'غير مسجل'
-            dept = row['department'] or '-'
-            vehicle = f"{row['make'] or ''} {row['model'] or ''}".strip() or '-'
-            date_time = row['recognized_at'][:16] if row['recognized_at'] else '-'
-            
-            table_data.append([
-                str(idx),
-                row['plate_number'] or '-',
-                confidence,
-                owner,
-                dept,
-                vehicle,
-                date_time
-            ])
-        
-        # Create table
-        table = Table(table_data, colWidths=[1.5*cm, 3*cm, 2.5*cm, 4*cm, 4*cm, 4*cm, 4*cm])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A5F7A')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
-        ]))
-        
-        elements.append(table)
-        
-        # Build PDF
-        doc.build(elements)
-        pdf_buffer.seek(0)
-        
-        # Generate filename
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'plate_recognition_report_{timestamp}.pdf'
-        
-        # Log audit
-        database.log_audit(
-            request.user['id'],
-            f'Exported plate recognition PDF report ({len(rows)} records)',
-            ip_address=request.remote_addr
-        )
-        
-        return send_file(
-            pdf_buffer,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=filename
-        )
-    
+        status = parkpow_integration.get_api_status()
+        return jsonify(status)
     except Exception as e:
-        app.logger.error(f'PDF export error: {str(e)}')
+        app.logger.error(f'ParkPow status error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': 'Failed to export PDF report',
-            'error_ar': 'فشل تصدير تقرير PDF'
+            'error': 'Failed to check ParkPow status',
+            'error_ar': 'خطأ في التحقق من حالة خدمة ParkPow'
         }), 500
 
-@app.route('/api/plate-recognizer/export-html', methods=['GET'])
+
+@app.route('/api/parkpow/recognize', methods=['POST'])
 @auth.require_auth
-def export_plate_recognition_html():
-    """Export plate recognition history to HTML"""
+def parkpow_recognize():
+    """Recognize license plate using ParkPow API"""
     try:
-        # Get query parameters
-        start_date = request.args.get('start_date', '')
-        end_date = request.args.get('end_date', '')
+        data = request.get_json()
         
-        conn = database.get_db_connection()
-        cursor = conn.cursor()
+        if not data or 'image' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'No image provided',
+                'error_ar': 'لم يتم تقديم صورة'
+            }), 400
         
-        # Build query
-        query = '''
-            SELECT 
-                p.id,
-                p.plate_number,
-                p.confidence,
-                p.recognized_at,
-                u.name as user_name,
-                v.plate_number as registered_plate,
-                v.vehicle_type,
-                v.make,
-                v.model,
-                v.year,
-                v.color,
-                r.name as owner_name,
-                r.national_id,
-                r.phone as owner_phone,
-                r.department,
-                r.job_title,
-                r.unit_number,
-                b.name as building_name
-            FROM plate_recognition_log p
-            LEFT JOIN users u ON p.user_id = u.id
-            LEFT JOIN vehicles v ON p.vehicle_id = v.id
-            LEFT JOIN residents r ON v.owner_id = r.id
-            LEFT JOIN buildings b ON r.building_id = b.id
-        '''
+        image_data = data.get('image')
+        camera_id = data.get('camera_id')
         
-        params = []
-        if start_date and end_date:
-            query += ' WHERE DATE(p.recognized_at) BETWEEN ? AND ?'
-            params.extend([start_date, end_date])
-        elif start_date:
-            query += ' WHERE DATE(p.recognized_at) >= ?'
-            params.append(start_date)
-        elif end_date:
-            query += ' WHERE DATE(p.recognized_at) <= ?'
-            params.append(end_date)
+        # Recognize plate
+        result = parkpow_integration.recognize_plate(image_data, camera_id)
         
-        query += ' ORDER BY p.recognized_at DESC'
-        
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-        conn.close()
-        
-        # Generate HTML
-        html_content = f'''
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقرير تمييز لوحات السيارات - Plate Recognition Report</title>
-    <style>
-        * {{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }}
-        body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-            direction: rtl;
-        }}
-        .container {{
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }}
-        .header {{
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #1A5F7A;
-        }}
-        h1 {{
-            color: #1A5F7A;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }}
-        .subtitle {{
-            color: #666;
-            font-size: 16px;
-        }}
-        .info-box {{
-            background: #E3F2FD;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }}
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }}
-        th {{
-            background: #1A5F7A;
-            color: white;
-            padding: 12px;
-            text-align: center;
-            font-weight: bold;
-            border: 1px solid #ddd;
-        }}
-        td {{
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }}
-        tr:nth-child(even) {{
-            background: #f9f9f9;
-        }}
-        tr:hover {{
-            background: #E3F2FD;
-        }}
-        .status-registered {{
-            background: #D4EDDA;
-            color: #155724;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }}
-        .status-unregistered {{
-            background: #F8D7DA;
-            color: #721C24;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }}
-        .confidence-high {{
-            color: #28a745;
-            font-weight: bold;
-        }}
-        .confidence-medium {{
-            color: #ffc107;
-            font-weight: bold;
-        }}
-        .confidence-low {{
-            color: #dc3545;
-            font-weight: bold;
-        }}
-        .footer {{
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #ddd;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }}
-        @media print {{
-            body {{
-                background: white;
-                padding: 0;
-            }}
-            .container {{
-                box-shadow: none;
-            }}
-        }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>تقرير تمييز لوحات السيارات</h1>
-            <div class="subtitle">Plate Recognition Report</div>
-            <div class="subtitle">جامعة الإمام محمد بن سعود الإسلامية</div>
-        </div>
-        
-        <div class="info-box">
-            <strong>تاريخ التقرير:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-            {f'<br><strong>الفترة:</strong> من {start_date} إلى {end_date}' if start_date or end_date else ''}
-            <br><strong>عدد السجلات:</strong> {len(rows)} سجل
-        </div>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>م</th>
-                    <th>رقم اللوحة</th>
-                    <th>نسبة الدقة</th>
-                    <th>التاريخ والوقت</th>
-                    <th>المستخدم</th>
-                    <th>اسم المالك</th>
-                    <th>القسم</th>
-                    <th>الوظيفة</th>
-                    <th>الوحدة</th>
-                    <th>المبنى</th>
-                    <th>الماركة</th>
-                    <th>الموديل</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-'''
-        
-        for idx, row in enumerate(rows, 1):
-            confidence = float(row['confidence']) * 100 if row['confidence'] else 0
-            if confidence >= 90:
-                conf_class = 'confidence-high'
-            elif confidence >= 70:
-                conf_class = 'confidence-medium'
-            else:
-                conf_class = 'confidence-low'
-            
-            status_text = 'مسجلة' if row['owner_name'] else 'غير مسجلة'
-            status_class = 'status-registered' if row['owner_name'] else 'status-unregistered'
-            
-            html_content += f'''
-                <tr>
-                    <td>{idx}</td>
-                    <td><strong>{row['plate_number'] or '-'}</strong></td>
-                    <td class="{conf_class}">{confidence:.1f}%</td>
-                    <td>{row['recognized_at'][:19] if row['recognized_at'] else '-'}</td>
-                    <td>{row['user_name'] or '-'}</td>
-                    <td>{row['owner_name'] or 'غير مسجل'}</td>
-                    <td>{row['department'] or '-'}</td>
-                    <td>{row['job_title'] or '-'}</td>
-                    <td>{row['unit_number'] or '-'}</td>
-                    <td>{row['building_name'] or '-'}</td>
-                    <td>{row['make'] or '-'}</td>
-                    <td>{row['model'] or '-'}</td>
-                    <td><span class="{status_class}">{status_text}</span></td>
-                </tr>
-'''
-        
-        html_content += '''
-            </tbody>
-        </table>
-        
-        <div class="footer">
-            <p><strong>نظام إدارة إسكان أعضاء هيئة التدريس</strong></p>
-            <p>Faculty Housing Management System</p>
-            <p>Imam Mohammad Ibn Saud Islamic University</p>
-        </div>
-    </div>
-</body>
-</html>
-'''
+        # If recognition was successful, find vehicle and log
+        if result.get('success') and result.get('results'):
+            for plate_data in result['results']:
+                plate_number = plate_data.get('plate') or plate_data.get('plate_number')
+                
+                if plate_number:
+                    # Find vehicle in database
+                    vehicle = parkpow_integration.find_vehicle_by_plate(plate_number)
+                    
+                    # Add vehicle info to result
+                    plate_data['vehicle_info'] = vehicle
+                    
+                    # Log event
+                    parkpow_integration.log_parkpow_event(
+                        request.user['id'],
+                        'recognition',
+                        plate_number,
+                        f"Confidence: {plate_data.get('confidence', 0)}"
+                    )
         
         # Log audit
         database.log_audit(
             request.user['id'],
-            f'Exported plate recognition HTML report ({len(rows)} records)',
+            'ParkPow plate recognition performed',
             ip_address=request.remote_addr
         )
         
-        # Return HTML
-        response = make_response(html_content)
-        response.headers['Content-Type'] = 'text/html; charset=utf-8'
-        response.headers['Content-Disposition'] = f'attachment; filename=plate_recognition_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.html'
-        
-        return response
+        return jsonify(result)
     
     except Exception as e:
-        app.logger.error(f'HTML export error: {str(e)}')
+        app.logger.error(f'ParkPow recognition error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': 'Failed to export HTML report',
-            'error_ar': 'فشل تصدير تقرير HTML'
+            'error': 'Failed to recognize plate',
+            'error_ar': 'خطأ في تمييز اللوحة'
         }), 500
+
+
+@app.route('/api/parkpow/record-violation', methods=['POST'])
+@auth.require_auth
+@auth.require_write_permission
+def parkpow_record_violation():
+    """Record a traffic violation"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'plate_number' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Plate number is required',
+                'error_ar': 'رقم اللوحة مطلوب'
+            }), 400
+        
+        plate_number = data.get('plate_number')
+        violation_data = {
+            'violation_type': data.get('violation_type', 'غير محدد'),
+            'violation_date': data.get('violation_date', datetime.now().isoformat()),
+            'location': data.get('location', ''),
+            'description': data.get('description', ''),
+            'fine_amount': data.get('fine_amount', 0)
+        }
+        
+        # Record violation
+        result = parkpow_integration.record_violation(
+            plate_number,
+            violation_data,
+            request.user['id']
+        )
+        
+        # Log audit
+        database.log_audit(
+            request.user['id'],
+            f'ParkPow violation recorded for plate: {plate_number}',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow record violation error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to record violation',
+            'error_ar': 'خطأ في تسجيل المخالفة'
+        }), 500
+
+
+@app.route('/api/parkpow/repeat-offenders', methods=['GET'])
+@auth.require_auth
+def parkpow_repeat_offenders():
+    """Get list of repeat offenders"""
+    try:
+        min_violations = request.args.get('min_violations', 3, type=int)
+        
+        offenders = parkpow_integration.get_repeat_offenders(min_violations)
+        
+        return jsonify({
+            'success': True,
+            'offenders': offenders,
+            'count': len(offenders),
+            'min_violations': min_violations
+        })
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow repeat offenders error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get repeat offenders list',
+            'error_ar': 'خطأ في جلب قائمة المخالفين المتكررين'
+        }), 500
+
+
+@app.route('/api/parkpow/webhook', methods=['POST'])
+def parkpow_webhook():
+    """Receive webhook data from ParkPow"""
+    try:
+        # Verify webhook token if configured
+        token = request.headers.get('Authorization')
+        expected_token = os.environ.get('PARKPOW_WEBHOOK_TOKEN', '')
+        
+        if expected_token and token != f'Token {expected_token}':
+            return jsonify({
+                'success': False,
+                'error': 'Invalid webhook token',
+                'error_ar': 'رمز webhook غير صالح'
+            }), 401
+        
+        webhook_data = request.get_json()
+        
+        if not webhook_data:
+            return jsonify({
+                'success': False,
+                'error': 'No data received',
+                'error_ar': 'لم يتم استقبال بيانات'
+            }), 400
+        
+        # Process webhook data
+        result = parkpow_integration.process_webhook_data(webhook_data)
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'ParkPow webhook error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process webhook',
+            'error_ar': 'خطأ في معالجة webhook'
+        }), 500
+
 
 # ==================== Static File Serving ====================
 
@@ -1285,12 +1050,31 @@ def system_stats():
 
 @app.route('/api/health')
 def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'database': 'connected'
-    })
+    """
+    Health check endpoint - Verifies database connectivity
+    نقطة فحص الصحة - تتحقق من الاتصال بقاعدة البيانات
+    """
+    try:
+        # Test database connection
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1')
+        cursor.fetchone()
+        conn.close()
+        
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'database': 'connected'
+        })
+    except Exception as e:
+        # Log the error for debugging but don't expose details to users
+        app.logger.error(f'Health check failed: {str(e)}')
+        return jsonify({
+            'status': 'unhealthy',
+            'timestamp': datetime.now().isoformat(),
+            'database': 'disconnected'
+        }), 503
 
 # ==================== Unified Dashboard API ====================
 
