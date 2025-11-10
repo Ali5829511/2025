@@ -3,9 +3,15 @@
 
 ## Overview / نظرة عامة
 
-This document explains how to set up the apartments and parking management system with initial data.
+This document explains how to set up the apartments and parking management system with comprehensive initial data for **1020 apartments and 1020 parking spots**.
 
-يشرح هذا المستند كيفية إعداد نظام إدارة الشقق والمواقف مع البيانات الأولية.
+يشرح هذا المستند كيفية إعداد نظام إدارة الشقق والمواقف مع بيانات أولية شاملة لـ **1020 شقة و 1020 موقف**.
+
+**Important Note / ملاحظة مهمة:**
+- Each apartment has its own dedicated parking spot
+- Parking spot number follows the format: Building-Apartment (e.g., 1-11, 25-42)
+- كل شقة لها موقف خاص بها برقم العمارة ورقم الشقة
+- رقم الموقف يتبع النمط: رقم المبنى-رقم الشقة (مثال: 1-11، 25-42)
 
 ## Quick Setup / الإعداد السريع
 
@@ -57,21 +63,26 @@ python3 import_apartments_parking.py
 ### Buildings / المباني
 - **Total / الإجمالي**: 165 buildings
 - **Old Buildings / المباني القديمة**: 30 buildings (1-30)
-- **New Buildings / المباني الجديدة**: 21 buildings (53-79)
+  - Each has 20 apartments: 1-4, 11-14, 21-24, 31-34, 41-44
+- **New Buildings / المباني الجديدة**: 21 buildings
+  - Buildings 53-56: 4 buildings (20 apartments each)
+  - Buildings 61-68: 8 buildings (20 apartments each)
+  - Buildings 71-79: 9 buildings (20 apartments each)
+  - Each has apartments: 11-13, 21-23, 31-33, 41-43, 51-53, 61-63, 71-72
 - **Villas / الفلل**: 114 villas (V1-V114)
 
 ### Apartments / الشقق
-- **Total / الإجمالي**: 70 apartments
-- **Building 1 / المبنى 1**: 20 apartments (units: 1-4, 11-14, 21-24, 31-34, 41-44)
-- **Building 2 / المبنى 2**: 20 apartments (units: 1-4, 11-14, 21-24, 31-34, 41-44)
-- **Building 3 / المبنى 3**: 20 apartments (units: 1-4, 11-14, 21-24, 31-34, 41-44)
-- **Building 4 / المبنى 4**: 10 apartments (units: 1-4, 11-14, 21-22)
+- **Total / الإجمالي**: 1020 apartments across 51 buildings
+- **Old Buildings (1-30)**: 600 apartments (20 apartments × 30 buildings)
+- **New Buildings (53-56)**: 80 apartments (20 apartments × 4 buildings)
+- **New Buildings (61-68)**: 160 apartments (20 apartments × 8 buildings)
+- **New Buildings (71-79)**: 180 apartments (20 apartments × 9 buildings)
 
 ### Parking Spots / المواقف
-- **Total / الإجمالي**: 70 parking spots
-- **Area G.L.P-6**: 10 spots (Building 4)
-- **Area G.L.P-7**: 60 spots (Buildings 1-3)
-- Each parking spot is linked to a specific apartment / كل موقف مرتبط بشقة محددة
+- **Total / الإجمالي**: 1020 parking spots
+- **Each apartment has its own parking spot**
+- **Parking spot number format**: Building-Apartment (e.g., 1-11, 5-23, 71-42)
+- **Parking areas**: G.L.P-7 (old buildings), G.L.P-8, G.L.P-9, G.L.P-10 (new buildings)
 
 ## Accessing the Page / الوصول إلى الصفحة
 
