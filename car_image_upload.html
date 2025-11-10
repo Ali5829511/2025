@@ -741,7 +741,7 @@
         // Check authentication on page load
         window.addEventListener('load', async () => {
             try {
-                const response = await fetch('/api/auth/check', {
+                const response = await fetch('/api/auth/validate', {
                     credentials: 'include'
                 });
 
