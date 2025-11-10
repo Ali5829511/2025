@@ -68,47 +68,84 @@ def get_building_id(cursor, building_number):
     return result[0] if result else None
 
 def generate_apartments_data():
-    """Generate comprehensive apartments data based on the new requirements"""
+    """Generate comprehensive apartments data with accurate parking areas"""
     data = []
     
-    # Buildings 1-30 (Old Buildings): apartments 1-4, 11-14, 21-24, 31-34, 41-44
+    # OLD BUILDINGS (1-30) with different parking areas
     print("📦 Generating data for buildings 1-30 (Old Buildings)...")
-    for building_num in range(1, 31):
+    
+    # Buildings 1-15: G.L.P-7 (assuming, since not specified in comment)
+    for building_num in range(1, 16):
         apartment_numbers = ['1', '2', '3', '4', '11', '12', '13', '14', 
                             '21', '22', '23', '24', '31', '32', '33', '34', 
                             '41', '42', '43', '44']
         for apt_num in apartment_numbers:
             data.append(("شقة", str(building_num), apt_num, "G . L . P - 7", f"{building_num}-{apt_num}"))
     
-    # Buildings 53-56 (New Buildings): apartments 11-13, 21-23, 31-33, 41-43, 51-53, 61-63, 71-72
-    print("📦 Generating data for buildings 53-56 (New Buildings)...")
-    for building_num in range(53, 57):
-        apartment_numbers = ['11', '12', '13', '21', '22', '23', 
-                            '31', '32', '33', '41', '42', '43', 
-                            '51', '52', '53', '61', '62', '63', 
-                            '71', '72']
+    # Building 16: G.L.P-3
+    apartment_numbers = ['1', '2', '3', '4', '11', '12', '13', '14', 
+                        '21', '22', '23', '24', '31', '32', '33', '34', 
+                        '41', '42', '43', '44']
+    for apt_num in apartment_numbers:
+        data.append(("شقة", "16", apt_num, "G . L . P - 3", f"16-{apt_num}"))
+    
+    # Buildings 17-21: G.L.P-2
+    for building_num in range(17, 22):
+        for apt_num in apartment_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - 2", f"{building_num}-{apt_num}"))
+    
+    # Buildings 22-27: G.L.P-1
+    for building_num in range(22, 28):
+        for apt_num in apartment_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - 1", f"{building_num}-{apt_num}"))
+    
+    # Buildings 28-30: G.L.P-8 (with complete apartments - fixing missing ones)
+    for building_num in range(28, 31):
         for apt_num in apartment_numbers:
             data.append(("شقة", str(building_num), apt_num, "G . L . P - 8", f"{building_num}-{apt_num}"))
     
-    # Buildings 61-68 (New Buildings): apartments 11-13, 21-23, 31-33, 41-43, 51-53, 61-63, 71-72
-    print("📦 Generating data for buildings 61-68 (New Buildings)...")
-    for building_num in range(61, 69):
-        apartment_numbers = ['11', '12', '13', '21', '22', '23', 
-                            '31', '32', '33', '41', '42', '43', 
-                            '51', '52', '53', '61', '62', '63', 
-                            '71', '72']
-        for apt_num in apartment_numbers:
-            data.append(("شقة", str(building_num), apt_num, "G . L . P - 9", f"{building_num}-{apt_num}"))
+    # NEW BUILDINGS with grouped parking areas
+    # Buildings 53-56: G.L.P-(53-54-55-56)
+    print("📦 Generating data for buildings 53-56 (New Buildings)...")
+    new_apt_numbers = ['11', '12', '13', '21', '22', '23', 
+                       '31', '32', '33', '41', '42', '43', 
+                       '51', '52', '53', '61', '62', '63', 
+                       '71', '72']
+    for building_num in range(53, 57):
+        for apt_num in new_apt_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 53 - 54 - 55 - 56 )", f"{building_num}-{apt_num}"))
     
-    # Buildings 71-79 (New Buildings): apartments 11-13, 21-23, 31-33, 41-43, 51-53, 61-63, 71-72
-    print("📦 Generating data for buildings 71-79 (New Buildings)...")
-    for building_num in range(71, 80):
-        apartment_numbers = ['11', '12', '13', '21', '22', '23', 
-                            '31', '32', '33', '41', '42', '43', 
-                            '51', '52', '53', '61', '62', '63', 
-                            '71', '72']
-        for apt_num in apartment_numbers:
-            data.append(("شقة", str(building_num), apt_num, "G . L . P - 10", f"{building_num}-{apt_num}"))
+    # Buildings 61-64: G.L.P-(61-62-63-64)
+    print("📦 Generating data for buildings 61-64 (New Buildings)...")
+    for building_num in range(61, 65):
+        for apt_num in new_apt_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 61-62-63-64)", f"{building_num}-{apt_num}"))
+    
+    # Buildings 65-68: G.L.P-(65-66-67-68)
+    print("📦 Generating data for buildings 65-68 (New Buildings)...")
+    for building_num in range(65, 69):
+        for apt_num in new_apt_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 65 - 66 - 67 -68 )", f"{building_num}-{apt_num}"))
+    
+    # Buildings 71-72: G.L.P-(71-72)
+    print("📦 Generating data for buildings 71-72 (New Buildings)...")
+    for building_num in range(71, 73):
+        for apt_num in new_apt_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 71 - 72 )", f"{building_num}-{apt_num}"))
+    
+    # Buildings 73-75: G.L.P-(73-74-75)
+    print("📦 Generating data for buildings 73-75 (New Buildings)...")
+    for building_num in range(73, 76):
+        for apt_num in new_apt_numbers:
+            data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 73 - 74 -75 )", f"{building_num}-{apt_num}"))
+    
+    # Buildings 76-79: G.L.P-(76-77-78-79)
+    print("📦 Generating data for buildings 76-79 (New Buildings)...")
+    # Building 79 has missing apartment 21, so add all except that one
+    for building_num in range(76, 80):
+        for apt_num in new_apt_numbers:
+            if not (building_num == 79 and apt_num == '21'):  # Skip 79-21 as it's missing
+                data.append(("شقة", str(building_num), apt_num, "G . L . P - ( 76- 77 - 78 - 79)", f"{building_num}-{apt_num}"))
     
     return data
 
