@@ -473,7 +473,13 @@
                     <i class="fas fa-sync"></i> تحديث السجل
                 </button>
                 <button class="btn-primary" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                    <i class="fas fa-file-excel"></i> تصدير Excel
+                </button>
+                <button class="btn-primary" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> تصدير PDF
+                </button>
+                <button class="btn-primary" onclick="exportToHTML()">
+                    <i class="fas fa-file-code"></i> تصدير HTML
                 </button>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <label style="color: #0f3d68; font-weight: bold;">من:</label>
@@ -974,6 +980,112 @@
                     existingLoadingMsg.parentNode.removeChild(existingLoadingMsg);
                 }
                 alert(`خطأ في تصدير التقرير\nError: ${error.message}`);
+            }
+        }
+
+        async function exportToPDF() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                let url = '/api/plate-recognizer/export-pdf';
+                const params = new URLSearchParams();
+                
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                
+                if (params.toString()) url += '?' + params.toString();
+                
+                // Show loading
+                const loadingMsg = document.createElement('div');
+                loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
+                loadingMsg.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: #dc3545;"></i>
+                    </div>
+                    <div style="color: #0f3d68; font-size: 1.2em;">جارٍ تصدير PDF...</div>
+                `;
+                document.body.appendChild(loadingMsg);
+                
+                const response = await fetch(url, { method: 'GET', credentials: 'include' });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `plate_recognition_report_${new Date().getTime()}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    document.body.removeChild(a);
+                    
+                    document.body.removeChild(loadingMsg);
+                    
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #d4edda; color: #155724; padding: 20px 40px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center; border: 2px solid #c3e6cb;';
+                    successMsg.innerHTML = '<i class="fas fa-check-circle" style="font-size: 2em;"></i><div style="margin-top: 10px;">تم تصدير PDF بنجاح!</div>';
+                    document.body.appendChild(successMsg);
+                    setTimeout(() => document.body.removeChild(successMsg), 3000);
+                } else {
+                    throw new Error('Failed to export PDF');
+                }
+            } catch (error) {
+                console.error('PDF export error:', error);
+                alert('خطأ في تصدير PDF\nError: ' + error.message);
+            }
+        }
+
+        async function exportToHTML() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                let url = '/api/plate-recognizer/export-html';
+                const params = new URLSearchParams();
+                
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                
+                if (params.toString()) url += '?' + params.toString();
+                
+                // Show loading
+                const loadingMsg = document.createElement('div');
+                loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
+                loadingMsg.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: #17a2b8;"></i>
+                    </div>
+                    <div style="color: #0f3d68; font-size: 1.2em;">جارٍ تصدير HTML...</div>
+                `;
+                document.body.appendChild(loadingMsg);
+                
+                const response = await fetch(url, { method: 'GET', credentials: 'include' });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `plate_recognition_report_${new Date().getTime()}.html`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    document.body.removeChild(a);
+                    
+                    document.body.removeChild(loadingMsg);
+                    
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #d4edda; color: #155724; padding: 20px 40px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center; border: 2px solid #c3e6cb;';
+                    successMsg.innerHTML = '<i class="fas fa-check-circle" style="font-size: 2em;"></i><div style="margin-top: 10px;">تم تصدير HTML بنجاح!</div>';
+                    document.body.appendChild(successMsg);
+                    setTimeout(() => document.body.removeChild(successMsg), 3000);
+                } else {
+                    throw new Error('Failed to export HTML');
+                }
+            } catch (error) {
+                console.error('HTML export error:', error);
+                alert('خطأ في تصدير HTML\nError: ' + error.message);
             }
         }
     </script>

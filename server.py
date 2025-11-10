@@ -38,6 +38,7 @@ DEPLOYMENT_URL = os.environ.get('DEPLOYMENT_URL', 'https://housing-management-sy
 # Default allowed origins
 ALLOWED_ORIGINS = [
     DEPLOYMENT_URL,
+    'https://two025-upa7.onrender.com',
     'http://localhost:5000',
     'http://127.0.0.1:5000'
 ]
@@ -194,6 +195,8 @@ def login():
         
     except Exception as e:
         app.logger.error(f'Login error: {str(e)}')
+        import traceback
+        app.logger.error(f'Login error traceback: {traceback.format_exc()}')
         return jsonify({
             'success': False,
             'error': 'Internal server error',
