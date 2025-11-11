@@ -182,6 +182,35 @@
             margin-left: 10px;
         }
 
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            color: #856404;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .warning-box p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .warning-box code {
+            background: #fff;
+            padding: 3px 8px;
+            border-radius: 5px;
+            border: 1px solid #ffc107;
+            font-family: monospace;
+        }
+
         .footer {
             background: #f8f9fa;
             padding: 20px;
@@ -223,6 +252,23 @@
                 <h2>❓ هل يوجد بيانات في الشقق والمواقف؟</h2>
                 <div class="answer">✅ نعم، توجد بيانات</div>
                 <p style="font-size: 1.2em;">YES, Data is Available!</p>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="warning-box">
+                <h3>⚠️ تنبيه هام / Important Notice</h3>
+                <p><strong>يجب استيراد البيانات أولاً!</strong><br>
+                البيانات متوفرة في ملفات Excel ولكن يجب استيرادها إلى قاعدة البيانات.</p>
+                <p><strong>Data must be imported first!</strong><br>
+                Data is available in Excel files but must be imported into the database.</p>
+                <p style="margin-top: 15px;">
+                    <strong>لاستيراد البيانات:</strong><br>
+                    <code>./setup_initial_data.sh</code>
+                </p>
+                <p>
+                    <strong>To import data:</strong><br>
+                    <code>./setup_initial_data.sh</code>
+                </p>
             </div>
 
             <!-- Main Statistics -->
