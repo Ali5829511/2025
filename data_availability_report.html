@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير توفر البيانات - الشقق والمواقف</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .answer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .answer-box h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .answer-box .answer {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-card .label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .breakdown {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .breakdown h3 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .breakdown-item {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breakdown-item .item-label {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .breakdown-item .item-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .summary h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .summary ul {
+            list-style: none;
+            font-size: 1.2em;
+            line-height: 2;
+        }
+
+        .summary li:before {
+            content: "✅ ";
+            margin-left: 10px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .answer-box .answer {
+                font-size: 2em;
+            }
+
+            .stat-card .number {
+                font-size: 2em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 تقرير توفر البيانات</h1>
+            <p>الشقق والمواقف في نظام إدارة الإسكان</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Data Availability Report - Apartments and Parking</p>
+        </div>
+
+        <div class="content">
+            <!-- Main Answer -->
+            <div class="answer-box">
+                <h2>❓ هل يوجد بيانات في الشقق والمواقف؟</h2>
+                <div class="answer">✅ نعم، توجد بيانات</div>
+                <p style="font-size: 1.2em;">YES, Data is Available!</p>
+            </div>
+
+            <!-- Main Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="icon">🏢</div>
+                    <div class="number">165</div>
+                    <div class="label">مبنى<br>Buildings</div>
+                </div>
+
+                <div class="stat-card green">
+                    <div class="icon">🏠</div>
+                    <div class="number">1,020</div>
+                    <div class="label">شقة<br>Apartments</div>
+                </div>
+
+                <div class="stat-card orange">
+                    <div class="icon">🅿️</div>
+                    <div class="number">1,300</div>
+                    <div class="label">موقف<br>Parking Spots</div>
+                </div>
+            </div>
+
+            <!-- Buildings Breakdown -->
+            <div class="breakdown">
+                <h3>🏢 تفاصيل المباني / Buildings Details</h3>
+                <div class="breakdown-item">
+                    <span class="item-label">عمارات قديمة / Old Buildings</span>
+                    <span class="item-value">30 مبنى</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="item-label">عمارات جديدة / New Buildings</span>
+                    <span class="item-value">21 مبنى</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="item-label">فلل / Villas</span>
+                    <span class="item-value">114 فلة</span>
+                </div>
+            </div>
+
+            <!-- Apartments Breakdown -->
+            <div class="breakdown">
+                <h3>🏠 تفاصيل الشقق / Apartments Details</h3>
+                <div class="breakdown-item">
+                    <span class="item-label">شقق المباني القديمة / Old Buildings Apartments</span>
+                    <span class="item-value">600 شقة</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="item-label">شقق المباني الجديدة / New Buildings Apartments</span>
+                    <span class="item-value">420 شقة</span>
+                </div>
+            </div>
+
+            <!-- Parking Breakdown -->
+            <div class="breakdown">
+                <h3>🅿️ تفاصيل المواقف / Parking Details</h3>
+                <div class="breakdown-item">
+                    <span class="item-label">مواقف خاصة / Private Parking</span>
+                    <span class="item-value">1,020 موقف</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="item-label">مواقف عامة / Public Parking</span>
+                    <span class="item-value">241 موقف</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="item-label">مواقف احتياجات خاصة / Special Needs</span>
+                    <span class="item-value">39 موقف</span>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary">
+                <h3>📋 الخلاصة / Summary</h3>
+                <ul>
+                    <li>تم استيراد 165 مبنى بنجاح</li>
+                    <li>تم استيراد 1,020 شقة بنجاح</li>
+                    <li>تم استيراد 1,300 موقف بنجاح</li>
+                    <li>جميع البيانات جاهزة للاستخدام</li>
+                    <li>All data successfully imported and ready to use</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+            <p>Faculty Housing Management System</p>
+            <p>جامعة الإمام محمد بن سعود الإسلامية</p>
+            <p style="margin-top: 10px;">تاريخ التقرير: <span id="reportDate"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Set current date
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('reportDate').textContent = dateStr;
+    </script>
+</body>
+</html>
