@@ -327,6 +327,33 @@ def serve_static(filename):
     """Serve static files"""
     return send_from_directory('static', filename)
 
+@app.route('/health')
+@app.route('/api/health')
+def health_check():
+    """
+    Health check endpoint for deployment platforms
+    نقطة فحص صحة النظام لمنصات النشر
+    """
+    try:
+        # Test database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1')
+        conn.close()
+        
+        return jsonify({
+            'status': 'healthy',
+            'service': 'Traffic Violations Management System',
+            'database': 'connected',
+            'timestamp': datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 503
+
 if __name__ == '__main__':
     # Initialize database if it doesn't exist
     if not os.path.exists(DATABASE_PATH):
