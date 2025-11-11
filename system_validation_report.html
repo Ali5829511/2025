@@ -714,21 +714,21 @@
 
         function updateStatistics() {
             // Update database statistics
-            document.getElementById('buildingsCount').textContent = formatCount(databaseStats.buildings);
-            document.getElementById('residentsCount').textContent = formatCount(databaseStats.residents);
-            document.getElementById('activeResidentsCount').textContent = formatCount(databaseStats.activeResidents);
-            document.getElementById('vehiclesCount').textContent = formatCount(databaseStats.vehicles);
-            document.getElementById('activeVehiclesCount').textContent = formatCount(databaseStats.activeVehicles);
-            document.getElementById('violationsCount').textContent = formatCount(databaseStats.violations);
-            document.getElementById('openViolationsCount').textContent = formatCount(databaseStats.openViolations);
-            document.getElementById('securityIncidentsCount').textContent = formatCount(databaseStats.securityIncidents);
-            document.getElementById('openIncidentsCount').textContent = formatCount(databaseStats.openIncidents);
-            document.getElementById('visitorsCount').textContent = formatCount(databaseStats.visitors);
-            document.getElementById('complaintsCount').textContent = formatCount(databaseStats.complaints);
-            document.getElementById('openComplaintsCount').textContent = formatCount(databaseStats.openComplaints);
-            document.getElementById('usersCount').textContent = formatCount(databaseStats.users);
-            document.getElementById('activeUsersCount').textContent = formatCount(databaseStats.activeUsers);
-            document.getElementById('activeSessionsCount').textContent = formatCount(databaseStats.activeSessions);
+            document.getElementById('buildingsCount').innerHTML = formatCount(databaseStats.buildings);
+            document.getElementById('residentsCount').innerHTML = formatCount(databaseStats.residents);
+            document.getElementById('activeResidentsCount').innerHTML = formatCount(databaseStats.activeResidents);
+            document.getElementById('vehiclesCount').innerHTML = formatCount(databaseStats.vehicles);
+            document.getElementById('activeVehiclesCount').innerHTML = formatCount(databaseStats.activeVehicles);
+            document.getElementById('violationsCount').innerHTML = formatCount(databaseStats.violations);
+            document.getElementById('openViolationsCount').innerHTML = formatCount(databaseStats.openViolations);
+            document.getElementById('securityIncidentsCount').innerHTML = formatCount(databaseStats.securityIncidents);
+            document.getElementById('openIncidentsCount').innerHTML = formatCount(databaseStats.openIncidents);
+            document.getElementById('visitorsCount').innerHTML = formatCount(databaseStats.visitors);
+            document.getElementById('complaintsCount').innerHTML = formatCount(databaseStats.complaints);
+            document.getElementById('openComplaintsCount').innerHTML = formatCount(databaseStats.openComplaints);
+            document.getElementById('usersCount').innerHTML = formatCount(databaseStats.users);
+            document.getElementById('activeUsersCount').innerHTML = formatCount(databaseStats.activeUsers);
+            document.getElementById('activeSessionsCount').innerHTML = formatCount(databaseStats.activeSessions);
 
             // Count pages with/without data
             let activePages = 0;

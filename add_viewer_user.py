@@ -25,6 +25,10 @@ def add_viewer_user():
         return
     
     # Create viewer user
+    # ⚠️ SECURITY WARNING: These are default credentials for initial setup only
+    # ⚠️ تحذير أمني: هذه بيانات افتراضية للإعداد الأولي فقط
+    # Change the password immediately after first login in production
+    # غيّر كلمة المرور فوراً بعد أول تسجيل دخول في بيئة الإنتاج
     username = 'viewer'
     password = 'Viewer@2025'
     name = 'مستخدم استعلام فقط'
