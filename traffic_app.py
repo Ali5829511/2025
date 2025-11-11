@@ -8,6 +8,8 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
+import sys
+import signal
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import requests
@@ -23,6 +25,16 @@ CORS(app)
 DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'traffic.db')
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads', 'violations')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Signal handler for graceful shutdown
+def signal_handler(sig, frame):
+    """Handle shutdown signals gracefully"""
+    print(f"\n✅ Received signal {sig}. Shutting down gracefully...")
+    sys.exit(0)
+
+# Register signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 # Plate Recognizer API Configuration
 PLATE_RECOGNIZER_API_TOKEN = os.environ.get('PLATE_RECOGNIZER_API_TOKEN', '')
@@ -364,4 +376,24 @@ if __name__ == '__main__':
     # Run server
     port = int(os.environ.get('PORT', 5001))
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    
+    # Print startup information
+    print("\n" + "="*60)
+    print("🚀 نظام إدارة المخالفات المرورية")
+    print("🚀 Traffic Violations Management System")
+    print("="*60)
+    print(f"\n✅ Server starting on port {port}")
+    print(f"✅ Host: 0.0.0.0")
+    print(f"✅ Debug mode: {debug}")
+    print(f"✅ Database: {DATABASE_PATH}")
+    print(f"✅ Health check: http://localhost:{port}/health")
+    print("\n💡 Press Ctrl+C to stop the server")
+    print("="*60 + "\n")
+    
+    try:
+        app.run(host='0.0.0.0', port=port, debug=debug)
+    except KeyboardInterrupt:
+        print("\n✅ Server stopped gracefully")
+    except Exception as e:
+        print(f"\n❌ Error starting server: {e}")
+        sys.exit(1)
