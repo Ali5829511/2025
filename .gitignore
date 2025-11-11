@@ -49,6 +49,10 @@ Thumbs.db
 # Temporary files
 /tmp/
 *.tmp
+*.pid
+*_summary.txt
+test_*.html
+*_test.html
 
 # Environment variables
 .env
@@ -58,3 +62,9 @@ IMPLEMENTATION_SUMMARY.txt
 # Uploads and exports
 uploads/
 exports/
+
+# Historical documentation (keep these out of commits)
+*_SUMMARY.md
+COMPLETION_CHECKLIST.md
+todo.md
+pull_request.md
