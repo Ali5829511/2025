@@ -1,0 +1,27 @@
+# Docker Compose for Traffic Violations System
+# نظام إدارة المخالفات المرورية
+
+version: '3.8'
+
+services:
+  traffic-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.traffic
+    container_name: traffic-violations-system
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_DEBUG=False
+      - PORT=5001
+      - PLATE_RECOGNIZER_API_TOKEN=${PLATE_RECOGNIZER_API_TOKEN}
+    volumes:
+      - ./traffic.db:/app/traffic.db
+      - ./static/uploads:/app/static/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/violations"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

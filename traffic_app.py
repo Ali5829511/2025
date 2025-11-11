@@ -317,6 +317,11 @@ def add_violation_page():
     """Page for adding new violations"""
     return render_template('add_violation.html')
 
+@app.route('/about')
+def about_page():
+    """About page with system information"""
+    return render_template('about.html')
+
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files"""
