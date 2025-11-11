@@ -68,3 +68,6 @@ exports/
 COMPLETION_CHECKLIST.md
 todo.md
 pull_request.md
+
+# Traffic system database
+traffic.db

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة مخالفة - Add Violation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            direction: rtl;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area:hover {
+            border-color: #28a745;
+            background: #e9f7ef;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .preview-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #28a745;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .api-status {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .api-status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .api-status.disconnected {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .plate-detection {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .plate-detection h3 {
+            color: #007BFF;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>➕ إضافة مخالفة جديدة</h1>
+            <p>Add New Traffic Violation</p>
+        </header>
+
+        <div class="form-container">
+            <div id="apiStatus" class="api-status"></div>
+            
+            <div id="alertBox" class="alert"></div>
+
+            <form id="violationForm">
+                <div class="form-group">
+                    <label>📸 صورة المخالفة - Violation Image</label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <p>📁 اسحب وأفلت الصورة هنا أو انقر للاختيار</p>
+                        <p style="font-size: 0.9em; color: #666;">Drag and drop image here or click to select</p>
+                        <input type="file" id="imageInput" accept="image/*">
+                    </div>
+                    <div class="preview-area" id="previewArea"></div>
+                    <div class="plate-detection" id="plateDetection"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>🚗 رقم اللوحة - Plate Number *</label>
+                    <input type="text" id="plateNumber" required placeholder="مثال: ABC-1234">
+                </div>
+
+                <div class="form-group">
+                    <label>👤 اسم المالك - Owner Name</label>
+                    <input type="text" id="ownerName" placeholder="اختياري - Optional">
+                </div>
+
+                <div class="form-group">
+                    <label>🚙 الموديل - Model</label>
+                    <input type="text" id="model" placeholder="مثال: تويوتا كامري">
+                </div>
+
+                <div class="form-group">
+                    <label>📅 السنة - Year</label>
+                    <input type="number" id="year" placeholder="مثال: 2020">
+                </div>
+
+                <div class="form-group">
+                    <label>🎨 اللون - Color</label>
+                    <input type="text" id="color" placeholder="مثال: أبيض">
+                </div>
+
+                <div class="form-group">
+                    <label>⚠️ نوع المخالفة - Violation Type *</label>
+                    <select id="violationType" required>
+                        <option value="">-- اختر نوع المخالفة --</option>
+                        <option value="تجاوز السرعة">تجاوز السرعة - Speeding</option>
+                        <option value="وقوف ممنوع">وقوف ممنوع - Illegal Parking</option>
+                        <option value="عكس السير">عكس السير - Wrong Way</option>
+                        <option value="استخدام الجوال">استخدام الجوال - Phone Usage</option>
+                        <option value="تجاوز الإشارة الحمراء">تجاوز الإشارة الحمراء - Red Light</option>
+                        <option value="عدم ربط الحزام">عدم ربط الحزام - Seatbelt</option>
+                        <option value="أخرى">أخرى - Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>📅 تاريخ المخالفة - Violation Date *</label>
+                    <input type="date" id="violationDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>💰 قيمة الغرامة (ريال) - Fine Amount (SAR) *</label>
+                    <input type="number" id="fineAmount" required step="0.01" placeholder="مثال: 500">
+                </div>
+
+                <div class="form-group">
+                    <label>👮 اسم الضابط - Officer Name</label>
+                    <input type="text" id="officerName" placeholder="اختياري - Optional">
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>جاري الحفظ... Saving...</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary">💾 حفظ المخالفة - Save Violation</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">🔙 العودة للقائمة - Back to List</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImagePath = '';
+        let detectedPlate = null;
+
+        // Check API status on load
+        window.onload = async function() {
+            // Set today's date as default
+            document.getElementById('violationDate').valueAsDate = new Date();
+            
+            // Check Plate Recognizer API status
+            try {
+                const response = await fetch('/api/plate-recognizer/status');
+                const data = await response.json();
+                const statusDiv = document.getElementById('apiStatus');
+                
+                if (data.configured && data.connected) {
+                    statusDiv.className = 'api-status connected';
+                    statusDiv.innerHTML = '✅ Plate Recognizer API متصل ومفعّل - Connected';
+                } else if (data.configured) {
+                    statusDiv.className = 'api-status disconnected';
+                    statusDiv.innerHTML = '⚠️ Plate Recognizer API مكوّن لكن غير متصل - Configured but not connected';
+                } else {
+                    statusDiv.className = 'api-status disconnected';
+                    statusDiv.innerHTML = '⚠️ Plate Recognizer API غير مكوّن - Not configured. التعرف التلقائي على اللوحات معطل.';
+                }
+            } catch (error) {
+                console.error('Error checking API status:', error);
+            }
+        };
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const previewArea = document.getElementById('previewArea');
+        const plateDetection = document.getElementById('plateDetection');
+
+        fileUploadArea.addEventListener('click', () => imageInput.click());
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewArea.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+            };
+            reader.readAsDataURL(file);
+
+            // Upload to server
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/upload-violation', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    uploadedImagePath = data.image_path;
+                    
+                    // Check if plate was detected
+                    if (data.plate_recognition && data.plate_recognition.success) {
+                        detectedPlate = data.plate_recognition;
+                        plateDetection.style.display = 'block';
+                        plateDetection.innerHTML = `
+                            <h3>🎯 تم اكتشاف اللوحة تلقائياً!</h3>
+                            <p><strong>رقم اللوحة:</strong> ${detectedPlate.plate}</p>
+                            <p><strong>نسبة الثقة:</strong> ${(detectedPlate.confidence * 100).toFixed(1)}%</p>
+                            <button type="button" class="btn btn-primary" onclick="useDetectedPlate()">استخدام هذا الرقم</button>
+                        `;
+                    }
+                    
+                    showAlert('success', '✅ تم رفع الصورة بنجاح - Image uploaded successfully');
+                } else {
+                    showAlert('error', '❌ فشل رفع الصورة - Failed to upload image');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showAlert('error', '❌ خطأ في الاتصال - Connection error');
+            }
+        }
+
+        function useDetectedPlate() {
+            if (detectedPlate) {
+                document.getElementById('plateNumber').value = detectedPlate.plate;
+            }
+        }
+
+        // Form submission
+        document.getElementById('violationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            const formData = {
+                plate_number: document.getElementById('plateNumber').value,
+                owner_name: document.getElementById('ownerName').value || 'غير محدد',
+                model: document.getElementById('model').value || 'غير محدد',
+                year: document.getElementById('year').value || null,
+                color: document.getElementById('color').value || 'غير محدد',
+                violation_type: document.getElementById('violationType').value,
+                violation_date: document.getElementById('violationDate').value,
+                fine_amount: document.getElementById('fineAmount').value,
+                officer_name: document.getElementById('officerName').value || 'غير محدد',
+                image_path: uploadedImagePath
+            };
+
+            try {
+                const response = await fetch('/api/add-violation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    showAlert('success', '✅ تم إضافة المخالفة بنجاح! - Violation added successfully!');
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    showAlert('error', '❌ فشل في إضافة المخالفة - Failed to add violation');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                loading.style.display = 'none';
+                showAlert('error', '❌ خطأ في الاتصال - Connection error');
+            }
+        });
+
+        function showAlert(type, message) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type}`;
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

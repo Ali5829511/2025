@@ -1,0 +1,21 @@
+# Render.com Configuration for Traffic Violations System
+# تكوين Render.com لنظام المخالفات المرورية
+
+services:
+  - type: web
+    name: traffic-violations-system
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt && python init_traffic_db.py
+    startCommand: python traffic_app.py
+    healthCheckPath: /
+    envVars:
+      - key: FLASK_DEBUG
+        value: false
+      - key: PORT
+        value: 10000
+      - key: PLATE_RECOGNIZER_API_TOKEN
+        sync: false
+        # Set this in Render dashboard with your actual API token
