@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 نظام إدارة المخالفات المرورية - Traffic Violations Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            direction: rtl;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #007BFF;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .stat-card h3 {
+            color: #007BFF;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 10px rgba(0,123,255,0.2);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #007BFF;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #007BFF;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e3f2fd;
+            transition: background-color 0.3s;
+        }
+
+        .thumbnail-cell {
+            padding: 5px;
+        }
+
+        .thumbnail {
+            width: 100px;
+            height: auto;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.5);
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+
+        .no-image {
+            color: #999;
+            font-style: italic;
+        }
+
+        .plate-number {
+            font-weight: bold;
+            color: #007BFF;
+            font-size: 1.1em;
+        }
+
+        .fine-amount {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .stats-bar {
+                flex-direction: column;
+            }
+
+            .stat-card {
+                margin: 10px 0;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            .thumbnail {
+                width: 60px;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 الواجهة الرسمية لنظام إدارة المخالفات المرورية</h1>
+            <p>Traffic Violations Management System - Official Interface</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3 id="total-violations">{{ records|length }}</h3>
+                <p>إجمالي المخالفات<br>Total Violations</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-cars">-</h3>
+                <p>إجمالي السيارات<br>Total Cars</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-fines">-</h3>
+                <p>إجمالي الغرامات (ريال)<br>Total Fines (SAR)</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 ابحث برقم اللوحة، المالك، نوع المخالفة... Search by plate, owner, violation type..." onkeyup="filterTable()">
+            </div>
+            <button class="btn btn-primary" onclick="refreshData()">🔄 تحديث البيانات</button>
+            <button class="btn btn-success" onclick="window.location.href='/add-violation'">➕ إضافة مخالفة</button>
+        </div>
+
+        <div class="table-container">
+            <table id="violationsTable">
+                <thead>
+                    <tr>
+                        <th>رقم اللوحة<br>Plate Number</th>
+                        <th>المالك<br>Owner</th>
+                        <th>الموديل<br>Model</th>
+                        <th>السنة<br>Year</th>
+                        <th>اللون<br>Color</th>
+                        <th>نوع المخالفة<br>Violation Type</th>
+                        <th>تاريخ المخالفة<br>Date</th>
+                        <th>الغرامة (ريال)<br>Fine (SAR)</th>
+                        <th>الضابط<br>Officer</th>
+                        <th>الصورة<br>Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td class="plate-number">{{ r[0] }}</td>
+                        <td>{{ r[1] }}</td>
+                        <td>{{ r[2] }}</td>
+                        <td>{{ r[3] }}</td>
+                        <td>{{ r[4] }}</td>
+                        <td>{{ r[5] }}</td>
+                        <td>{{ r[6] }}</td>
+                        <td class="fine-amount">{{ r[7] }}</td>
+                        <td>{{ r[8] }}</td>
+                        <td class="thumbnail-cell">
+                            {% if r[9] %}
+                                <img src="{{ r[9] }}" alt="صورة المخالفة" class="thumbnail" onclick="showImage('{{ r[9] }}')">
+                            {% else %}
+                                <span class="no-image">لا توجد صورة</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>نظام إدارة المخالفات المرورية &copy; 2024</p>
+            <p>Integrated with <a href="https://app.platerecognizer.com/" target="_blank">Plate Recognizer API</a></p>
+        </footer>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        // Calculate statistics
+        function calculateStats() {
+            const rows = document.querySelectorAll('#violationsTable tbody tr');
+            const plates = new Set();
+            let totalFines = 0;
+
+            rows.forEach(row => {
+                const cells = row.cells;
+                plates.add(cells[0].textContent);
+                const fine = parseFloat(cells[7].textContent) || 0;
+                totalFines += fine;
+            });
+
+            document.getElementById('total-cars').textContent = plates.size;
+            document.getElementById('total-fines').textContent = totalFines.toFixed(2);
+        }
+
+        // Filter table based on search input
+        function filterTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('violationsTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                let found = false;
+                const td = tr[i].getElementsByTagName('td');
+                
+                for (let j = 0; j < td.length - 1; j++) { // Exclude image column
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+
+        // Show image in modal
+        function showImage(imagePath) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'flex';
+            modalImg.src = imagePath;
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Refresh data from API
+        function refreshData() {
+            location.reload();
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            calculateStats();
+        };
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
