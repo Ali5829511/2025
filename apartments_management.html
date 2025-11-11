@@ -452,8 +452,33 @@
         // تحميل البيانات
         async function loadApartmentsData() {
             try {
-                const response = await fetch('apartments_data.json');
-                apartmentsData = await response.json();
+                // محاولة تحميل من API أولاً
+                let response = await fetch('/api/apartments');
+                
+                // إذا فشل، حاول من ملف JSON المحلي
+                if (!response.ok) {
+                    response = await fetch('apartments_data.json');
+                }
+                
+                const data = await response.json();
+                
+                // تحويل البيانات من API إلى صيغة الجدول
+                if (data.success && Array.isArray(data.data)) {
+                    apartmentsData = data.data.map(apt => ({
+                        'اسم_الساكن': apt.resident_name || 'غير محدد',
+                        'نوع الوحدة': apt.unit_type || 'شقة',
+                        'وصف المبنى': apt.building_name || 'غير محدد',
+                        'حالة الشقة': apt.is_occupied ? 'مشغولة' : 'شاغرة',
+                        'رقم المبنى': apt.building_number || apt.building_id || 'غير محدد',
+                        'رقم الشقة': apt.unit_number || 'غير محدد'
+                    }));
+                } else if (Array.isArray(data)) {
+                    // البيانات من ملف JSON
+                    apartmentsData = data;
+                } else {
+                    apartmentsData = [];
+                }
+                
                 filteredData = [...apartmentsData];
                 
                 updateStats();
@@ -461,7 +486,7 @@
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
                 document.getElementById('apartments-table-body').innerHTML = 
-                    '<tr><td colspan="6" class="no-data">خطأ في تحميل البيانات</td></tr>';
+                    '<tr><td colspan="6" class="no-data">خطأ في تحميل البيانات. يرجى التحقق من الاتصال بقاعدة البيانات.</td></tr>';
             }
         }
 
