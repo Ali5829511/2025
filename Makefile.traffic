@@ -1,0 +1,155 @@
+# Makefile for Traffic Violations Management System
+# نظام إدارة المخالفات المرورية
+
+.PHONY: help install init-db run run-dev run-prod test clean docker-build docker-run docker-stop health check
+
+# Default target
+help:
+	@echo "=========================================="
+	@echo "🚀 Traffic Violations Management System"
+	@echo "=========================================="
+	@echo ""
+	@echo "Available commands:"
+	@echo ""
+	@echo "  make install      - Install dependencies"
+	@echo "  make init-db      - Initialize database"
+	@echo "  make run          - Run in production mode (Gunicorn)"
+	@echo "  make run-dev      - Run in development mode (Flask)"
+	@echo "  make test         - Run health check tests"
+	@echo "  make health       - Quick health check"
+	@echo "  make check        - Check system status"
+	@echo "  make clean        - Clean temporary files"
+	@echo "  make docker-build - Build Docker image"
+	@echo "  make docker-run   - Run with Docker Compose"
+	@echo "  make docker-stop  - Stop Docker containers"
+	@echo ""
+
+# Install dependencies
+install:
+	@echo "📦 Installing dependencies..."
+	@pip install -q flask flask-cors python-dotenv requests pillow gunicorn colorama
+	@echo "✅ Dependencies installed"
+
+# Initialize database
+init-db:
+	@echo "🗄️  Initializing database..."
+	@python3 init_traffic_db.py
+	@echo "✅ Database initialized"
+
+# Run in production mode
+run:
+	@echo "🚀 Starting server in production mode..."
+	@PORT=10000 gunicorn --config gunicorn_traffic_config.py traffic_app:app
+
+# Run in development mode
+run-dev:
+	@echo "🚀 Starting server in development mode..."
+	@PORT=10000 python3 traffic_app.py
+
+# Run production mode with custom port
+run-prod:
+	@echo "🚀 Starting server in production mode on port $(PORT)..."
+	@gunicorn --config gunicorn_traffic_config.py traffic_app:app
+
+# Run tests
+test:
+	@echo "🧪 Running health check tests..."
+	@python3 test_traffic_health.py http://localhost:10000
+
+# Quick health check
+health:
+	@echo "🏥 Checking system health..."
+	@curl -s http://localhost:10000/health | python3 -m json.tool || echo "❌ Server not running"
+
+# Check system status
+check:
+	@echo "📊 System Status Check"
+	@echo "======================"
+	@echo ""
+	@echo "Python version:"
+	@python3 --version
+	@echo ""
+	@echo "Gunicorn installed:"
+	@which gunicorn || echo "❌ Not installed"
+	@echo ""
+	@echo "Database exists:"
+	@test -f traffic.db && echo "✅ traffic.db found" || echo "❌ traffic.db not found"
+	@echo ""
+	@echo "Server running:"
+	@curl -s http://localhost:10000/health > /dev/null && echo "✅ Server is running" || echo "❌ Server not running"
+
+# Clean temporary files
+clean:
+	@echo "🧹 Cleaning temporary files..."
+	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@find . -type f -name "*.pyo" -delete 2>/dev/null || true
+	@find . -type f -name "*.log" -delete 2>/dev/null || true
+	@echo "✅ Cleanup complete"
+
+# Build Docker image
+docker-build:
+	@echo "🐳 Building Docker image..."
+	@docker build -f Dockerfile.traffic -t traffic-violations-system:latest .
+	@echo "✅ Docker image built"
+
+# Run with Docker Compose
+docker-run:
+	@echo "🐳 Starting with Docker Compose..."
+	@docker-compose -f docker-compose.traffic-standalone.yml up -d
+	@echo "✅ Containers started"
+	@echo ""
+	@echo "Access the application at: http://localhost:10000"
+	@echo "View logs: docker-compose -f docker-compose.traffic-standalone.yml logs -f"
+
+# Stop Docker containers
+docker-stop:
+	@echo "🐳 Stopping Docker containers..."
+	@docker-compose -f docker-compose.traffic-standalone.yml down
+	@echo "✅ Containers stopped"
+
+# Quick setup (install + init-db)
+setup: install init-db
+	@echo ""
+	@echo "✅ Setup complete!"
+	@echo ""
+	@echo "To start the server, run:"
+	@echo "  make run"
+
+# Development setup
+dev-setup: setup
+	@echo ""
+	@echo "To start in development mode, run:"
+	@echo "  make run-dev"
+
+# Full test (start server, test, stop)
+full-test:
+	@echo "🧪 Running full test suite..."
+	@PORT=10000 gunicorn --config gunicorn_traffic_config.py traffic_app:app > /dev/null 2>&1 & echo $$! > .server.pid
+	@sleep 5
+	@python3 test_traffic_health.py http://localhost:10000
+	@kill `cat .server.pid` 2>/dev/null || true
+	@rm -f .server.pid
+	@echo "✅ Full test complete"
+
+# Show logs (if running with systemd or similar)
+logs:
+	@echo "📋 Recent logs:"
+	@tail -n 50 *.log 2>/dev/null || echo "No log files found"
+
+# Monitor (live health checks)
+monitor:
+	@echo "📊 Monitoring system health (Ctrl+C to stop)..."
+	@while true; do \
+		clear; \
+		echo "========================================"; \
+		echo "Traffic System Monitor"; \
+		echo "========================================"; \
+		echo ""; \
+		date; \
+		echo ""; \
+		curl -s http://localhost:10000/health | python3 -m json.tool 2>/dev/null || echo "❌ Server not responding"; \
+		echo ""; \
+		echo "Press Ctrl+C to stop monitoring"; \
+		sleep 5; \
+	done
