@@ -1,0 +1,93 @@
+/*
+ * الهوية البصرية الموحدة لنظام إدارة إسكان أعضاء هيئة التدريس
+ * Unified Brand Identity for Faculty Housing Management System
+ * جامعة الإمام محمد بن سعود الإسلامية
+ */
+
+:root {
+    /* الألوان الأساسية - Primary Colors */
+    --primary-dark: #0f3d68;
+    --primary-main: #2e8bc0;
+    --primary-light: #5ba3ce;
+    --primary-lighter: #a8d5e8;
+    
+    /* الألوان الثانوية - Secondary Colors */
+    --secondary-dark: #1e5a7d;
+    --secondary-main: #3b8ab8;
+    
+    /* ألوان الحالة - Status Colors */
+    --success: #28a745;
+    --success-light: #d4edda;
+    --warning: #ffc107;
+    --warning-light: #fff3cd;
+    --danger: #dc3545;
+    --danger-light: #f8d7da;
+    --info: #17a2b8;
+    
+    /* ألوان الخلفية - Background Colors */
+    --bg-main: #f8f9fa;
+    --bg-light: #ffffff;
+    --bg-gradient: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+    
+    /* ألوان النص - Text Colors */
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-light: #ffffff;
+    
+    /* التدرجات - Gradients */
+    --gradient-primary: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+    --gradient-header: linear-gradient(135deg, #0f3d68 0%, #2e8bc0 100%);
+    
+    /* الظلال - Shadows */
+    --shadow-sm: 0 2px 4px rgba(15, 61, 104, 0.1);
+    --shadow-md: 0 4px 12px rgba(15, 61, 104, 0.15);
+    --shadow-lg: 0 6px 16px rgba(15, 61, 104, 0.2);
+    
+    /* الحدود - Borders */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    
+    /* الانتقالات - Transitions */
+    --transition-normal: 0.3s ease;
+}
+
+/* الخلفية الموحدة */
+body.unified-page {
+    font-family: 'Tajawal', Arial, sans-serif;
+    background: var(--bg-gradient);
+    direction: rtl;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* الرأسية الموحدة */
+.unified-header {
+    background: var(--gradient-primary);
+    color: var(--text-light);
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+/* زر العودة الموحد */
+.back-btn-unified {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition-normal);
+    backdrop-filter: blur(10px);
+}
+
+.back-btn-unified:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}

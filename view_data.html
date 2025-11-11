@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عرض بيانات الشقق والمواقف - نظام الإسكان</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/brand-identity.css">
     <style>
         * {
             margin: 0;
@@ -12,8 +15,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
             min-height: 100vh;
             padding: 20px;
             direction: rtl;
@@ -24,12 +27,12 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(15, 61, 104, 0.15);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
             color: white;
             padding: 40px;
             text-align: center;
@@ -183,6 +186,30 @@
             opacity: 0.9;
         }
 
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-btn i {
+            font-size: 1.1em;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
@@ -203,6 +230,10 @@
         <div class="header">
             <h1>📊 عرض بيانات الشقق والمواقف</h1>
             <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
         </div>
 
         <div class="content">
