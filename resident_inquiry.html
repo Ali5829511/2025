@@ -4,20 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>استعلام عن ساكن - نظام إدارة إسكان هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/brand-identity.css">
     <style>
         :root {
-            --primary: #6b46c1;
-            --primary-dark: #553c9a;
-            --secondary: #9333ea;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
+            --primary: #0f3d68;
+            --primary-dark: #0f3d68;
+            --secondary: #2e8bc0;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
             --light: #f3f4f6;
             --dark: #1f2937;
             --white: #ffffff;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(15, 61, 104, 0.1), 0 2px 4px -1px rgba(15, 61, 104, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(15, 61, 104, 0.1), 0 4px 6px -2px rgba(15, 61, 104, 0.05);
         }
 
         * {
@@ -27,8 +30,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -39,7 +42,8 @@
         }
 
         .header {
-            background: var(--white);
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: white;
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 25px;
@@ -48,14 +52,14 @@
         }
 
         .header h1 {
-            color: var(--primary);
+            color: white;
             font-size: clamp(24px, 5vw, 32px);
             margin-bottom: 10px;
         }
 
         .header p {
-            color: var(--dark);
-            opacity: 0.7;
+            color: rgba(255, 255, 255, 0.95);
+            opacity: 0.95;
             font-size: clamp(14px, 3vw, 16px);
         }
 
