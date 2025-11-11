@@ -421,6 +421,72 @@ def init_database():
         print("⚠️  يرجى تغيير كلمات المرور بعد أول تسجيل دخول")
         print("=" * 60)
     
+    # Check if sample buildings exist
+    _execute_query(cursor, 'SELECT COUNT(*) FROM buildings')
+    building_count = cursor.fetchone()[0]
+    
+    if building_count == 0:
+        print("\n📦 Creating sample buildings, apartments, and parking spots...")
+        
+        # Create sample buildings
+        sample_buildings = [
+            ('مبنى 1', '1', 3, 12, 'المنطقة الشمالية'),
+            ('مبنى 2', '2', 3, 12, 'المنطقة الشمالية'),
+            ('مبنى 3', '3', 3, 12, 'المنطقة الجنوبية'),
+        ]
+        
+        for building in sample_buildings:
+            _execute_query(cursor, '''
+                INSERT INTO buildings (name, building_number, total_floors, total_units, address)
+                VALUES (?, ?, ?, ?, ?)
+            ''', building)
+        
+        conn.commit()
+        
+        # Get building IDs
+        _execute_query(cursor, 'SELECT id, building_number FROM buildings ORDER BY building_number')
+        buildings_map = {row[1]: row[0] for row in cursor.fetchall()}
+        
+        # Create sample apartments for each building
+        apartments_data = []
+        for building_num in ['1', '2', '3']:
+            building_id = buildings_map[building_num]
+            for floor in range(1, 4):  # 3 floors
+                for unit in range(1, 5):  # 4 units per floor
+                    unit_number = f"{floor}{unit}"
+                    apartments_data.append((building_id, unit_number, floor, 'شقة', 0))
+        
+        for apt in apartments_data:
+            _execute_query(cursor, '''
+                INSERT INTO apartments (building_id, unit_number, floor_number, unit_type, is_occupied)
+                VALUES (?, ?, ?, ?, ?)
+            ''', apt)
+        
+        conn.commit()
+        
+        # Create sample parking spots
+        parking_data = []
+        for building_num in ['1', '2', '3']:
+            building_id = buildings_map[building_num]
+            parking_area = f"G.L.P-{building_num}"
+            for spot in range(1, 13):  # 12 parking spots per building
+                spot_number = f"{building_num}-{spot}"
+                parking_data.append((spot_number, parking_area, building_id, None, 0))
+        
+        for parking in parking_data:
+            _execute_query(cursor, '''
+                INSERT INTO parking_spots (spot_number, parking_area, building_id, apartment_id, is_occupied)
+                VALUES (?, ?, ?, ?, ?)
+            ''', parking)
+        
+        conn.commit()
+        
+        print("✅ Sample data created:")
+        print(f"   - Buildings: {len(sample_buildings)}")
+        print(f"   - Apartments: {len(apartments_data)}")
+        print(f"   - Parking spots: {len(parking_data)}")
+        print("=" * 60)
+    
     conn.close()
     print("✅ Database initialized successfully")
 
