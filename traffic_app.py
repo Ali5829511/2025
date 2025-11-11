@@ -360,9 +360,11 @@ def health_check():
             'timestamp': datetime.now().isoformat()
         }), 200
     except Exception as e:
+        # Log the error internally but don't expose details to external users
+        print(f"Health check error: {str(e)}")
         return jsonify({
             'status': 'unhealthy',
-            'error': str(e),
+            'database': 'disconnected',
             'timestamp': datetime.now().isoformat()
         }), 503
 
