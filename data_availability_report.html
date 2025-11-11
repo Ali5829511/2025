@@ -236,6 +236,30 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-btn i {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -244,6 +268,10 @@
             <h1>📊 تقرير توفر البيانات</h1>
             <p>الشقق والمواقف في نظام إدارة الإسكان</p>
             <p style="font-size: 0.9em; margin-top: 10px;">Data Availability Report - Apartments and Parking</p>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
         </div>
 
         <div class="content">

@@ -399,6 +399,29 @@
                 page-break-inside: avoid;
             }
         }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .back-btn i {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -407,6 +430,10 @@
         <div class="header">
             <h1>🔍 استعلام عن ساكن</h1>
             <p>نظام إدارة إسكان هيئة التدريس - استعلام شامل</p>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+                العودة للوحة التحكم
+            </a>
         </div>
 
         <!-- Search Section -->
