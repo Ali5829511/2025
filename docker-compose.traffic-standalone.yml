@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  traffic-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.traffic
+    container_name: traffic-violations-system
+    ports:
+      - "10000:10000"
+    environment:
+      - PORT=10000
+      - FLASK_DEBUG=false
+      - PLATE_RECOGNIZER_API_TOKEN=${PLATE_RECOGNIZER_API_TOKEN:-}
+    volumes:
+      - ./static/uploads:/app/static/uploads
+      - ./traffic.db:/app/traffic.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - traffic-network
+
+networks:
+  traffic-network:
+    driver: bridge
+
+volumes:
+  uploads:
+  database:
