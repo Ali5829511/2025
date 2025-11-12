@@ -1,0 +1,22 @@
+{
+  "name": "traffic-violations-system",
+  "type": "web",
+  "env": "python",
+  "buildCommand": "pip install -r requirements.txt && python init_traffic_db.py",
+  "startCommand": "gunicorn --config gunicorn_traffic_config.py traffic_app:app",
+  "healthCheckPath": "/health",
+  "envVars": [
+    {
+      "key": "PORT",
+      "value": "10000"
+    },
+    {
+      "key": "FLASK_DEBUG",
+      "value": "false"
+    },
+    {
+      "key": "FLASK_ENV",
+      "value": "production"
+    }
+  ]
+}
