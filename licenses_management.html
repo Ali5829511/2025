@@ -551,64 +551,84 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             loadLicenses();
+            loadStatistics();
         });
 
         // Load licenses from server
-        function loadLicenses() {
-            // For now, using sample data
-            // TODO: Replace with actual API call
-            licensesData = [
-                {
-                    id: 1,
-                    licenseNumber: 'L-2025-001',
-                    licenseType: 'entry',
-                    holderName: 'د. أحمد محمد',
-                    nationalId: '1234567890',
-                    issueDate: '2025-01-01',
-                    expiryDate: '2025-12-31',
-                    status: 'active',
-                    notes: 'تصريح دخول سنوي'
-                },
-                {
-                    id: 2,
-                    licenseNumber: 'L-2025-002',
-                    licenseType: 'parking',
-                    holderName: 'د. فاطمة علي',
-                    nationalId: '9876543210',
-                    issueDate: '2025-01-15',
-                    expiryDate: '2025-06-15',
-                    status: 'active',
-                    notes: 'تصريح موقف مؤقت'
-                },
-                {
-                    id: 3,
-                    licenseNumber: 'L-2024-099',
-                    licenseType: 'visitor',
-                    holderName: 'محمد سعيد',
-                    nationalId: '5555555555',
-                    issueDate: '2024-06-01',
-                    expiryDate: '2024-12-31',
-                    status: 'expired',
-                    notes: 'تصريح زائر منتهي'
+        async function loadLicenses() {
+            try {
+                const searchTerm = document.getElementById('searchBox').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+                const typeFilter = document.getElementById('typeFilter').value;
+                
+                // Build query parameters
+                const params = new URLSearchParams();
+                if (searchTerm) params.append('search', searchTerm);
+                if (statusFilter) params.append('status', statusFilter);
+                if (typeFilter) params.append('type', typeFilter);
+                
+                const response = await fetch(`/api/licenses?${params.toString()}`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load licenses');
                 }
-            ];
-            
-            filteredData = [...licensesData];
-            updateStatistics();
-            displayLicenses();
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Convert field names from database to JavaScript naming
+                    licensesData = result.data.map(license => ({
+                        id: license.id,
+                        licenseNumber: license.license_number,
+                        licenseType: license.license_type,
+                        holderName: license.holder_name,
+                        nationalId: license.national_id,
+                        issueDate: license.issue_date,
+                        expiryDate: license.expiry_date,
+                        status: license.status,
+                        notes: license.notes
+                    }));
+                    
+                    filteredData = [...licensesData];
+                    displayLicenses();
+                } else {
+                    alert(result.error_ar || result.error || 'فشل في تحميل التراخيص');
+                }
+            } catch (error) {
+                console.error('Load licenses error:', error);
+                alert('حدث خطأ أثناء تحميل التراخيص');
+            }
         }
 
-        // Update statistics
-        function updateStatistics() {
-            const total = licensesData.length;
-            const active = licensesData.filter(l => l.status === 'active').length;
-            const expired = licensesData.filter(l => l.status === 'expired').length;
-            const pending = licensesData.filter(l => l.status === 'pending').length;
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/licenses/stats', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load statistics');
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('totalLicenses').textContent = result.data.total;
+                    document.getElementById('activeLicenses').textContent = result.data.active;
+                    document.getElementById('expiredLicenses').textContent = result.data.expired;
+                    document.getElementById('pendingLicenses').textContent = result.data.pending;
+                }
+            } catch (error) {
+                console.error('Load statistics error:', error);
+            }
+        }
 
-            document.getElementById('totalLicenses').textContent = total;
-            document.getElementById('activeLicenses').textContent = active;
-            document.getElementById('expiredLicenses').textContent = expired;
-            document.getElementById('pendingLicenses').textContent = pending;
+        // Update statistics (kept for compatibility)
+        function updateStatistics() {
+            loadStatistics();
         }
 
         // Display licenses in table
@@ -676,20 +696,7 @@
 
         // Filter licenses
         function filterLicenses() {
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-
-            filteredData = licensesData.filter(license => {
-                const matchSearch = license.holderName.toLowerCase().includes(searchTerm) ||
-                                  license.licenseNumber.toLowerCase().includes(searchTerm);
-                const matchStatus = !statusFilter || license.status === statusFilter;
-                const matchType = !typeFilter || license.licenseType === typeFilter;
-
-                return matchSearch && matchStatus && matchType;
-            });
-
-            displayLicenses();
+            loadLicenses();  // Reload with filters
         }
 
         // Show add license modal
@@ -727,73 +734,123 @@
         }
 
         // Renew license
-        function renewLicense(id) {
+        async function renewLicense(id) {
             const license = licensesData.find(l => l.id === id);
             if (!license) return;
 
             if (confirm(`هل تريد تجديد الترخيص ${license.licenseNumber}؟`)) {
-                // Set new expiry date (1 year from now)
-                const newExpiryDate = new Date();
-                newExpiryDate.setFullYear(newExpiryDate.getFullYear() + 1);
-                
-                license.status = 'active';
-                license.issueDate = new Date().toISOString().split('T')[0];
-                license.expiryDate = newExpiryDate.toISOString().split('T')[0];
-
-                updateStatistics();
-                displayLicenses();
-                alert('تم تجديد الترخيص بنجاح');
+                try {
+                    // Set new expiry date (1 year from now)
+                    const newExpiryDate = new Date();
+                    newExpiryDate.setFullYear(newExpiryDate.getFullYear() + 1);
+                    
+                    const updatedData = {
+                        license_number: license.licenseNumber,
+                        license_type: license.licenseType,
+                        holder_name: license.holderName,
+                        national_id: license.nationalId,
+                        issue_date: new Date().toISOString().split('T')[0],
+                        expiry_date: newExpiryDate.toISOString().split('T')[0],
+                        status: 'active',
+                        notes: license.notes
+                    };
+                    
+                    const response = await fetch(`/api/licenses/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(updatedData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('تم تجديد الترخيص بنجاح');
+                        loadLicenses();
+                        loadStatistics();
+                    } else {
+                        alert(result.error_ar || result.error || 'فشل في تجديد الترخيص');
+                    }
+                } catch (error) {
+                    console.error('Renew license error:', error);
+                    alert('حدث خطأ أثناء تجديد الترخيص');
+                }
             }
         }
 
         // Delete license
-        function deleteLicense(id) {
+        async function deleteLicense(id) {
             const license = licensesData.find(l => l.id === id);
             if (!license) return;
 
             if (confirm(`هل أنت متأكد من حذف الترخيص ${license.licenseNumber}؟`)) {
-                licensesData = licensesData.filter(l => l.id !== id);
-                filteredData = filteredData.filter(l => l.id !== id);
-                updateStatistics();
-                displayLicenses();
-                alert('تم حذف الترخيص بنجاح');
+                try {
+                    const response = await fetch(`/api/licenses/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('تم حذف الترخيص بنجاح');
+                        loadLicenses();
+                        loadStatistics();
+                    } else {
+                        alert(result.error_ar || result.error || 'فشل في حذف الترخيص');
+                    }
+                } catch (error) {
+                    console.error('Delete license error:', error);
+                    alert('حدث خطأ أثناء حذف الترخيص');
+                }
             }
         }
 
         // Submit license form
-        function submitLicense(event) {
+        async function submitLicense(event) {
             event.preventDefault();
 
             const id = document.getElementById('licenseId').value;
             const licenseData = {
-                licenseNumber: document.getElementById('licenseNumber').value,
-                licenseType: document.getElementById('licenseType').value,
-                holderName: document.getElementById('holderName').value,
-                nationalId: document.getElementById('nationalId').value,
-                issueDate: document.getElementById('issueDate').value,
-                expiryDate: document.getElementById('expiryDate').value,
+                license_number: document.getElementById('licenseNumber').value,
+                license_type: document.getElementById('licenseType').value,
+                holder_name: document.getElementById('holderName').value,
+                national_id: document.getElementById('nationalId').value,
+                issue_date: document.getElementById('issueDate').value,
+                expiry_date: document.getElementById('expiryDate').value,
                 status: document.getElementById('status').value,
                 notes: document.getElementById('notes').value
             };
 
-            if (id) {
-                // Update existing license
-                const index = licensesData.findIndex(l => l.id === parseInt(id));
-                if (index !== -1) {
-                    licensesData[index] = { ...licensesData[index], ...licenseData };
-                    alert('تم تحديث الترخيص بنجاح');
+            try {
+                const url = id ? `/api/licenses/${id}` : '/api/licenses';
+                const method = id ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(licenseData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message_ar || result.message || (id ? 'تم تحديث الترخيص بنجاح' : 'تم إضافة الترخيص بنجاح'));
+                    closeLicenseModal();
+                    loadLicenses();
+                    loadStatistics();
+                } else {
+                    alert(result.error_ar || result.error || 'فشل في حفظ الترخيص');
                 }
-            } else {
-                // Add new license
-                const newId = Math.max(...licensesData.map(l => l.id), 0) + 1;
-                licensesData.push({ id: newId, ...licenseData });
-                alert('تم إضافة الترخيص بنجاح');
+            } catch (error) {
+                console.error('Submit license error:', error);
+                alert('حدث خطأ أثناء حفظ الترخيص');
             }
-
-            filteredData = [...licensesData];
-            updateStatistics();
-            displayLicenses();
-            closeLicenseModal();
         }
 
         // Close modal when clicking outside

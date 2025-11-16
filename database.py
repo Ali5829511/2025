@@ -224,6 +224,23 @@ def init_database():
     )
     '''))
     
+    # Licenses table
+    cursor.execute(database_adapter.adapt_sql('''
+    CREATE TABLE IF NOT EXISTS licenses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        license_number TEXT UNIQUE NOT NULL,
+        license_type TEXT NOT NULL,
+        holder_name TEXT NOT NULL,
+        national_id TEXT,
+        issue_date DATE NOT NULL,
+        expiry_date DATE NOT NULL,
+        status TEXT DEFAULT 'pending',
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    '''))
+    
     # Audit log table
     cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS audit_log (
@@ -485,6 +502,93 @@ def init_database():
         print(f"   - Buildings: {len(sample_buildings)}")
         print(f"   - Apartments: {len(apartments_data)}")
         print(f"   - Parking spots: {len(parking_data)}")
+        print("=" * 60)
+    
+    # Check if sample residents exist
+    _execute_query(cursor, 'SELECT COUNT(*) FROM residents')
+    resident_count = cursor.fetchone()[0]
+    
+    if resident_count == 0:
+        print("\n📦 Creating sample residents, vehicles, stickers, and licenses...")
+        
+        # Create sample residents
+        sample_residents = [
+            ('د. أحمد محمد علي', '1234567890', 'ahmed.ali@university.edu.sa', '0501234567', 'علوم الحاسب', 'أستاذ مشارك', 1, '11'),
+            ('د. فاطمة علي حسن', '9876543210', 'fatima.hassan@university.edu.sa', '0509876543', 'الهندسة', 'أستاذ مساعد', 1, '12'),
+            ('د. محمد سعيد أحمد', '5555555555', 'mohammed.said@university.edu.sa', '0505555555', 'الرياضيات', 'أستاذ', 2, '21'),
+            ('د. نورة خالد', '7777777777', 'noura.khaled@university.edu.sa', '0507777777', 'الفيزياء', 'أستاذ مشارك', 2, '22'),
+            ('د. عبدالله يوسف', '8888888888', 'abdullah.youssef@university.edu.sa', '0508888888', 'الكيمياء', 'أستاذ مساعد', 3, '31'),
+        ]
+        
+        for resident in sample_residents:
+            _execute_query(cursor, '''
+                INSERT INTO residents (name, national_id, email, phone, department, job_title, building_id, unit_number)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', resident)
+        
+        conn.commit()
+        
+        # Get resident IDs
+        _execute_query(cursor, 'SELECT id, name, national_id FROM residents')
+        residents_list = cursor.fetchall()
+        
+        # Create sample vehicles
+        sample_vehicles = [
+            (1, 'أ ب ج 1234', 'تويوتا', 'كامري', '2023', 'أبيض'),
+            (2, 'د هـ و 5678', 'هوندا', 'أكورد', '2022', 'أسود'),
+            (3, 'ز ح ط 9012', 'فورد', 'إكسبلورر', '2023', 'رمادي'),
+            (4, 'ي ك ل 3456', 'شيفروليه', 'تاهو', '2024', 'أبيض'),
+            (5, 'م ن س 7890', 'نيسان', 'ألتيما', '2022', 'أزرق'),
+        ]
+        
+        for vehicle in sample_vehicles:
+            _execute_query(cursor, '''
+                INSERT INTO vehicles (owner_id, plate_number, make, model, year, color)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', vehicle)
+        
+        conn.commit()
+        
+        # Get vehicle IDs
+        _execute_query(cursor, 'SELECT id, owner_id, plate_number FROM vehicles')
+        vehicles_list = cursor.fetchall()
+        
+        # Create sample stickers
+        from datetime import date, timedelta
+        today = date.today()
+        expiry = today + timedelta(days=365)
+        
+        for i, vehicle in enumerate(vehicles_list, 1):
+            sticker_number = f'ST-2025-{i:03d}'
+            _execute_query(cursor, '''
+                INSERT INTO stickers (sticker_number, resident_id, plate_number, vehicle_type, issue_date, expiry_date, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (sticker_number, vehicle[1], vehicle[2], 'سيارة', today, expiry, 'active'))
+        
+        conn.commit()
+        
+        # Create sample licenses
+        sample_licenses = [
+            ('L-2025-001', 'entry', 'د. أحمد محمد علي', '1234567890', today, expiry, 'active', 'تصريح دخول سنوي'),
+            ('L-2025-002', 'parking', 'د. فاطمة علي حسن', '9876543210', today, expiry, 'active', 'تصريح موقف مؤقت'),
+            ('L-2024-099', 'visitor', 'محمد سعيد', '5555555555', date(2024, 6, 1), date(2024, 12, 31), 'expired', 'تصريح زائر منتهي'),
+            ('L-2025-003', 'construction', 'شركة البناء المتحدة', '1111111111', today, today + timedelta(days=90), 'pending', 'تصريح أعمال صيانة'),
+            ('L-2025-004', 'temporary', 'د. نورة خالد', '7777777777', today, today + timedelta(days=30), 'active', 'تصريح مؤقت لشهر واحد'),
+        ]
+        
+        for license_data in sample_licenses:
+            _execute_query(cursor, '''
+                INSERT INTO licenses (license_number, license_type, holder_name, national_id, issue_date, expiry_date, status, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', license_data)
+        
+        conn.commit()
+        
+        print("✅ Additional sample data created:")
+        print(f"   - Residents: {len(sample_residents)}")
+        print(f"   - Vehicles: {len(sample_vehicles)}")
+        print(f"   - Stickers: {len(vehicles_list)}")
+        print(f"   - Licenses: {len(sample_licenses)}")
         print("=" * 60)
     
     conn.close()
