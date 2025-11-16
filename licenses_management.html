@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التراخيص والتصاريح - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ef 0%, #f7fcff 100%);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3d68 60%, #2e8bc0 100%);
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #2e8bc055;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+
+        .header-text h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.active {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .stat-card.expired {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        }
+
+        .stat-card.pending {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #0f3d68;
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15, 61, 104, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2e8bc0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 139, 192, 0.4);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Tajawal', Arial, sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #2e8bc0;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: white;
+        }
+
+        .licenses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .licenses-table th {
+            background: linear-gradient(135deg, #0f3d68 0%, #2e8bc0 100%);
+            color: white;
+            padding: 15px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .licenses-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e7ef;
+        }
+
+        .licenses-table tr:hover {
+            background: #f9fbfd;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #d3f9d8;
+            color: #2f9e44;
+        }
+
+        .status-expired {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+        .status-pending {
+            background: #fff3bf;
+            color: #e67700;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin: 0 3px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.edit {
+            background: #4dabf7;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn.renew {
+            background: #51cf66;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #0f3d68;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2e8bc0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #0f3d68;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2e8bc0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #868e96;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #2e8bc0 0%, #0f3d68 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #868e96;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <img src="university_logo.png" alt="شعار الجامعة" class="university-logo" onerror="this.style.display='none'">
+                <div class="header-text">
+                    <h1><i class="fas fa-file-alt"></i> إدارة التراخيص والتصاريح</h1>
+                    <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                </div>
+            </div>
+            <a href="main_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i> العودة
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-label">إجمالي التراخيص</div>
+                    <div class="stat-value" id="totalLicenses">0</div>
+                </div>
+                <div class="stat-card active">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-label">التراخيص السارية</div>
+                    <div class="stat-value" id="activeLicenses">0</div>
+                </div>
+                <div class="stat-card expired">
+                    <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-label">التراخيص منتهية الصلاحية</div>
+                    <div class="stat-value" id="expiredLicenses">0</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-label">قيد المراجعة</div>
+                    <div class="stat-value" id="pendingLicenses">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Licenses Management Section -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-list"></i>
+                إدارة التراخيص والتصاريح
+            </h2>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showAddLicenseModal()">
+                    <i class="fas fa-plus"></i> إضافة ترخيص جديد
+                </button>
+                <input type="text" class="search-box" id="searchBox" placeholder="بحث بالاسم أو رقم الترخيص..." onkeyup="filterLicenses()">
+                <select class="filter-select" id="statusFilter" onchange="filterLicenses()">
+                    <option value="">جميع الحالات</option>
+                    <option value="active">سارية</option>
+                    <option value="expired">منتهية</option>
+                    <option value="pending">قيد المراجعة</option>
+                </select>
+                <select class="filter-select" id="typeFilter" onchange="filterLicenses()">
+                    <option value="">جميع الأنواع</option>
+                    <option value="entry">تصريح دخول</option>
+                    <option value="parking">تصريح موقف</option>
+                    <option value="construction">تصريح بناء</option>
+                    <option value="visitor">تصريح زائر</option>
+                    <option value="temporary">تصريح مؤقت</option>
+                </select>
+            </div>
+
+            <div id="licensesTableContainer">
+                <table class="licenses-table" id="licensesTable">
+                    <thead>
+                        <tr>
+                            <th>رقم الترخيص</th>
+                            <th>نوع الترخيص</th>
+                            <th>اسم المستفيد</th>
+                            <th>تاريخ الإصدار</th>
+                            <th>تاريخ الانتهاء</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="licensesTableBody">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit License Modal -->
+    <div class="modal" id="licenseModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modalTitle">إضافة ترخيص جديد</h2>
+            <form id="licenseForm" onsubmit="submitLicense(event)">
+                <input type="hidden" id="licenseId">
+                
+                <div class="form-group">
+                    <label for="licenseNumber">رقم الترخيص *</label>
+                    <input type="text" id="licenseNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="licenseType">نوع الترخيص *</label>
+                    <select id="licenseType" required>
+                        <option value="">اختر النوع</option>
+                        <option value="entry">تصريح دخول</option>
+                        <option value="parking">تصريح موقف</option>
+                        <option value="construction">تصريح بناء</option>
+                        <option value="visitor">تصريح زائر</option>
+                        <option value="temporary">تصريح مؤقت</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="holderName">اسم المستفيد *</label>
+                    <input type="text" id="holderName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nationalId">رقم الهوية</label>
+                    <input type="text" id="nationalId">
+                </div>
+
+                <div class="form-group">
+                    <label for="issueDate">تاريخ الإصدار *</label>
+                    <input type="date" id="issueDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="expiryDate">تاريخ الانتهاء *</label>
+                    <input type="date" id="expiryDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">الحالة *</label>
+                    <select id="status" required>
+                        <option value="pending">قيد المراجعة</option>
+                        <option value="active">سارية</option>
+                        <option value="expired">منتهية</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">ملاحظات</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeLicenseModal()">إلغاء</button>
+                    <button type="submit" class="btn btn-submit">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - will be replaced with API calls
+        let licensesData = [];
+        let filteredData = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLicenses();
+        });
+
+        // Load licenses from server
+        function loadLicenses() {
+            // For now, using sample data
+            // TODO: Replace with actual API call
+            licensesData = [
+                {
+                    id: 1,
+                    licenseNumber: 'L-2025-001',
+                    licenseType: 'entry',
+                    holderName: 'د. أحمد محمد',
+                    nationalId: '1234567890',
+                    issueDate: '2025-01-01',
+                    expiryDate: '2025-12-31',
+                    status: 'active',
+                    notes: 'تصريح دخول سنوي'
+                },
+                {
+                    id: 2,
+                    licenseNumber: 'L-2025-002',
+                    licenseType: 'parking',
+                    holderName: 'د. فاطمة علي',
+                    nationalId: '9876543210',
+                    issueDate: '2025-01-15',
+                    expiryDate: '2025-06-15',
+                    status: 'active',
+                    notes: 'تصريح موقف مؤقت'
+                },
+                {
+                    id: 3,
+                    licenseNumber: 'L-2024-099',
+                    licenseType: 'visitor',
+                    holderName: 'محمد سعيد',
+                    nationalId: '5555555555',
+                    issueDate: '2024-06-01',
+                    expiryDate: '2024-12-31',
+                    status: 'expired',
+                    notes: 'تصريح زائر منتهي'
+                }
+            ];
+            
+            filteredData = [...licensesData];
+            updateStatistics();
+            displayLicenses();
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const total = licensesData.length;
+            const active = licensesData.filter(l => l.status === 'active').length;
+            const expired = licensesData.filter(l => l.status === 'expired').length;
+            const pending = licensesData.filter(l => l.status === 'pending').length;
+
+            document.getElementById('totalLicenses').textContent = total;
+            document.getElementById('activeLicenses').textContent = active;
+            document.getElementById('expiredLicenses').textContent = expired;
+            document.getElementById('pendingLicenses').textContent = pending;
+        }
+
+        // Display licenses in table
+        function displayLicenses() {
+            const tbody = document.getElementById('licensesTableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>لا توجد تراخيص للعرض</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map(license => {
+                const statusClass = license.status === 'active' ? 'status-active' : 
+                                  license.status === 'expired' ? 'status-expired' : 'status-pending';
+                const statusText = license.status === 'active' ? 'سارية' : 
+                                 license.status === 'expired' ? 'منتهية' : 'قيد المراجعة';
+                const typeText = getTypeText(license.licenseType);
+
+                return `
+                    <tr>
+                        <td><strong>${license.licenseNumber}</strong></td>
+                        <td>${typeText}</td>
+                        <td>${license.holderName}</td>
+                        <td>${new Date(license.issueDate).toLocaleDateString('ar-SA')}</td>
+                        <td>${new Date(license.expiryDate).toLocaleDateString('ar-SA')}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="action-btn edit" onclick="editLicense(${license.id})">
+                                <i class="fas fa-edit"></i> تعديل
+                            </button>
+                            ${license.status === 'expired' ? `
+                            <button class="action-btn renew" onclick="renewLicense(${license.id})">
+                                <i class="fas fa-sync"></i> تجديد
+                            </button>
+                            ` : ''}
+                            <button class="action-btn delete" onclick="deleteLicense(${license.id})">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Get license type text in Arabic
+        function getTypeText(type) {
+            const types = {
+                'entry': 'تصريح دخول',
+                'parking': 'تصريح موقف',
+                'construction': 'تصريح بناء',
+                'visitor': 'تصريح زائر',
+                'temporary': 'تصريح مؤقت'
+            };
+            return types[type] || type;
+        }
+
+        // Filter licenses
+        function filterLicenses() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            filteredData = licensesData.filter(license => {
+                const matchSearch = license.holderName.toLowerCase().includes(searchTerm) ||
+                                  license.licenseNumber.toLowerCase().includes(searchTerm);
+                const matchStatus = !statusFilter || license.status === statusFilter;
+                const matchType = !typeFilter || license.licenseType === typeFilter;
+
+                return matchSearch && matchStatus && matchType;
+            });
+
+            displayLicenses();
+        }
+
+        // Show add license modal
+        function showAddLicenseModal() {
+            document.getElementById('modalTitle').textContent = 'إضافة ترخيص جديد';
+            document.getElementById('licenseForm').reset();
+            document.getElementById('licenseId').value = '';
+            // Set default issue date to today
+            document.getElementById('issueDate').valueAsDate = new Date();
+            document.getElementById('licenseModal').classList.add('active');
+        }
+
+        // Close license modal
+        function closeLicenseModal() {
+            document.getElementById('licenseModal').classList.remove('active');
+        }
+
+        // Edit license
+        function editLicense(id) {
+            const license = licensesData.find(l => l.id === id);
+            if (!license) return;
+
+            document.getElementById('modalTitle').textContent = 'تعديل الترخيص';
+            document.getElementById('licenseId').value = license.id;
+            document.getElementById('licenseNumber').value = license.licenseNumber;
+            document.getElementById('licenseType').value = license.licenseType;
+            document.getElementById('holderName').value = license.holderName;
+            document.getElementById('nationalId').value = license.nationalId || '';
+            document.getElementById('issueDate').value = license.issueDate;
+            document.getElementById('expiryDate').value = license.expiryDate;
+            document.getElementById('status').value = license.status;
+            document.getElementById('notes').value = license.notes || '';
+
+            document.getElementById('licenseModal').classList.add('active');
+        }
+
+        // Renew license
+        function renewLicense(id) {
+            const license = licensesData.find(l => l.id === id);
+            if (!license) return;
+
+            if (confirm(`هل تريد تجديد الترخيص ${license.licenseNumber}؟`)) {
+                // Set new expiry date (1 year from now)
+                const newExpiryDate = new Date();
+                newExpiryDate.setFullYear(newExpiryDate.getFullYear() + 1);
+                
+                license.status = 'active';
+                license.issueDate = new Date().toISOString().split('T')[0];
+                license.expiryDate = newExpiryDate.toISOString().split('T')[0];
+
+                updateStatistics();
+                displayLicenses();
+                alert('تم تجديد الترخيص بنجاح');
+            }
+        }
+
+        // Delete license
+        function deleteLicense(id) {
+            const license = licensesData.find(l => l.id === id);
+            if (!license) return;
+
+            if (confirm(`هل أنت متأكد من حذف الترخيص ${license.licenseNumber}؟`)) {
+                licensesData = licensesData.filter(l => l.id !== id);
+                filteredData = filteredData.filter(l => l.id !== id);
+                updateStatistics();
+                displayLicenses();
+                alert('تم حذف الترخيص بنجاح');
+            }
+        }
+
+        // Submit license form
+        function submitLicense(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('licenseId').value;
+            const licenseData = {
+                licenseNumber: document.getElementById('licenseNumber').value,
+                licenseType: document.getElementById('licenseType').value,
+                holderName: document.getElementById('holderName').value,
+                nationalId: document.getElementById('nationalId').value,
+                issueDate: document.getElementById('issueDate').value,
+                expiryDate: document.getElementById('expiryDate').value,
+                status: document.getElementById('status').value,
+                notes: document.getElementById('notes').value
+            };
+
+            if (id) {
+                // Update existing license
+                const index = licensesData.findIndex(l => l.id === parseInt(id));
+                if (index !== -1) {
+                    licensesData[index] = { ...licensesData[index], ...licenseData };
+                    alert('تم تحديث الترخيص بنجاح');
+                }
+            } else {
+                // Add new license
+                const newId = Math.max(...licensesData.map(l => l.id), 0) + 1;
+                licensesData.push({ id: newId, ...licenseData });
+                alert('تم إضافة الترخيص بنجاح');
+            }
+
+            filteredData = [...licensesData];
+            updateStatistics();
+            displayLicenses();
+            closeLicenseModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('licenseModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLicenseModal();
+            }
+        });
+    </script>
+</body>
+</html>
