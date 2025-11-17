@@ -54,6 +54,51 @@ If you discover a security vulnerability in this project, please:
    - ✅ حظر الملفات الحساسة
    - ✅ Blocked sensitive files
 
+### ✅ تحديثات الأمان الأخيرة / Recent Security Updates (2025-11-17)
+
+1. **✅ فرض تغيير كلمة المرور / Password Change Enforcement**
+   - ✅ حقل must_change_password في جدول المستخدمين
+   - ✅ must_change_password field in users table
+   - ✅ فرض تلقائي عند أول تسجيل دخول
+   - ✅ Automatic enforcement on first login
+   - ✅ API endpoint لتغيير كلمة المرور
+   - ✅ Password change API endpoint
+
+2. **✅ ترويسات الأمان / Security Headers**
+   - ✅ X-Frame-Options: SAMEORIGIN
+   - ✅ X-Content-Type-Options: nosniff
+   - ✅ X-XSS-Protection: 1; mode=block
+   - ✅ Content-Security-Policy (للإنتاج / for production)
+   - ✅ Strict-Transport-Security (HTTPS)
+   - ✅ Referrer-Policy
+   - ✅ Permissions-Policy
+
+3. **✅ نظام السجلات الشامل / Comprehensive Logging**
+   - ✅ سجلات منفصلة للأمان والتدقيق
+   - ✅ Separate security and audit logs
+   - ✅ تتبع جميع أحداث المصادقة
+   - ✅ Track all authentication events
+   - ✅ الاحتفاظ بالسجلات لمدة سنة
+   - ✅ Log retention up to 1 year
+
+4. **✅ النسخ الاحتياطي التلقائي / Automated Backups**
+   - ✅ سكريبت نسخ احتياطي تلقائي
+   - ✅ Automated backup script
+   - ✅ دعم SQLite و PostgreSQL
+   - ✅ SQLite and PostgreSQL support
+   - ✅ ضغط وتحميل إلى S3
+   - ✅ Compression and S3 upload
+
+5. **✅ اختبار الأمان / Security Testing**
+   - ✅ سكريبت اختبار تلقائي
+   - ✅ Automated testing script
+   - ✅ فحص حقن SQL
+   - ✅ SQL injection check
+   - ✅ فحص XSS
+   - ✅ XSS check
+   - ✅ اختبار SSL/TLS
+   - ✅ SSL/TLS testing
+
 ### 🟡 تحذيرات / Warnings
 
 1. **كلمات المرور الافتراضية / Default Passwords**
