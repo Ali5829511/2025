@@ -1,1 +1,1 @@
-web: python traffic_app.py
+web: gunicorn --config gunicorn_traffic_config.py traffic_app:app

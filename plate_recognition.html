@@ -414,10 +414,13 @@
                 <div class="status-icon status-unconfigured" id="statusIcon">
                     <i class="fas fa-spinner fa-spin"></i>
                 </div>
-                <div>
+                <div style="flex-grow: 1;">
                     <h3 id="statusTitle">جارٍ التحقق من حالة الاتصال...</h3>
                     <p id="statusMessage">Checking API connection...</p>
                 </div>
+                <button id="retryButton" class="btn-secondary" style="display: none;" onclick="checkAPIStatus()">
+                    <i class="fas fa-redo"></i> إعادة المحاولة / Retry
+                </button>
             </div>
         </div>
 
@@ -502,34 +505,66 @@
         });
 
         async function checkAPIStatus() {
+            const statusIcon = document.getElementById('statusIcon');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            const retryButton = document.getElementById('retryButton');
+
+            // Show loading state
+            statusIcon.className = 'status-icon status-unconfigured';
+            statusIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            statusTitle.textContent = 'جارٍ التحقق من حالة الاتصال...';
+            statusMessage.textContent = 'Checking API connection...';
+            retryButton.style.display = 'none';
+
             try {
                 const response = await fetch('/api/plate-recognizer/status', {
                     credentials: 'include'
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-
-                const statusIcon = document.getElementById('statusIcon');
-                const statusTitle = document.getElementById('statusTitle');
-                const statusMessage = document.getElementById('statusMessage');
 
                 if (data.configured && data.connected) {
                     statusIcon.className = 'status-icon status-connected';
                     statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
                     statusTitle.textContent = 'الخدمة متصلة ومفعلة';
                     statusMessage.textContent = 'Plate Recognizer API Connected';
+                    if (data.usage) {
+                        const usageInfo = `استخدام اليوم: ${data.usage.today || 0} | المتبقي: ${data.usage.remaining || 'غير محدد'}`;
+                        statusMessage.textContent += ` | ${usageInfo}`;
+                    }
+                    retryButton.style.display = 'none';
                 } else if (data.configured && !data.connected) {
                     statusIcon.className = 'status-icon status-disconnected';
                     statusIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
                     statusTitle.textContent = 'خطأ في الاتصال بالخدمة';
                     statusMessage.textContent = data.message || 'Connection Error';
+                    if (data.message_ar) {
+                        statusMessage.textContent += ` | ${data.message_ar}`;
+                    }
+                    retryButton.style.display = 'inline-block';
                 } else {
                     statusIcon.className = 'status-icon status-unconfigured';
                     statusIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
                     statusTitle.textContent = 'الخدمة غير مفعلة';
                     statusMessage.textContent = 'API not configured. Please set PLATE_RECOGNIZER_API_TOKEN';
+                    if (data.message_ar) {
+                        statusMessage.textContent += ` | ${data.message_ar}`;
+                    }
+                    retryButton.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error checking API status:', error);
+                // Update UI to show error state
+                statusIcon.className = 'status-icon status-disconnected';
+                statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                statusTitle.textContent = 'خطأ في الاتصال بالخادم';
+                statusMessage.textContent = `Connection Error: ${error.message} | خطأ في الاتصال`;
+                retryButton.style.display = 'inline-block';
             }
         }
 

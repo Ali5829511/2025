@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir flask flask-cors python-dotenv requests pillow
+RUN pip install --no-cache-dir flask flask-cors python-dotenv requests pillow gunicorn
 
 # Copy application files
 COPY traffic_app.py .
 COPY init_traffic_db.py .
+COPY gunicorn_traffic_config.py .
 COPY templates ./templates
 COPY static ./static
 
@@ -27,12 +28,15 @@ RUN mkdir -p static/uploads/violations static/images
 # Initialize database
 RUN python init_traffic_db.py
 
-# Expose port
-EXPOSE 5001
+# Expose port (configurable via PORT env var, defaults to 10000)
+EXPOSE 10000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:5001/api/violations || exit 1
+# Set default PORT
+ENV PORT=10000
 
-# Run application
-CMD ["python", "traffic_app.py"]
+# Health check using the dedicated health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-10000}/health || exit 1
+
+# Run application with Gunicorn for production
+CMD ["gunicorn", "--config", "gunicorn_traffic_config.py", "traffic_app:app"]
