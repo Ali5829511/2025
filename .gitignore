@@ -82,6 +82,19 @@ static/uploads/thumbnails/*
 
 # Historical documentation (keep these out of commits)
 *_SUMMARY.md
+*_COMPLETE.md
+*_STATUS.md
+*_FIX.md
+*_VERIFICATION.md
+COMPLETION_*.md
+PROJECT_*.md
+TASK_*.md
+FINAL_*.md
+REVIEW_*.md
+FIX_*.md
+DEPLOY_NOW.md
+QUICK_DEPLOY.md
+PRE_DEPLOYMENT_CHECKLIST.md
 COMPLETION_CHECKLIST.md
 todo.md
 pull_request.md
