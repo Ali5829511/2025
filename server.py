@@ -77,6 +77,35 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
+# Security Headers Middleware / ترويسات الأمان
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to all responses"""
+    # Prevent clickjacking
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    # Prevent MIME type sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    
+    # Enable XSS protection
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # Content Security Policy
+    if os.environ.get('FLASK_ENV') == 'production':
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    
+    # HTTPS enforcement (only in production with HTTPS)
+    if os.environ.get('FLASK_ENV') == 'production' and os.environ.get('HTTPS_ONLY') == 'True':
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    
+    # Referrer Policy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    # Permissions Policy
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    
+    return response
+
 # Base directory for serving files
 BASE_DIR = os.path.abspath('.')
 
@@ -166,10 +195,14 @@ def login():
             ip_address=request.remote_addr
         )
         
+        # Check if user must change password
+        must_change_password = user.get('must_change_password', 0) == 1
+        
         # Create response
         response = make_response(jsonify({
             'success': True,
             'session_token': session_token,
+            'must_change_password': must_change_password,
             'user': {
                 'id': user['id'],
                 'username': user['username'],
@@ -177,8 +210,8 @@ def login():
                 'role': user['role'],
                 'email': user['email']
             },
-            'message': 'Login successful',
-            'message_ar': 'تم تسجيل الدخول بنجاح'
+            'message': 'Login successful' if not must_change_password else 'Login successful - Password change required',
+            'message_ar': 'تم تسجيل الدخول بنجاح' if not must_change_password else 'تم تسجيل الدخول بنجاح - يجب تغيير كلمة المرور'
         }))
         
         # Set session cookie
@@ -233,6 +266,77 @@ def logout():
         
     except Exception as e:
         app.logger.error(f'Logout error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error',
+            'error_ar': 'خطأ في الخادم'
+        }), 500
+
+@app.route('/api/auth/change-password', methods=['POST'])
+@auth.require_auth
+def change_password():
+    """Change password endpoint"""
+    try:
+        data = request.get_json()
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not current_password or not new_password:
+            return jsonify({
+                'success': False,
+                'error': 'Current and new password required',
+                'error_ar': 'كلمة المرور الحالية والجديدة مطلوبة'
+            }), 400
+        
+        # Validate new password strength
+        if len(new_password) < 8:
+            return jsonify({
+                'success': False,
+                'error': 'Password must be at least 8 characters',
+                'error_ar': 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'
+            }), 400
+        
+        # Verify current password
+        user = database.verify_user(request.user['username'], current_password)
+        if not user:
+            return jsonify({
+                'success': False,
+                'error': 'Current password is incorrect',
+                'error_ar': 'كلمة المرور الحالية غير صحيحة'
+            }), 401
+        
+        # Update password
+        from werkzeug.security import generate_password_hash
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        new_password_hash = generate_password_hash(new_password)
+        cursor.execute('''
+            UPDATE users 
+            SET password_hash = ?, must_change_password = 0, updated_at = ?
+            WHERE id = ?
+        ''', (new_password_hash, datetime.now(), request.user['id']))
+        
+        conn.commit()
+        conn.close()
+        
+        # Log password change
+        database.log_audit(
+            request.user['id'],
+            'User changed password',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password changed successfully',
+            'message_ar': 'تم تغيير كلمة المرور بنجاح'
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Change password error: {str(e)}')
+        import traceback
+        app.logger.error(f'Change password error traceback: {traceback.format_exc()}')
         return jsonify({
             'success': False,
             'error': 'Internal server error',

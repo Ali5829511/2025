@@ -1,0 +1,51 @@
+[Unit]
+Description=Housing Management System - نظام إدارة الإسكان
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/housing-system
+Environment="PATH=/opt/housing-system/venv/bin"
+Environment="FLASK_ENV=production"
+Environment="FLASK_DEBUG=False"
+
+# Load environment variables from file
+EnvironmentFile=/opt/housing-system/.env
+
+# Security hardening
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/housing-system/logs /opt/housing-system/uploads /opt/housing-system/backups
+
+# Process limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Start Gunicorn with proper configuration
+ExecStart=/opt/housing-system/venv/bin/gunicorn \
+    --config /opt/housing-system/gunicorn_config.py \
+    --bind 0.0.0.0:8000 \
+    --workers 4 \
+    --worker-class sync \
+    --timeout 120 \
+    --keepalive 5 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --access-logfile /opt/housing-system/logs/access.log \
+    --error-logfile /opt/housing-system/logs/error.log \
+    --log-level info \
+    server:app
+
+# Restart policy
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

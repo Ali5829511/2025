@@ -32,19 +32,29 @@ instance/
 *.sqlite
 *.sqlite3
 
+# Database backups (keep backups/ directory but ignore contents)
+backups/*.db
+backups/*.db.gz
+backups/*.sql
+backups/*.sql.gz
+
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.bak
+*.backup
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Logs
 *.log
+logs/*.log
 
 # Temporary files
 /tmp/
@@ -54,20 +64,87 @@ Thumbs.db
 test_*.html
 *_test.html
 
-# Environment variables
+# Environment variables - SECURITY CRITICAL
 .env
 .env.local
-IMPLEMENTATION_SUMMARY.txt
+.env.production
+.env.traffic
 
 # Uploads and exports
 uploads/
+uploads/*
 exports/
+exports/*
+
+# Thumbnails
+thumbnails/
+static/uploads/thumbnails/*
 
 # Historical documentation (keep these out of commits)
 *_SUMMARY.md
 COMPLETION_CHECKLIST.md
 todo.md
 pull_request.md
+IMPLEMENTATION_SUMMARY.txt
 
 # Traffic system database
 traffic.db
+
+# Security and test reports
+security_test_results*.txt
+penetration_test*.txt
+vulnerability_scan*.html
+
+# SSL/TLS certificates and keys - SECURITY CRITICAL
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+ssl/
+certs/
+
+# Secrets and credentials - SECURITY CRITICAL
+secrets/
+credentials/
+*.secret
+*_token.txt
+*_password.txt
+
+# Session files
+flask_session/
+sessions/
+
+# Cache
+.cache/
+*.cache
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# Testing
+.pytest_cache/
+.tox/
+
+# Docker
+docker-compose.override.yml
+
+# Backup files
+*~
+*.orig
+*.rej
+
+# System monitoring
+*.pid.lock
+*.sock
+
+# Keep these directories but ignore their contents
+!logs/.gitkeep
+!backups/.gitkeep
+!uploads/.gitkeep
+!exports/.gitkeep
+
