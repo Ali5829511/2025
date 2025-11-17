@@ -166,10 +166,14 @@ def login():
             ip_address=request.remote_addr
         )
         
+        # Check if user must change password
+        must_change_password = user.get('must_change_password', 0) == 1
+        
         # Create response
         response = make_response(jsonify({
             'success': True,
             'session_token': session_token,
+            'must_change_password': must_change_password,
             'user': {
                 'id': user['id'],
                 'username': user['username'],
@@ -177,8 +181,8 @@ def login():
                 'role': user['role'],
                 'email': user['email']
             },
-            'message': 'Login successful',
-            'message_ar': 'تم تسجيل الدخول بنجاح'
+            'message': 'Login successful' if not must_change_password else 'Login successful - Password change required',
+            'message_ar': 'تم تسجيل الدخول بنجاح' if not must_change_password else 'تم تسجيل الدخول بنجاح - يجب تغيير كلمة المرور'
         }))
         
         # Set session cookie
@@ -233,6 +237,77 @@ def logout():
         
     except Exception as e:
         app.logger.error(f'Logout error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error',
+            'error_ar': 'خطأ في الخادم'
+        }), 500
+
+@app.route('/api/auth/change-password', methods=['POST'])
+@auth.require_auth
+def change_password():
+    """Change password endpoint"""
+    try:
+        data = request.get_json()
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not current_password or not new_password:
+            return jsonify({
+                'success': False,
+                'error': 'Current and new password required',
+                'error_ar': 'كلمة المرور الحالية والجديدة مطلوبة'
+            }), 400
+        
+        # Validate new password strength
+        if len(new_password) < 8:
+            return jsonify({
+                'success': False,
+                'error': 'Password must be at least 8 characters',
+                'error_ar': 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'
+            }), 400
+        
+        # Verify current password
+        user = database.verify_user(request.user['username'], current_password)
+        if not user:
+            return jsonify({
+                'success': False,
+                'error': 'Current password is incorrect',
+                'error_ar': 'كلمة المرور الحالية غير صحيحة'
+            }), 401
+        
+        # Update password
+        from werkzeug.security import generate_password_hash
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        new_password_hash = generate_password_hash(new_password)
+        cursor.execute('''
+            UPDATE users 
+            SET password_hash = ?, must_change_password = 0, updated_at = ?
+            WHERE id = ?
+        ''', (new_password_hash, datetime.now(), request.user['id']))
+        
+        conn.commit()
+        conn.close()
+        
+        # Log password change
+        database.log_audit(
+            request.user['id'],
+            'User changed password',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password changed successfully',
+            'message_ar': 'تم تغيير كلمة المرور بنجاح'
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Change password error: {str(e)}')
+        import traceback
+        app.logger.error(f'Change password error traceback: {traceback.format_exc()}')
         return jsonify({
             'success': False,
             'error': 'Internal server error',
