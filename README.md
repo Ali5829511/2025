@@ -152,18 +152,8 @@ The script will automatically:
 
 ### التشغيل اليدوي / Manual Start
 
-**الخادم الجديد مع قاعدة البيانات / New Server with Database (Recommended):**
-
 ```bash
 python3 server.py
-```
-
-**الخادم القديم (بدون قاعدة بيانات) / Legacy Server (No Database):**
-
-```bash
-python3 main.py
-# أو / or
-python3 app.py
 ```
 
 سيعمل التطبيق على المنفذ 5000. افتح المتصفح على:
@@ -227,11 +217,9 @@ http://localhost:5000
 ├── comprehensive_reports_enhanced.html # التقارير الشاملة / Comprehensive reports
 ├── advanced_users_management.html      # إدارة المستخدمين / Users management
 ├── admin_permissions.js                # صلاحيات المدير / Admin permissions
-├── server.py                           # ✅ خادم Flask الجديد مع قاعدة البيانات / New Flask server with database
+├── server.py                           # ✅ خادم Flask مع قاعدة البيانات / Flask server with database
 ├── database.py                         # ✅ نظام قاعدة البيانات / Database system
 ├── auth.py                             # ✅ نظام المصادقة والجلسات / Authentication and session system
-├── app.py                              # خادم Flask القديم (بدون قاعدة بيانات) / Legacy Flask server (no database)
-├── main.py                             # خادم Flask القديم (بدون قاعدة بيانات) / Legacy Flask server (no database)
 ├── housing.db                          # قاعدة بيانات SQLite (تُنشأ تلقائياً) / SQLite database (auto-created)
 ├── requirements.txt                    # متطلبات Python / Python dependencies
 ├── .env.example                        # مثال ملف التكوين / Configuration file example
