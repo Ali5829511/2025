@@ -10,6 +10,7 @@ gunicorn==22.0.0
 # SQLite is included in Python standard library
 # PostgreSQL adapter for production deployment
 psycopg2-binary==2.9.9
+Pillow==10.1.0
 
 # Data Processing
 pandas==2.2.3
