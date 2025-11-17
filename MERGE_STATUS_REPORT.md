@@ -1,7 +1,7 @@
 # Merge Status Report: Sub-Branches into Main
 
 **Date**: November 17, 2025
-**Report prepared for**: PR #85 - Merge sub-branches into main branch
+**Branch**: copilot/merge-sub-branches-into-main
 
 ## Executive Summary
 
@@ -47,7 +47,7 @@ Branch merge status was analyzed using:
 git merge-base --is-ancestor origin/<branch> origin/main
 ```
 
-Result: None of the copilot/* branches show as "ancestors" of main because PR #84 created a single merge commit rather than preserving individual branch histories. This is normal for pull request merges.
+Result: None of the copilot/* branches show as "ancestors" of main (meaning their commits are not directly reachable in main's history) because PR #84 created a single merge commit rather than preserving individual branch histories. This is normal for pull request merges.
 
 ### Content Comparison
 
@@ -65,12 +65,12 @@ This pattern indicates that while git history shows branches as "not merged," th
 Only 2 branches were created after the PR #84 merge:
 
 1. **copilot/configure-production-settings** (PR #86)
-   - Created: 2025-11-17 16:55:03
+   - Created: 2025-11-17 16:55:03 +0000
    - Status: Active PR
    - Purpose: Update production environment settings and security measures
 
 2. **copilot/merge-sub-branches-into-main** (PR #85 - current)
-   - Created: 2025-11-17 16:53:52
+   - Created: 2025-11-17 16:53:52 +0000
    - Status: Current PR
    - Purpose: Document merge status and consolidate any remaining changes
 
@@ -79,7 +79,7 @@ Only 2 branches were created after the PR #84 merge:
 Attempting to merge remaining branch references encounters significant challenges:
 
 ### 1. Grafted History
-The main branch has a grafted history at commit `8d6eb07`, meaning history before this point is truncated. This makes standard git merge operations problematic.
+The main branch has a grafted history at commit `8d6eb07`. A grafted history means the repository has been modified to cut off historical commits before this point, effectively truncating the commit history. This prevents standard git merge operations from working properly when attempting to merge branches that reference the removed history.
 
 ### 2. Unrelated Histories
 Branches show as "unrelated histories" when attempting to merge:
