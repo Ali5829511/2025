@@ -2501,6 +2501,283 @@ def export_housing_report_word():
             'error': 'Failed to generate Word report. Please try again later.'
         }), 500
 
+# ==================== Licenses Management API ====================
+
+@app.route('/api/licenses', methods=['GET'])
+@auth.require_auth
+def get_licenses():
+    """Get all licenses with optional filtering"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get filter parameters
+        status_filter = request.args.get('status', '')
+        type_filter = request.args.get('type', '')
+        search = request.args.get('search', '')
+        
+        # Build query
+        query = 'SELECT * FROM licenses WHERE 1=1'
+        params = []
+        
+        if status_filter:
+            query += ' AND status = ?'
+            params.append(status_filter)
+        
+        if type_filter:
+            query += ' AND license_type = ?'
+            params.append(type_filter)
+        
+        if search:
+            query += ' AND (license_number LIKE ? OR holder_name LIKE ?)'
+            params.extend([f'%{search}%', f'%{search}%'])
+        
+        query += ' ORDER BY created_at DESC'
+        
+        cursor.execute(query, params)
+        licenses = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': licenses
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get licenses error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load licenses',
+            'error_ar': 'فشل في تحميل التراخيص'
+        }), 500
+
+@app.route('/api/licenses/<int:license_id>', methods=['GET'])
+@auth.require_auth
+def get_license(license_id):
+    """Get a single license by ID"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM licenses WHERE id = ?', (license_id,))
+        license_data = cursor.fetchone()
+        conn.close()
+        
+        if not license_data:
+            return jsonify({
+                'success': False,
+                'error': 'License not found',
+                'error_ar': 'الترخيص غير موجود'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'data': dict(license_data)
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get license error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load license',
+            'error_ar': 'فشل في تحميل الترخيص'
+        }), 500
+
+@app.route('/api/licenses', methods=['POST'])
+@auth.require_auth
+def create_license():
+    """Create a new license"""
+    try:
+        user = request.user
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['license_number', 'license_type', 'holder_name', 'issue_date', 'expiry_date']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required field: {field}',
+                    'error_ar': f'حقل مطلوب مفقود: {field}'
+                }), 400
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO licenses (license_number, license_type, holder_name, national_id, 
+                                issue_date, expiry_date, status, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data['license_number'],
+            data['license_type'],
+            data['holder_name'],
+            data.get('national_id'),
+            data['issue_date'],
+            data['expiry_date'],
+            data.get('status', 'pending'),
+            data.get('notes')
+        ))
+        
+        conn.commit()
+        license_id = cursor.lastrowid
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'License created successfully',
+            'message_ar': 'تم إنشاء الترخيص بنجاح',
+            'license_id': license_id
+        }), 201
+        
+    except Exception as e:
+        app.logger.error(f'Create license error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to create license',
+            'error_ar': 'فشل في إنشاء الترخيص'
+        }), 500
+
+@app.route('/api/licenses/<int:license_id>', methods=['PUT'])
+@auth.require_auth
+def update_license(license_id):
+    """Update an existing license"""
+    try:
+        user = request.user
+        data = request.get_json()
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if license exists
+        cursor.execute('SELECT * FROM licenses WHERE id = ?', (license_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'License not found',
+                'error_ar': 'الترخيص غير موجود'
+            }), 404
+        
+        # Update license
+        cursor.execute('''
+            UPDATE licenses 
+            SET license_number = ?, license_type = ?, holder_name = ?, national_id = ?,
+                issue_date = ?, expiry_date = ?, status = ?, notes = ?, updated_at = ?
+            WHERE id = ?
+        ''', (
+            data['license_number'],
+            data['license_type'],
+            data['holder_name'],
+            data.get('national_id'),
+            data['issue_date'],
+            data['expiry_date'],
+            data.get('status', 'pending'),
+            data.get('notes'),
+            datetime.now(),
+            license_id
+        ))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'License updated successfully',
+            'message_ar': 'تم تحديث الترخيص بنجاح'
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Update license error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to update license',
+            'error_ar': 'فشل في تحديث الترخيص'
+        }), 500
+
+@app.route('/api/licenses/<int:license_id>', methods=['DELETE'])
+@auth.require_auth
+def delete_license(license_id):
+    """Delete a license"""
+    try:
+        user = request.user
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if license exists
+        cursor.execute('SELECT * FROM licenses WHERE id = ?', (license_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'License not found',
+                'error_ar': 'الترخيص غير موجود'
+            }), 404
+        
+        # Delete license
+        cursor.execute('DELETE FROM licenses WHERE id = ?', (license_id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'License deleted successfully',
+            'message_ar': 'تم حذف الترخيص بنجاح'
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Delete license error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to delete license',
+            'error_ar': 'فشل في حذف الترخيص'
+        }), 500
+
+@app.route('/api/licenses/stats', methods=['GET'])
+@auth.require_auth
+def get_licenses_stats():
+    """Get licenses statistics"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Total licenses
+        cursor.execute('SELECT COUNT(*) FROM licenses')
+        total = cursor.fetchone()[0]
+        
+        # Active licenses
+        cursor.execute("SELECT COUNT(*) FROM licenses WHERE status = 'active'")
+        active = cursor.fetchone()[0]
+        
+        # Expired licenses
+        cursor.execute("SELECT COUNT(*) FROM licenses WHERE status = 'expired'")
+        expired = cursor.fetchone()[0]
+        
+        # Pending licenses
+        cursor.execute("SELECT COUNT(*) FROM licenses WHERE status = 'pending'")
+        pending = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'total': total,
+                'active': active,
+                'expired': expired,
+                'pending': pending
+            }
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get licenses stats error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load statistics',
+            'error_ar': 'فشل في تحميل الإحصائيات'
+        }), 500
+
 # ==================== Startup ====================
 
 if __name__ == '__main__':
