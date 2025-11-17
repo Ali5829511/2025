@@ -348,14 +348,14 @@ def plate_recognizer_status():
         app.logger.error(f'Plate recognizer status error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
-            'error_ar': 'خطأ في التحقق من حالة الخدمة'
+            'error': 'Unable to check API status. Please try again later.',
+            'error_ar': 'تعذر التحقق من حالة الخدمة. يرجى المحاولة لاحقاً.'
         }), 500
 
 @app.route('/api/plate-recognizer/recognize', methods=['POST'])
 @auth.require_auth
 def recognize_plate():
-    """Recognize license plate from uploaded image"""
+    """Recognize license plate from uploaded image with high accuracy"""
     try:
         # Check if image is provided
         if 'image' not in request.files and 'base64_image' not in request.json:
@@ -365,9 +365,19 @@ def recognize_plate():
                 'error_ar': 'لم يتم تقديم صورة'
             }), 400
         
+        # Get parameters for high-accuracy recognition
         regions = request.form.get('regions', 'sa').split(',') if 'image' in request.files else None
         if request.json and 'regions' in request.json:
             regions = request.json['regions']
+        
+        # Get enhancement and confidence parameters
+        enhance = request.form.get('enhance', 'true').lower() == 'true' if 'image' in request.files else True
+        if request.json and 'enhance' in request.json:
+            enhance = request.json['enhance']
+        
+        min_confidence = float(request.form.get('min_confidence', '0.0')) if 'image' in request.files else 0.0
+        if request.json and 'min_confidence' in request.json:
+            min_confidence = float(request.json['min_confidence'])
         
         # Handle file upload
         if 'image' in request.files:
@@ -376,13 +386,23 @@ def recognize_plate():
             # Read image bytes
             image_bytes = image_file.read()
             
-            # Recognize plate
-            result = plate_recognizer.recognize_plate_from_bytes(image_bytes, regions)
+            # Recognize plate with enhancements
+            result = plate_recognizer.recognize_plate_from_bytes(
+                image_bytes, 
+                regions, 
+                enhance=enhance,
+                min_confidence=min_confidence
+            )
         
         # Handle base64 image
         elif request.json and 'base64_image' in request.json:
             base64_image = request.json['base64_image']
-            result = plate_recognizer.recognize_plate_from_base64(base64_image, regions)
+            result = plate_recognizer.recognize_plate_from_base64(
+                base64_image, 
+                regions,
+                enhance=enhance,
+                min_confidence=min_confidence
+            )
         
         else:
             return jsonify({
@@ -415,7 +435,7 @@ def recognize_plate():
         # Log audit
         database.log_audit(
             request.user['id'],
-            'Plate recognition performed',
+            'Plate recognition performed (high accuracy mode)' if enhance else 'Plate recognition performed',
             ip_address=request.remote_addr
         )
         
@@ -425,8 +445,8 @@ def recognize_plate():
         app.logger.error(f'Plate recognition error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': str(e),
-            'error_ar': 'خطأ في تمييز اللوحة'
+            'error': 'An error occurred during plate recognition. Please try again.',
+            'error_ar': 'حدث خطأ أثناء تمييز اللوحة. يرجى المحاولة مرة أخرى.'
         }), 500
 
 @app.route('/api/plate-recognizer/history', methods=['GET'])
