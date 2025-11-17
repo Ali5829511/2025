@@ -54,7 +54,8 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_login TIMESTAMP,
-        is_active INTEGER DEFAULT 1
+        is_active INTEGER DEFAULT 1,
+        must_change_password INTEGER DEFAULT 0
     )
     '''))
     
@@ -422,9 +423,9 @@ def init_database():
         for user in default_users:
             password_hash = generate_password_hash(user['password'])
             _execute_query(cursor, '''
-                INSERT INTO users (username, password_hash, name, role, email)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (user['username'], password_hash, user['name'], user['role'], user['email']))
+                INSERT INTO users (username, password_hash, name, role, email, must_change_password)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (user['username'], password_hash, user['name'], user['role'], user['email'], 1))
         
         conn.commit()
         print("✅ Default users created successfully")
@@ -434,9 +435,31 @@ def init_database():
         for user in default_users:
             print(f"Username: {user['username']} | Password: {user['password']}")
         print("=" * 60)
-        print("⚠️  Please change these passwords after first login")
-        print("⚠️  يرجى تغيير كلمات المرور بعد أول تسجيل دخول")
+        print("⚠️  SECURITY: Users MUST change these passwords on first login")
+        print("⚠️  أمان: يجب على المستخدمين تغيير كلمات المرور عند أول تسجيل دخول")
         print("=" * 60)
+    
+    # Migration: Add must_change_password column if it doesn't exist
+    try:
+        cursor.execute("SELECT must_change_password FROM users LIMIT 1")
+    except Exception:
+        # Column doesn't exist, add it
+        print("\n🔄 Running database migration: Adding must_change_password column...")
+        try:
+            cursor.execute(database_adapter.adapt_sql('''
+                ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0
+            '''))
+            # Set flag for all existing users with default passwords
+            default_usernames = ['admin', 'violations_officer', 'visitors_officer', 'viewer', 'violation_entry']
+            for username in default_usernames:
+                _execute_query(cursor, '''
+                    UPDATE users SET must_change_password = 1 
+                    WHERE username = ? AND must_change_password IS NULL
+                ''', (username,))
+            conn.commit()
+            print("✅ Migration completed: must_change_password column added")
+        except Exception as e:
+            print(f"⚠️  Migration warning: {e}")
     
     # Check if sample buildings exist
     _execute_query(cursor, 'SELECT COUNT(*) FROM buildings')
