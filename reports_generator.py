@@ -107,10 +107,10 @@ def get_report_data(report_type='all', from_date=None, to_date=None, building=No
         summary['total_security_incidents'] = cursor.fetchone()[0]
         
         # Parking
-        cursor.execute('SELECT COUNT(*) FROM parking')
+        cursor.execute('SELECT COUNT(*) FROM parking_spots')
         summary['total_parking_slots'] = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM parking WHERE is_occupied = 1')
+        cursor.execute('SELECT COUNT(*) FROM parking_spots WHERE is_occupied = 1')
         summary['occupied_parking'] = cursor.fetchone()[0]
         
         summary['parking_occupancy_rate'] = round((summary['occupied_parking'] / summary['total_parking_slots'] * 100), 1) if summary['total_parking_slots'] > 0 else 0
@@ -126,12 +126,12 @@ def get_report_data(report_type='all', from_date=None, to_date=None, building=No
             # Get residents data
             cursor.execute("""
                 SELECT r.id, r.name, b.name as building_name, 
-                       COALESCE(a.number, r.apartment_number) as apartment,
+                       COALESCE(a.unit_number, r.unit_number) as apartment,
                        r.move_in_date, 
                        CASE WHEN r.is_active = 1 THEN 'مقيم' ELSE 'غير مقيم' END as status
                 FROM residents r
                 LEFT JOIN buildings b ON r.building_id = b.id
-                LEFT JOIN apartments a ON r.apartment_id = a.id
+                LEFT JOIN apartments a ON r.building_id = a.building_id AND r.unit_number = a.unit_number
                 ORDER BY r.created_at DESC
                 LIMIT 100
             """)
@@ -148,10 +148,13 @@ def get_report_data(report_type='all', from_date=None, to_date=None, building=No
         if report_type in ['all', 'violations']:
             # Get violations data
             cursor.execute("""
-                SELECT id, violation_type, violation_date, location, 
-                       violator_name, status
-                FROM traffic_violations
-                ORDER BY violation_date DESC
+                SELECT tv.id, tv.violation_type, tv.violation_date, tv.location, 
+                       COALESCE(r.name, 'غير محدد') as violator_name,
+                       tv.status
+                FROM traffic_violations tv
+                LEFT JOIN vehicles v ON tv.vehicle_id = v.id
+                LEFT JOIN residents r ON v.owner_id = r.id
+                ORDER BY tv.violation_date DESC
                 LIMIT 100
             """)
             for row in cursor.fetchall():
@@ -186,11 +189,12 @@ def get_report_data(report_type='all', from_date=None, to_date=None, building=No
         if report_type in ['all', 'complaints']:
             # Get complaints data
             cursor.execute("""
-                SELECT c.id, c.complaint_type, c.description, c.complaint_date, 
+                SELECT c.id, c.category, c.description, c.created_at, 
                        b.name as building_name, c.status
                 FROM complaints c
-                LEFT JOIN buildings b ON c.building_id = b.id
-                ORDER BY c.complaint_date DESC
+                LEFT JOIN residents r ON c.resident_id = r.id
+                LEFT JOIN buildings b ON r.building_id = b.id
+                ORDER BY c.created_at DESC
                 LIMIT 100
             """)
             for row in cursor.fetchall():
