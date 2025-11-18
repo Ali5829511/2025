@@ -383,62 +383,6 @@ def validate():
             'error_ar': 'خطأ في الخادم'
         }), 500
 
-@app.route('/api/auth/change-password', methods=['POST'])
-@auth.require_auth
-def change_password():
-    """Change password endpoint"""
-    try:
-        data = request.get_json()
-        current_password = data.get('current_password')
-        new_password = data.get('new_password')
-        
-        if not current_password or not new_password:
-            return jsonify({
-                'success': False,
-                'error': 'Current and new password required',
-                'error_ar': 'كلمة المرور الحالية والجديدة مطلوبة'
-            }), 400
-        
-        # Verify current password
-        user = database.verify_user(request.user['username'], current_password)
-        if not user:
-            return jsonify({
-                'success': False,
-                'error': 'Current password is incorrect',
-                'error_ar': 'كلمة المرور الحالية غير صحيحة'
-            }), 401
-        
-        # Update password
-        success = database.update_user_password(request.user['id'], new_password)
-        
-        if success:
-            # Log password change
-            database.log_audit(
-                request.user['id'],
-                'Password changed',
-                ip_address=request.remote_addr
-            )
-            
-            return jsonify({
-                'success': True,
-                'message': 'Password changed successfully',
-                'message_ar': 'تم تغيير كلمة المرور بنجاح'
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Failed to change password',
-                'error_ar': 'فشل تغيير كلمة المرور'
-            }), 500
-            
-    except Exception as e:
-        app.logger.error(f'Change password error: {str(e)}')
-        return jsonify({
-            'success': False,
-            'error': 'Internal server error',
-            'error_ar': 'خطأ في الخادم'
-        }), 500
-
 # ==================== Plate Recognition API ====================
 
 @app.route('/api/plate-recognizer/status', methods=['GET'])
@@ -1718,11 +1662,52 @@ def get_comprehensive_reports():
         reports['activeVehicles'] = cursor.fetchone()[0]
         
         # Monthly occupancy trend (last 7 months)
-        # TODO: Calculate from actual residents data when available
-        reports['occupancyTrend'] = {
-            'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
-            'data': [85, 87, 89, 91, 88, 90, 92]  # Mock data - requires residents data
-        }
+        # Calculate occupancy rate from actual residents data
+        cursor.execute("""
+            SELECT 
+                strftime('%Y-%m', move_in_date) as month,
+                COUNT(*) as resident_count
+            FROM residents
+            WHERE is_active = 1 
+                AND move_in_date IS NOT NULL
+                AND date(move_in_date) >= date('now', '-7 months')
+            GROUP BY month
+            ORDER BY month DESC
+            LIMIT 7
+        """)
+        occupancy_data = cursor.fetchall()
+        
+        # Get total apartments for occupancy rate calculation
+        cursor.execute('SELECT COUNT(*) FROM apartments')
+        total_apartments = cursor.fetchone()[0] or 1  # Avoid division by zero
+        
+        # If we have actual data, use it; otherwise use defaults
+        if occupancy_data:
+            months_ar = []
+            occupancy_rates = []
+            month_names = {
+                '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
+                '05': 'مايو', '06': 'يونيو', '07': 'يوليو', '08': 'أغسطس',
+                '09': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر'
+            }
+            for month, count in reversed(occupancy_data):
+                month_num = month.split('-')[1] if month else '01'
+                months_ar.append(month_names.get(month_num, 'شهر'))
+                occupancy_rates.append(round((count / total_apartments) * 100, 1))
+            
+            reports['occupancyTrend'] = {
+                'labels': months_ar,
+                'data': occupancy_rates
+            }
+        else:
+            # Fallback to default labels with current occupancy rate
+            cursor.execute('SELECT COUNT(*) FROM residents WHERE is_active = 1')
+            current_residents = cursor.fetchone()[0]
+            current_rate = round((current_residents / total_apartments) * 100, 1)
+            reports['occupancyTrend'] = {
+                'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+                'data': [current_rate] * 7  # Use current rate as baseline
+            }
         
         # Violations by type
         cursor.execute("""
@@ -1739,19 +1724,86 @@ def get_comprehensive_reports():
         }
         
         # Security incidents trend (last 7 months)
-        # TODO: Group by month when sufficient data exists
-        reports['securityTrend'] = {
-            'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
-            'data': [8, 6, 10, 7, 9, 11, 12]  # Mock data - will be replaced with real aggregation
-        }
+        # Group by month from actual security incidents data
+        cursor.execute("""
+            SELECT 
+                strftime('%Y-%m', incident_date) as month,
+                COUNT(*) as incident_count
+            FROM security_incidents
+            WHERE incident_date IS NOT NULL
+                AND date(incident_date) >= date('now', '-7 months')
+            GROUP BY month
+            ORDER BY month DESC
+            LIMIT 7
+        """)
+        security_data = cursor.fetchall()
         
-        # Complaints trend
-        # TODO: Calculate from actual complaints data with monthly grouping
-        reports['complaintsTrend'] = {
-            'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
-            'new': [25, 30, 28, 35, 32, 29, 31],  # Mock data
-            'resolved': [23, 28, 26, 33, 30, 27, 29]  # Mock data
-        }
+        if security_data:
+            months_ar = []
+            incident_counts = []
+            month_names = {
+                '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
+                '05': 'مايو', '06': 'يونيو', '07': 'يوليو', '08': 'أغسطس',
+                '09': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر'
+            }
+            for month, count in reversed(security_data):
+                month_num = month.split('-')[1] if month else '01'
+                months_ar.append(month_names.get(month_num, 'شهر'))
+                incident_counts.append(count)
+            
+            reports['securityTrend'] = {
+                'labels': months_ar,
+                'data': incident_counts
+            }
+        else:
+            # Fallback to default data if no incidents recorded
+            reports['securityTrend'] = {
+                'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+                'data': [0, 0, 0, 0, 0, 0, 0]
+            }
+        
+        # Complaints trend - Calculate from actual complaints data with monthly grouping
+        cursor.execute("""
+            SELECT 
+                strftime('%Y-%m', complaint_date) as month,
+                COUNT(*) as total_count,
+                SUM(CASE WHEN status IN ('resolved', 'محلولة', 'closed', 'مغلقة') THEN 1 ELSE 0 END) as resolved_count
+            FROM complaints
+            WHERE complaint_date IS NOT NULL
+                AND date(complaint_date) >= date('now', '-7 months')
+            GROUP BY month
+            ORDER BY month DESC
+            LIMIT 7
+        """)
+        complaints_data = cursor.fetchall()
+        
+        if complaints_data:
+            months_ar = []
+            new_counts = []
+            resolved_counts = []
+            month_names = {
+                '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
+                '05': 'مايو', '06': 'يونيو', '07': 'يوليو', '08': 'أغسطس',
+                '09': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر'
+            }
+            for month, total, resolved in reversed(complaints_data):
+                month_num = month.split('-')[1] if month else '01'
+                months_ar.append(month_names.get(month_num, 'شهر'))
+                new_counts.append(total)
+                resolved_counts.append(resolved)
+            
+            reports['complaintsTrend'] = {
+                'labels': months_ar,
+                'new': new_counts,
+                'resolved': resolved_counts
+            }
+        else:
+            # Fallback to default data if no complaints recorded
+            reports['complaintsTrend'] = {
+                'labels': ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+                'new': [0, 0, 0, 0, 0, 0, 0],
+                'resolved': [0, 0, 0, 0, 0, 0, 0]
+            }
         
         # Residents by building
         cursor.execute("""

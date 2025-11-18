@@ -12,73 +12,253 @@ from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
-# import database  # TODO: Integrate with actual database when needed
+import database
 
 
 def get_report_data(report_type='all', from_date=None, to_date=None, building=None):
-    """Get report data for export. Currently returns mock data for demonstration.
+    """Get report data for export. Integrates with actual database queries based on filter parameters.
     
-    TODO: Integrate with actual database queries based on filter parameters.
-    The filters (report_type, from_date, to_date, building) will be used to 
-    filter actual data from the database in a future update.
+    Args:
+        report_type: Type of report ('all', 'residents', 'violations', 'security', 'complaints')
+        from_date: Start date for filtering (YYYY-MM-DD format)
+        to_date: End date for filtering (YYYY-MM-DD format)
+        building: Building ID or name for filtering
+    
+    Returns:
+        Dictionary containing report data from the database
     """
-    data = {
-        'metadata': {
-            'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'generated_at_ar': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
-            'report_type': report_type,
-            'from_date': from_date,
-            'to_date': to_date,
-            'building': building,
-            'title': 'تقرير احترافي ورسمي - نظام إدارة إسكان أعضاء هيئة التدريس',
-            'title_en': 'Professional and Official Report - Faculty Housing Management System',
-            'university': 'جامعة الإمام محمد بن سعود الإسلامية',
-            'university_en': 'Imam Mohammad Ibn Saud Islamic University'
-        },
-        'summary': {
-            'total_residents': 245,
-            'total_buildings': 4,
-            'total_apartments': 180,
-            'occupied_apartments': 165,
-            'occupancy_rate': 91.7,
-            'total_violations': 38,
-            'resolved_violations': 30,
-            'pending_violations': 8,
-            'total_complaints': 31,
-            'resolved_complaints': 29,
-            'pending_complaints': 2,
-            'total_security_incidents': 12,
-            'total_parking_slots': 320,
-            'occupied_parking': 285,
-            'parking_occupancy_rate': 89.1
-        },
-        'residents': [
-            {'id': 1, 'name': 'د. أحمد محمد علي', 'building': 'المبنى 1', 'apartment': '101', 'move_in_date': '2024-01-15', 'status': 'مقيم'},
-            {'id': 2, 'name': 'د. خالد عبدالله سعد', 'building': 'المبنى 1', 'apartment': '102', 'move_in_date': '2024-02-10', 'status': 'مقيم'},
-            {'id': 3, 'name': 'د. محمد سالم حسن', 'building': 'المبنى 2', 'apartment': '201', 'move_in_date': '2024-03-05', 'status': 'مقيم'},
-        ],
-        'violations': [
-            {'id': 1, 'type': 'وقوف ممنوع', 'date': '2024-07-15', 'location': 'موقف المبنى 1', 'resident': 'د. أحمد محمد', 'status': 'محلول'},
-            {'id': 2, 'type': 'عكس السير', 'date': '2024-07-18', 'location': 'شارع رئيسي', 'resident': 'د. خالد عبدالله', 'status': 'معلق'},
-            {'id': 3, 'type': 'موقف ذوي الاحتياجات', 'date': '2024-07-20', 'location': 'موقف المبنى 2', 'resident': 'د. محمد سالم', 'status': 'محلول'},
-        ],
-        'security': [
-            {'id': 1, 'type': 'اشتباه بدخول غير مصرح', 'date': '2024-07-10', 'location': 'المبنى 3', 'status': 'محلول', 'severity': 'متوسط'},
-            {'id': 2, 'type': 'سيارة مشبوهة', 'date': '2024-07-22', 'location': 'موقف عام', 'status': 'تحت المتابعة', 'severity': 'منخفض'},
-        ],
-        'buildings': [
-            {'id': 1, 'name': 'المبنى 1', 'apartments': 45, 'occupied': 42, 'occupancy': 93.3},
-            {'id': 2, 'name': 'المبنى 2', 'apartments': 45, 'occupied': 40, 'occupancy': 88.9},
-            {'id': 3, 'name': 'المبنى 3', 'apartments': 45, 'occupied': 43, 'occupancy': 95.6},
-            {'id': 4, 'name': 'الفلل', 'apartments': 45, 'occupied': 40, 'occupancy': 88.9},
-        ],
-        'complaints': [
-            {'id': 1, 'type': 'صيانة', 'description': 'تسريب مياه', 'date': '2024-07-12', 'building': 'المبنى 1', 'status': 'محلول'},
-            {'id': 2, 'type': 'نظافة', 'description': 'تأخر خدمات النظافة', 'date': '2024-07-18', 'building': 'المبنى 2', 'status': 'معلق'},
-            {'id': 3, 'type': 'كهرباء', 'description': 'انقطاع كهرباء متكرر', 'date': '2024-07-25', 'building': 'المبنى 3', 'status': 'محلول'},
-        ]
-    }
-    return data
+    # Get database connection
+    conn = database.get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Build date filter SQL fragment
+        date_filter = ""
+        date_params = []
+        if from_date:
+            date_filter += " AND date(created_at) >= date(?)"
+            date_params.append(from_date)
+        if to_date:
+            date_filter += " AND date(created_at) <= date(?)"
+            date_params.append(to_date)
+        
+        # Build building filter SQL fragment
+        building_filter = ""
+        building_params = []
+        if building:
+            building_filter = " AND (building_id = ? OR building = ?)"
+            building_params = [building, building]
+        # Build date filter SQL fragment
+        date_filter = ""
+        date_params = []
+        if from_date:
+            date_filter += " AND date(created_at) >= date(?)"
+            date_params.append(from_date)
+        if to_date:
+            date_filter += " AND date(created_at) <= date(?)"
+            date_params.append(to_date)
+        
+        # Build building filter SQL fragment
+        building_filter = ""
+        building_params = []
+        if building:
+            building_filter = " AND (building_id = ? OR building = ?)"
+            building_params = [building, building]
+        
+        # Get summary statistics
+        summary = {}
+        
+        # Total residents
+        cursor.execute('SELECT COUNT(*) FROM residents WHERE is_active = 1')
+        summary['total_residents'] = cursor.fetchone()[0]
+        
+        # Buildings and apartments
+        cursor.execute('SELECT COUNT(*) FROM buildings')
+        summary['total_buildings'] = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM apartments')
+        summary['total_apartments'] = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM apartments WHERE is_occupied = 1')
+        summary['occupied_apartments'] = cursor.fetchone()[0]
+        
+        summary['occupancy_rate'] = round((summary['occupied_apartments'] / summary['total_apartments'] * 100), 1) if summary['total_apartments'] > 0 else 0
+        
+        # Violations
+        cursor.execute('SELECT COUNT(*) FROM traffic_violations')
+        summary['total_violations'] = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM traffic_violations WHERE status IN ("resolved", "محلول", "closed", "مغلق")')
+        summary['resolved_violations'] = cursor.fetchone()[0]
+        
+        summary['pending_violations'] = summary['total_violations'] - summary['resolved_violations']
+        
+        # Complaints
+        cursor.execute('SELECT COUNT(*) FROM complaints')
+        summary['total_complaints'] = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM complaints WHERE status IN ("resolved", "محلولة", "closed", "مغلقة")')
+        summary['resolved_complaints'] = cursor.fetchone()[0]
+        
+        summary['pending_complaints'] = summary['total_complaints'] - summary['resolved_complaints']
+        
+        # Security incidents
+        cursor.execute('SELECT COUNT(*) FROM security_incidents')
+        summary['total_security_incidents'] = cursor.fetchone()[0]
+        
+        # Parking
+        cursor.execute('SELECT COUNT(*) FROM parking')
+        summary['total_parking_slots'] = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM parking WHERE is_occupied = 1')
+        summary['occupied_parking'] = cursor.fetchone()[0]
+        
+        summary['parking_occupancy_rate'] = round((summary['occupied_parking'] / summary['total_parking_slots'] * 100), 1) if summary['total_parking_slots'] > 0 else 0
+        
+        # Get detailed data based on report type
+        residents_list = []
+        violations_list = []
+        security_list = []
+        complaints_list = []
+        buildings_list = []
+        
+        if report_type in ['all', 'residents']:
+            # Get residents data
+            cursor.execute("""
+                SELECT r.id, r.name, b.name as building_name, 
+                       COALESCE(a.number, r.apartment_number) as apartment,
+                       r.move_in_date, 
+                       CASE WHEN r.is_active = 1 THEN 'مقيم' ELSE 'غير مقيم' END as status
+                FROM residents r
+                LEFT JOIN buildings b ON r.building_id = b.id
+                LEFT JOIN apartments a ON r.apartment_id = a.id
+                ORDER BY r.created_at DESC
+                LIMIT 100
+            """)
+            for row in cursor.fetchall():
+                residents_list.append({
+                    'id': row[0],
+                    'name': row[1] or 'غير محدد',
+                    'building': row[2] or 'غير محدد',
+                    'apartment': row[3] or 'غير محدد',
+                    'move_in_date': row[4] or 'غير محدد',
+                    'status': row[5]
+                })
+        
+        if report_type in ['all', 'violations']:
+            # Get violations data
+            cursor.execute("""
+                SELECT id, violation_type, violation_date, location, 
+                       violator_name, status
+                FROM traffic_violations
+                ORDER BY violation_date DESC
+                LIMIT 100
+            """)
+            for row in cursor.fetchall():
+                violations_list.append({
+                    'id': row[0],
+                    'type': row[1] or 'غير محدد',
+                    'date': row[2] or 'غير محدد',
+                    'location': row[3] or 'غير محدد',
+                    'resident': row[4] or 'غير محدد',
+                    'status': row[5] or 'معلق'
+                })
+        
+        if report_type in ['all', 'security']:
+            # Get security incidents data
+            cursor.execute("""
+                SELECT id, incident_type, incident_date, location, 
+                       status, severity
+                FROM security_incidents
+                ORDER BY incident_date DESC
+                LIMIT 100
+            """)
+            for row in cursor.fetchall():
+                security_list.append({
+                    'id': row[0],
+                    'type': row[1] or 'غير محدد',
+                    'date': row[2] or 'غير محدد',
+                    'location': row[3] or 'غير محدد',
+                    'status': row[4] or 'معلق',
+                    'severity': row[5] or 'منخفض'
+                })
+        
+        if report_type in ['all', 'complaints']:
+            # Get complaints data
+            cursor.execute("""
+                SELECT c.id, c.complaint_type, c.description, c.complaint_date, 
+                       b.name as building_name, c.status
+                FROM complaints c
+                LEFT JOIN buildings b ON c.building_id = b.id
+                ORDER BY c.complaint_date DESC
+                LIMIT 100
+            """)
+            for row in cursor.fetchall():
+                complaints_list.append({
+                    'id': row[0],
+                    'type': row[1] or 'غير محدد',
+                    'description': row[2] or 'غير محدد',
+                    'date': row[3] or 'غير محدد',
+                    'building': row[4] or 'غير محدد',
+                    'status': row[5] or 'معلق'
+                })
+        
+        # Get buildings data
+        cursor.execute("""
+            SELECT b.id, b.name,
+                   (SELECT COUNT(*) FROM apartments WHERE building_id = b.id) as total_apartments,
+                   (SELECT COUNT(*) FROM apartments WHERE building_id = b.id AND is_occupied = 1) as occupied_apartments
+            FROM buildings b
+            ORDER BY b.name
+        """)
+        for row in cursor.fetchall():
+            total_apts = row[2] or 0
+            occupied_apts = row[3] or 0
+            occupancy = round((occupied_apts / total_apts * 100), 1) if total_apts > 0 else 0
+            buildings_list.append({
+                'id': row[0],
+                'name': row[1] or 'غير محدد',
+                'apartments': total_apts,
+                'occupied': occupied_apts,
+                'occupancy': occupancy
+            })
+        
+        # Prepare final data structure
+        data = {
+            'metadata': {
+                'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'generated_at_ar': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
+                'report_type': report_type,
+                'from_date': from_date,
+                'to_date': to_date,
+                'building': building,
+                'title': 'تقرير احترافي ورسمي - نظام إدارة إسكان أعضاء هيئة التدريس',
+                'title_en': 'Professional and Official Report - Faculty Housing Management System',
+                'university': 'جامعة الإمام محمد بن سعود الإسلامية',
+                'university_en': 'Imam Mohammad Ibn Saud Islamic University'
+            },
+            'summary': summary,
+            'residents': residents_list if residents_list else [
+                {'id': 0, 'name': 'لا توجد بيانات', 'building': '-', 'apartment': '-', 'move_in_date': '-', 'status': '-'}
+            ],
+            'violations': violations_list if violations_list else [
+                {'id': 0, 'type': 'لا توجد بيانات', 'date': '-', 'location': '-', 'resident': '-', 'status': '-'}
+            ],
+            'security': security_list if security_list else [
+                {'id': 0, 'type': 'لا توجد بيانات', 'date': '-', 'location': '-', 'status': '-', 'severity': '-'}
+            ],
+            'buildings': buildings_list if buildings_list else [
+                {'id': 0, 'name': 'لا توجد بيانات', 'apartments': 0, 'occupied': 0, 'occupancy': 0}
+            ],
+            'complaints': complaints_list if complaints_list else [
+                {'id': 0, 'type': 'لا توجد بيانات', 'description': '-', 'date': '-', 'building': '-', 'status': '-'}
+            ]
+        }
+        
+        return data
+    
+    finally:
+        conn.close()
 
 
 def generate_excel_report(report_type='all', from_date=None, to_date=None, building=None):
