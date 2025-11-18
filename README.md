@@ -241,6 +241,13 @@ http://localhost:5000
 - [System Validation Report Documentation](SYSTEM_VALIDATION_REPORT.md) - Technical documentation for validation report
 - [تقرير التحقق من النظام (صفحة ويب)](system_validation_report.html) - أداة تفاعلية لمراجعة البيانات
 
+### إدارة الفروع والمستودع / Branch and Repository Management
+- 🌿 **[دليل اتخاذ القرار: دمج الفروع أو تركها](BRANCH_MANAGEMENT_DECISION_GUIDE.md)** - دليل شامل ثنائي اللغة ⭐ **NEW!**
+- 🌿 **[دليل إدارة الفروع](دليل_إدارة_الفروع.md)** - دليل عربي مفصل مع أمثلة عملية ⭐ **NEW!**
+- 📋 **[ملخص قرار إدارة الفروع](BRANCH_DECISION_SUMMARY.md)** - إجابة مباشرة على "دمج أو ترك؟" ⭐ **NEW!**
+- 📊 [تقرير حالة الدمج](MERGE_STATUS_REPORT.md) - تحليل تفصيلي لحالة دمج الفروع
+- 📊 [ملخص الدمج (عربي)](MERGE_SUMMARY_AR.md) - ملخص ثنائي اللغة
+
 ### النشر والتثبيت / Deployment & Installation
 - 🐳 **[دليل Docker Hub](DOCKER_HUB_GUIDE.md)** - نشر ومشاركة الصور على Docker Hub ⭐ **NEW!**
 - 🔐 **[إعداد أسرار النشر](DEPLOYMENT_SECRETS_SETUP.md)** - تكوين أسرار GitHub لـ Docker Hub و Fly.io ⭐ **NEW!**
