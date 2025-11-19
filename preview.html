@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة إسكان أعضاء هيئة التدريس - معاينة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .status-icon {
+            font-size: 2em;
+        }
+
+        .status-text h3 {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .status-text p {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .card h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card li {
+            padding: 8px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-box:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .feature-box h4 {
+            margin-bottom: 10px;
+        }
+
+        .stats-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .footer {
+            background: #1e3c72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        }
+
+        .alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 نظام إدارة إسكان أعضاء هيئة التدريس</h1>
+            <p>جامعة الإمام محمد بن سعود الإسلامية</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Faculty Housing Management System</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-icon">✅</div>
+                <div class="status-text">
+                    <h3>حالة النظام</h3>
+                    <p>جاهز 100%</p>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">🗄️</div>
+                <div class="status-text">
+                    <h3>قاعدة البيانات</h3>
+                    <p>Supabase متصل</p>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">🔐</div>
+                <div class="status-text">
+                    <h3>الأمان</h3>
+                    <p>مفعّل A-</p>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">📊</div>
+                <div class="status-text">
+                    <h3>الإصدار</h3>
+                    <p>v2.0.1</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="alert alert-success">
+                <h3>🎉 تم إنشاء النظام بنجاح!</h3>
+                <p>قاعدة بيانات Supabase جاهزة مع 14 جدول و 3 مباني و 36 شقة و 36 موقف سيارة</p>
+            </div>
+
+            <div class="stats-box">
+                <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 15px;">📊 إحصائيات النظام</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">14</div>
+                        <div class="stat-label">جدول قاعدة بيانات</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">مباني</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">36</div>
+                        <div class="stat-label">شقة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">36</div>
+                        <div class="stat-label">موقف سيارة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">مستخدمين</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">48,857</div>
+                        <div class="stat-label">سطر كود</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 الميزات الرئيسية</h2>
+                <div class="features-grid">
+                    <div class="feature-box">
+                        <div class="feature-icon">🏢</div>
+                        <h4>إدارة المباني</h4>
+                        <p>والشقق السكنية</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">👥</div>
+                        <h4>إدارة السكان</h4>
+                        <p>أعضاء هيئة التدريس</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">🚗</div>
+                        <h4>إدارة المواقف</h4>
+                        <p>والملصقات</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">🚦</div>
+                        <h4>المخالفات المرورية</h4>
+                        <p>والحوادث</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">🔒</div>
+                        <h4>الأمن</h4>
+                        <p>والوقائع الأمنية</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">📝</div>
+                        <h4>الشكاوى</h4>
+                        <p>والزوار</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">📊</div>
+                        <h4>التقارير</h4>
+                        <p>والإحصائيات</p>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">📷</div>
+                        <h4>تمييز اللوحات</h4>
+                        <p>Plate Recognizer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💾 قاعدة البيانات</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>🗄️ الجداول الأساسية</h3>
+                        <ul>
+                            <li>users - المستخدمون</li>
+                            <li>sessions - الجلسات</li>
+                            <li>buildings - المباني</li>
+                            <li>apartments - الشقق</li>
+                            <li>residents - السكان</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>🚗 المركبات والمواقف</h3>
+                        <ul>
+                            <li>vehicles - المركبات</li>
+                            <li>parking_spots - المواقف</li>
+                            <li>stickers - الملصقات</li>
+                            <li>traffic_violations - المخالفات</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>📋 الإدارة والأمان</h3>
+                        <ul>
+                            <li>security_incidents - الوقائع الأمنية</li>
+                            <li>complaints - الشكاوى</li>
+                            <li>visitors - الزوار</li>
+                            <li>licenses - التراخيص</li>
+                            <li>audit_log - سجل التدقيق</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>👥 أدوار المستخدمين</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>🔑 مدير النظام (admin)</h3>
+                        <ul>
+                            <li>صلاحيات كاملة</li>
+                            <li>إدارة المستخدمين</li>
+                            <li>جميع الوحدات</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>🚦 مسؤول المخالفات</h3>
+                        <ul>
+                            <li>المخالفات المرورية</li>
+                            <li>الحوادث المرورية</li>
+                            <li>السيارات المكبوحة</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>👥 مسؤول الزوار</h3>
+                        <ul>
+                            <li>سجل الزوار</li>
+                            <li>الشكاوى</li>
+                            <li>التراخيص</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>👁️ مستخدم عرض</h3>
+                        <ul>
+                            <li>عرض البيانات فقط</li>
+                            <li>التقارير</li>
+                            <li>الإحصائيات</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔐 الأمان والحماية</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>✅ المصادقة</h3>
+                        <ul>
+                            <li>تشفير كلمات المرور (pbkdf2)</li>
+                            <li>إدارة جلسات آمنة</li>
+                            <li>انتهاء صلاحية تلقائي</li>
+                            <li>Session tokens عشوائية</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>✅ حماية البيانات</h3>
+                        <ul>
+                            <li>SQL Injection Protection</li>
+                            <li>Path Traversal Protection</li>
+                            <li>CORS Configuration</li>
+                            <li>Security Headers</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>✅ التدقيق</h3>
+                        <ul>
+                            <li>سجل تدقيق شامل</li>
+                            <li>تسجيل IP Address</li>
+                            <li>تتبع العمليات</li>
+                            <li>RLS Policies</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <h3>⚠️ ملاحظة هامة</h3>
+                <p><strong>بيانات الدخول الافتراضية:</strong></p>
+                <ul style="list-style: none; padding-right: 20px; margin-top: 10px;">
+                    <li>• admin / Admin@2025</li>
+                    <li>• violations_officer / Violations@2025</li>
+                    <li>• visitors_officer / Visitors@2025</li>
+                    <li>• viewer / Viewer@2025</li>
+                    <li>• violation_entry / Violation@2025</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>⚠️ يجب تغيير جميع كلمات المرور عند أول تسجيل دخول!</strong></p>
+            </div>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <h2 style="color: #1e3c72; margin-bottom: 20px;">📚 الوثائق المتاحة</h2>
+                <a href="README.md" class="btn">📖 الدليل الشامل</a>
+                <a href="QUICK_START.md" class="btn">⚡ البدء السريع</a>
+                <a href="API_DOCUMENTATION.md" class="btn">🔌 توثيق API</a>
+                <a href="USER_ROLES.md" class="btn">👥 أدوار المستخدمين</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>🎉 النظام جاهز للاستخدام!</h3>
+            <p style="margin: 15px 0;">تم إنشاء قاعدة البيانات بنجاح في Supabase</p>
+            <p>جميع الجداول والبيانات التجريبية جاهزة</p>
+            <p style="margin-top: 20px; opacity: 0.8;">© 2025 جامعة الإمام محمد بن سعود الإسلامية</p>
+        </div>
+    </div>
+</body>
+</html>
