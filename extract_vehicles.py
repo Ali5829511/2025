@@ -24,6 +24,11 @@ Configuration:
     Set the following variables before running:
     - IMAGE_FOLDER: Path to folder containing vehicle images
     - API_TOKEN: Your Plate Recognizer API token
+
+For detailed documentation, see:
+    - EXTRACT_VEHICLES_GUIDE.md (Comprehensive guide)
+    - QUICK_START_EXTRACT.md (Quick start guide)
+    - EXTRACT_VEHICLES_README.md (Main README)
 """
 
 import os
