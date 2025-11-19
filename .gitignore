@@ -76,6 +76,11 @@ uploads/*
 exports/
 exports/*
 
+# Vehicle extraction outputs
+نتائج_المركبات*.xlsx
+*_progress.json
+vehicle_results*.xlsx
+
 # Thumbnails
 thumbnails/
 static/uploads/thumbnails/*
