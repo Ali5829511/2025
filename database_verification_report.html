@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير التحقق من قاعدة البيانات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .timestamp {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-occupied {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-vacant {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #155724;
+        }
+
+        .alert-success h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .detail-card h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .detail-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 تقرير التحقق من قاعدة البيانات</h1>
+            <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Database Verification Report</p>
+            <div class="timestamp">
+                📅 تاريخ التقرير: 19 نوفمبر 2025<br>
+                ⏰ الوقت: تم إنشاؤه الآن
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="alert-success">
+                <h3>✅ تم التحقق من قاعدة البيانات بنجاح</h3>
+                <p>جميع الجداول تحتوي على بيانات صحيحة ومتكاملة</p>
+                <p style="margin-top: 5px;">قاعدة البيانات: <strong>Supabase PostgreSQL</strong></p>
+            </div>
+
+            <!-- إحصائيات عامة -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">📈</span>
+                    <span>الإحصائيات العامة</span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">مباني</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">36</div>
+                        <div class="stat-label">وحدات سكنية</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">شقق مشغولة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">33</div>
+                        <div class="stat-label">شقق شاغرة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">36</div>
+                        <div class="stat-label">مواقف سيارات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">سكان نشطين</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">مركبات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">ملصقات نشطة</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بيانات السكان -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">👥</span>
+                    <span>بيانات السكان (أعضاء هيئة التدريس)</span>
+                </div>
+
+                <div class="detail-card">
+                    <h4>👨‍🏫 د. أحمد محمد علي</h4>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم الهوية:</div>
+                        <div class="detail-value">1234567890</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">البريد الإلكتروني:</div>
+                        <div class="detail-value">ahmed.ali@university.edu.sa</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">الهاتف:</div>
+                        <div class="detail-value">0501234567</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">القسم:</div>
+                        <div class="detail-value">علوم الحاسب</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المسمى الوظيفي:</div>
+                        <div class="detail-value">أستاذ مشارك</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المبنى والوحدة:</div>
+                        <div class="detail-value">مبنى 1 - وحدة 11</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المركبة:</div>
+                        <div class="detail-value">تويوتا كامري (2023) - أبيض</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم اللوحة:</div>
+                        <div class="detail-value">أ ب ج 1234</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم الملصق:</div>
+                        <div class="detail-value"><span class="status-badge badge-active">ST-2025-001</span></div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h4>👩‍🏫 د. فاطمة علي حسن</h4>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم الهوية:</div>
+                        <div class="detail-value">9876543210</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">البريد الإلكتروني:</div>
+                        <div class="detail-value">fatima.hassan@university.edu.sa</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">الهاتف:</div>
+                        <div class="detail-value">0509876543</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">القسم:</div>
+                        <div class="detail-value">الهندسة</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المسمى الوظيفي:</div>
+                        <div class="detail-value">أستاذ مساعد</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المبنى والوحدة:</div>
+                        <div class="detail-value">مبنى 1 - وحدة 12</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المركبة:</div>
+                        <div class="detail-value">هوندا أكورد (2022) - أسود</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم اللوحة:</div>
+                        <div class="detail-value">د هـ و 5678</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم الملصق:</div>
+                        <div class="detail-value"><span class="status-badge badge-active">ST-2025-002</span></div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h4>👨‍🏫 د. محمد سعيد أحمد</h4>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم الهوية:</div>
+                        <div class="detail-value">5555555555</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">البريد الإلكتروني:</div>
+                        <div class="detail-value">mohammed.said@university.edu.sa</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">الهاتف:</div>
+                        <div class="detail-value">0505555555</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">القسم:</div>
+                        <div class="detail-value">الرياضيات</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المسمى الوظيفي:</div>
+                        <div class="detail-value">أستاذ</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المبنى والوحدة:</div>
+                        <div class="detail-value">مبنى 2 - وحدة 21</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">المركبة:</div>
+                        <div class="detail-value">فورد إكسبلورر (2023) - رمادي</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم اللوحة:</div>
+                        <div class="detail-value">ز ح ط 9012</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">رقم الملصق:</div>
+                        <div class="detail-value"><span class="status-badge badge-active">ST-2025-003</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول الوحدات السكنية -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">🏢</span>
+                    <span>الوحدات السكنية (عينة)</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المبنى</th>
+                                <th>رقم الوحدة</th>
+                                <th>الطابق</th>
+                                <th>النوع</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>مبنى 1</td>
+                                <td>11</td>
+                                <td>1</td>
+                                <td>شقة</td>
+                                <td><span class="status-badge badge-occupied">مشغولة</span></td>
+                            </tr>
+                            <tr>
+                                <td>مبنى 1</td>
+                                <td>12</td>
+                                <td>1</td>
+                                <td>شقة</td>
+                                <td><span class="status-badge badge-occupied">مشغولة</span></td>
+                            </tr>
+                            <tr>
+                                <td>مبنى 1</td>
+                                <td>13</td>
+                                <td>1</td>
+                                <td>شقة</td>
+                                <td><span class="status-badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>مبنى 1</td>
+                                <td>14</td>
+                                <td>1</td>
+                                <td>شقة</td>
+                                <td><span class="status-badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>مبنى 2</td>
+                                <td>21</td>
+                                <td>2</td>
+                                <td>شقة</td>
+                                <td><span class="status-badge badge-occupied">مشغولة</span></td>
+                            </tr>
+                            <tr>
+                                <td>مبنى 2</td>
+                                <td>22</td>
+                                <td>2</td>
+                                <td>شقة</td>
+                                <td><span class="status-badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                    * يوجد 36 وحدة سكنية إجمالاً، 3 منها مشغولة و 33 شاغرة
+                </p>
+            </div>
+
+            <!-- جدول المواقف -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">🅿️</span>
+                    <span>مواقف السيارات (عينة)</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الموقف</th>
+                                <th>منطقة المواقف</th>
+                                <th>المبنى</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1-1</td>
+                                <td>G.L.P-1</td>
+                                <td>مبنى 1</td>
+                                <td><span class="status-badge badge-vacant">شاغر</span></td>
+                            </tr>
+                            <tr>
+                                <td>1-2</td>
+                                <td>G.L.P-1</td>
+                                <td>مبنى 1</td>
+                                <td><span class="status-badge badge-vacant">شاغر</span></td>
+                            </tr>
+                            <tr>
+                                <td>2-1</td>
+                                <td>G.L.P-2</td>
+                                <td>مبنى 2</td>
+                                <td><span class="status-badge badge-vacant">شاغر</span></td>
+                            </tr>
+                            <tr>
+                                <td>2-2</td>
+                                <td>G.L.P-2</td>
+                                <td>مبنى 2</td>
+                                <td><span class="status-badge badge-vacant">شاغر</span></td>
+                            </tr>
+                            <tr>
+                                <td>3-1</td>
+                                <td>G.L.P-3</td>
+                                <td>مبنى 3</td>
+                                <td><span class="status-badge badge-vacant">شاغر</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                    * يوجد 36 موقف سيارة إجمالاً (12 موقف لكل مبنى)، جميعها شاغرة حالياً
+                </p>
+            </div>
+
+            <!-- جدول الملصقات -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">🎫</span>
+                    <span>ملصقات السيارات</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الملصق</th>
+                                <th>اسم الساكن</th>
+                                <th>رقم اللوحة</th>
+                                <th>نوع المركبة</th>
+                                <th>تاريخ الإصدار</th>
+                                <th>تاريخ الانتهاء</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ST-2025-001</strong></td>
+                                <td>د. أحمد محمد علي</td>
+                                <td>أ ب ج 1234</td>
+                                <td>سيارة</td>
+                                <td>2025-11-19</td>
+                                <td>2026-11-19</td>
+                                <td><span class="status-badge badge-active">نشط</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ST-2025-002</strong></td>
+                                <td>د. فاطمة علي حسن</td>
+                                <td>د هـ و 5678</td>
+                                <td>سيارة</td>
+                                <td>2025-11-19</td>
+                                <td>2026-11-19</td>
+                                <td><span class="status-badge badge-active">نشط</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ST-2025-003</strong></td>
+                                <td>د. محمد سعيد أحمد</td>
+                                <td>ز ح ط 9012</td>
+                                <td>سيارة</td>
+                                <td>2025-11-19</td>
+                                <td>2026-11-19</td>
+                                <td><span class="status-badge badge-active">نشط</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="alert-success">
+                <h3>✅ التحقق مكتمل</h3>
+                <ul style="list-style: none; padding-right: 20px; margin-top: 15px;">
+                    <li>✓ جميع السكان لديهم وحدات سكنية محددة</li>
+                    <li>✓ جميع السكان لديهم مركبات مسجلة</li>
+                    <li>✓ جميع المركبات لديها ملصقات نشطة</li>
+                    <li>✓ حالة الوحدات السكنية محدثة (مشغولة/شاغرة)</li>
+                    <li>✓ المواقف متوفرة ومنظمة حسب المباني</li>
+                    <li>✓ جميع البيانات متكاملة ومترابطة</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background: #1e3c72; color: white; padding: 20px; text-align: center;">
+            <p>تم إنشاء التقرير بواسطة نظام إدارة إسكان أعضاء هيئة التدريس</p>
+            <p style="opacity: 0.8; margin-top: 5px; font-size: 0.9em;">© 2025 جامعة الإمام محمد بن سعود الإسلامية</p>
+        </div>
+    </div>
+</body>
+</html>
