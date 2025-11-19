@@ -1,0 +1,126 @@
+# Vehicle Extraction Configuration Example
+# مثال على إعدادات استخراج بيانات المركبات
+
+# This is an example configuration file showing how to configure extract_vehicles.py
+# هذا ملف إعدادات مثالي يوضح كيفية تكوين extract_vehicles.py
+
+# ============================================================================
+# BASIC CONFIGURATION / الإعدادات الأساسية
+# ============================================================================
+
+[basic]
+# Path to folder containing vehicle images
+# مسار مجلد الصور
+image_folder = E:\WhatsApp Chat - الامام المرور\6
+
+# Your Plate Recognizer API Token
+# رمز API الخاص بك من Plate Recognizer
+# Get your token from: https://platerecognizer.com
+api_token = ضع رمز API الخاص بك هنا
+
+# Output Excel file name
+# اسم ملف Excel الناتج
+output_file = نتائج_المركبات.xlsx
+
+# ============================================================================
+# PROCESSING SETTINGS / إعدادات المعالجة
+# ============================================================================
+
+[processing]
+# Batch size (number of images to process before saving)
+# حجم الدفعة (عدد الصور التي تتم معالجتها قبل الحفظ)
+batch_size = 50
+
+# Delay between API calls in seconds (to avoid rate limiting)
+# التأخير بين طلبات API بالثواني (لتجنب تجاوز الحد المسموح)
+api_delay = 0.5
+
+# Enable/disable image enhancement
+# تفعيل/تعطيل تحسين الصور
+enhance_images = true
+
+# ============================================================================
+# RECOGNITION SETTINGS / إعدادات التعرف
+# ============================================================================
+
+[recognition]
+# Minimum confidence threshold (0.0 to 1.0)
+# الحد الأدنى للثقة (من 0.0 إلى 1.0)
+min_confidence = 0.0
+
+# Region codes for better accuracy
+# رموز المناطق لتحسين الدقة
+# Options: sa (Saudi Arabia), ae (UAE), kw (Kuwait), qa (Qatar), etc.
+# خيارات: sa (السعودية), ae (الإمارات), kw (الكويت), qa (قطر), إلخ
+regions = sa
+
+# ============================================================================
+# EXAMPLES / أمثلة
+# ============================================================================
+
+# Example 1: Saudi Arabia only
+# مثال 1: السعودية فقط
+# regions = sa
+
+# Example 2: Multiple Gulf countries
+# مثال 2: عدة دول خليجية
+# regions = sa,ae,kw,qa,om,bh
+
+# Example 3: All regions (no restriction)
+# مثال 3: جميع المناطق (بدون تقييد)
+# regions = 
+
+# ============================================================================
+# CONFIGURATION TEMPLATES / قوالب الإعدادات
+# ============================================================================
+
+# Template 1: Fast processing (for testing)
+# قالب 1: معالجة سريعة (للاختبار)
+# batch_size = 10
+# api_delay = 0.1
+# min_confidence = 0.8
+
+# Template 2: Safe processing (recommended for production)
+# قالب 2: معالجة آمنة (موصى به للإنتاج)
+# batch_size = 50
+# api_delay = 0.5
+# min_confidence = 0.0
+
+# Template 3: Slow but thorough (for high accuracy)
+# قالب 3: بطيء لكن دقيق (للدقة العالية)
+# batch_size = 100
+# api_delay = 1.0
+# min_confidence = 0.9
+
+# ============================================================================
+# NOTES / ملاحظات
+# ============================================================================
+
+# 1. Make sure to use raw string (r"path") for Windows paths in the Python script
+#    تأكد من استخدام raw string (r"path") للمسارات في Windows
+
+# 2. Get your API token from Plate Recognizer dashboard
+#    احصل على رمز API من لوحة تحكم Plate Recognizer
+
+# 3. Start with a small batch for testing (10-50 images)
+#    ابدأ بدفعة صغيرة للاختبار (10-50 صورة)
+
+# 4. Monitor your API usage on Plate Recognizer dashboard
+#    راقب استخدام API على لوحة تحكم Plate Recognizer
+
+# 5. The script supports resume - if interrupted, run again to continue
+#    السكربت يدعم الاستئناف - إذا توقف، شغله مرة أخرى للمتابعة
+
+# ============================================================================
+# SUPPORT / الدعم
+# ============================================================================
+
+# For full documentation, see:
+# للوثائق الكاملة، راجع:
+# - EXTRACT_VEHICLES_GUIDE.md (Comprehensive guide / الدليل الشامل)
+# - QUICK_START_EXTRACT.md (Quick start / البدء السريع)
+
+# For issues and questions:
+# للمشاكل والأسئلة:
+# - GitHub: https://github.com/Ali5829511/2025/issues
+# - Plate Recognizer: https://docs.platerecognizer.com/
