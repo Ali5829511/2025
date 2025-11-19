@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير الوحدات السكنية الحقيقية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .success-banner {
+            background: #28a745;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .stats-hero {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .stat-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transform: translateY(0);
+            transition: transform 0.3s;
+        }
+
+        .stat-hero:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-hero-number {
+            font-size: 4.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .stat-hero-label {
+            font-size: 1.3em;
+            opacity: 0.95;
+        }
+
+        .section {
+            margin: 40px 0;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 2em;
+            color: #1e3c72;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-card {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .info-card h3 {
+            color: #1e3c72;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-right: 5px solid #667eea;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            color: #1e3c72;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 18px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .badge-vacant {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 3px solid #28a745;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            color: #155724;
+        }
+
+        .alert-success h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .alert-success ul {
+            list-style: none;
+            padding-right: 20px;
+        }
+
+        .alert-success li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer {
+            background: #1e3c72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 تقرير الوحدات السكنية</h1>
+            <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">منطقة الفلل - البيانات الحقيقية</p>
+        </div>
+
+        <div class="success-banner">
+            ✅ تم استيراد 114 وحدة سكنية (فلل) بنجاح!
+        </div>
+
+        <div class="content">
+            <div class="alert-success">
+                <h3>✓ ملخص العملية</h3>
+                <ul>
+                    <li><strong>✓</strong> تم حذف جميع الوحدات السكنية السابقة</li>
+                    <li><strong>✓</strong> تم استيراد بيانات الفلل الحقيقية من الملف المرفق</li>
+                    <li><strong>✓</strong> جميع البيانات مطابقة للصورة المقدمة</li>
+                    <li><strong>✓</strong> تم ربط كل فلة بالمبنى الخاص بها</li>
+                </ul>
+            </div>
+
+            <div class="stats-hero">
+                <div class="stat-hero">
+                    <div class="stat-hero-number">114</div>
+                    <div class="stat-hero-label">إجمالي الفلل</div>
+                </div>
+                <div class="stat-hero">
+                    <div class="stat-hero-number">114</div>
+                    <div class="stat-hero-label">وحدات شاغرة</div>
+                </div>
+                <div class="stat-hero">
+                    <div class="stat-hero-number">0</div>
+                    <div class="stat-hero-label">وحدات مشغولة</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span style="font-size: 1.5em;">📋</span>
+                    <span>تفاصيل الوحدات السكنية</span>
+                </div>
+
+                <div class="info-card">
+                    <h3>معلومات عامة</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">نوع الوحدة</div>
+                            <div class="detail-value">فلة</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">رقم الطابق</div>
+                            <div class="detail-value">0 (أرضي)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">رقم الوحدة</div>
+                            <div class="detail-value">1</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">المنطقة</div>
+                            <div class="detail-value">منطقة الفلل</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span style="font-size: 1.5em;">📊</span>
+                    <span>عينة من الفلل المسجلة</span>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الفلة</th>
+                                <th>اسم المبنى</th>
+                                <th>رقم الوحدة</th>
+                                <th>الطابق</th>
+                                <th>النوع</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>V1</td>
+                                <td>فلة 1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>V10</td>
+                                <td>فلة 10</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>V25</td>
+                                <td>فلة 25</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>V50</td>
+                                <td>فلة 50</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>V75</td>
+                                <td>فلة 75</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>V100</td>
+                                <td>فلة 100</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                            <tr>
+                                <td>V114</td>
+                                <td>فلة 114</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>فلة</td>
+                                <td><span class="badge badge-vacant">شاغرة</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="color: #666; margin-top: 15px; font-size: 0.95em;">
+                    * جميع الفلل من 1 إلى 114 مسجلة في قاعدة البيانات
+                </p>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span style="font-size: 1.5em;">✅</span>
+                    <span>حالة النظام النهائية</span>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="background: white; padding: 25px; border-radius: 12px; text-align: center; border-top: 5px solid #28a745;">
+                            <div style="font-size: 2.5em; color: #28a745; font-weight: bold;">165</div>
+                            <div style="color: #555; margin-top: 10px;">إجمالي المباني</div>
+                        </div>
+                        <div style="background: white; padding: 25px; border-radius: 12px; text-align: center; border-top: 5px solid #667eea;">
+                            <div style="font-size: 2.5em; color: #667eea; font-weight: bold;">114</div>
+                            <div style="color: #555; margin-top: 10px;">الوحدات السكنية</div>
+                        </div>
+                        <div style="background: white; padding: 25px; border-radius: 12px; text-align: center; border-top: 5px solid #17a2b8;">
+                            <div style="font-size: 2.5em; color: #17a2b8; font-weight: bold;">100%</div>
+                            <div style="color: #555; margin-top: 10px;">نسبة الشواغر</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert-success" style="margin-top: 30px;">
+                    <h3>🎉 البيانات جاهزة للاستخدام</h3>
+                    <ul>
+                        <li><strong>✓</strong> قاعدة البيانات: Supabase PostgreSQL</li>
+                        <li><strong>✓</strong> المباني: 165 مبنى (51 عمارة + 114 فلة)</li>
+                        <li><strong>✓</strong> الوحدات: 114 فلة مسجلة بالكامل</li>
+                        <li><strong>✓</strong> الحالة: جميع البيانات مطابقة للملف الأصلي</li>
+                        <li><strong>✓</strong> جاهز: لإضافة بيانات السكان والمواقف</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>✨ اكتمل الاستيراد بنجاح!</h3>
+            <p style="margin-top: 15px;">تم استيراد جميع الوحدات السكنية الحقيقية (114 فلة)</p>
+            <p style="margin-top: 10px; opacity: 0.9;">البيانات مطابقة تماماً للملف المصدر</p>
+            <p style="margin-top: 15px; opacity: 0.8;">© 2025 جامعة الإمام محمد بن سعود الإسلامية</p>
+        </div>
+    </div>
+</body>
+</html>
