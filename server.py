@@ -2107,12 +2107,12 @@ def get_comprehensive_reports():
         # Complaints trend - Calculate from actual complaints data with monthly grouping
         cursor.execute("""
             SELECT 
-                strftime('%Y-%m', complaint_date) as month,
+                strftime('%Y-%m', created_at) as month,
                 COUNT(*) as total_count,
                 SUM(CASE WHEN status IN ('resolved', 'محلولة', 'closed', 'مغلقة') THEN 1 ELSE 0 END) as resolved_count
             FROM complaints
-            WHERE complaint_date IS NOT NULL
-                AND date(complaint_date) >= date('now', '-7 months')
+            WHERE created_at IS NOT NULL
+                AND date(created_at) >= date('now', '-7 months')
             GROUP BY month
             ORDER BY month DESC
             LIMIT 7
@@ -2176,6 +2176,209 @@ def get_comprehensive_reports():
             'error': 'Failed to load comprehensive reports data',
             'error_ar': 'فشل في تحميل بيانات التقارير الشاملة'
         }), 500
+
+
+@app.route('/api/reports/export/excel')
+def export_comprehensive_reports_excel():
+    """Export comprehensive reports to Excel"""
+    try:
+        import pandas as pd
+        from io import BytesIO
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get filter parameters
+        report_type = request.args.get('type', 'all')
+        from_date = request.args.get('from_date', '')
+        to_date = request.args.get('to_date', '')
+        building = request.args.get('building', '')
+        
+        # Create Excel writer
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='openpyxl')
+        
+        # Export residents data
+        if report_type in ['all', 'residents']:
+            query = 'SELECT * FROM residents WHERE 1=1'
+            params = []
+            if building:
+                query += ' AND building_id = ?'
+                params.append(building)
+            
+            cursor.execute(query, params)
+            residents = cursor.fetchall()
+            columns = [description[0] for description in cursor.description]
+            df_residents = pd.DataFrame(residents, columns=columns)
+            df_residents.to_excel(writer, sheet_name='السكان', index=False)
+        
+        # Export violations data
+        if report_type in ['all', 'violations']:
+            query = 'SELECT * FROM traffic_violations WHERE 1=1'
+            params = []
+            if from_date:
+                query += ' AND date(violation_date) >= date(?)'
+                params.append(from_date)
+            if to_date:
+                query += ' AND date(violation_date) <= date(?)'
+                params.append(to_date)
+            
+            cursor.execute(query, params)
+            violations = cursor.fetchall()
+            columns = [description[0] for description in cursor.description]
+            df_violations = pd.DataFrame(violations, columns=columns)
+            df_violations.to_excel(writer, sheet_name='المخالفات', index=False)
+        
+        # Export security incidents
+        if report_type in ['all', 'security']:
+            cursor.execute('SELECT * FROM security_incidents')
+            incidents = cursor.fetchall()
+            columns = [description[0] for description in cursor.description]
+            df_incidents = pd.DataFrame(incidents, columns=columns)
+            df_incidents.to_excel(writer, sheet_name='الوقائع الأمنية', index=False)
+        
+        # Export complaints
+        if report_type in ['all', 'complaints']:
+            cursor.execute('SELECT * FROM complaints')
+            complaints = cursor.fetchall()
+            columns = [description[0] for description in cursor.description]
+            df_complaints = pd.DataFrame(complaints, columns=columns)
+            df_complaints.to_excel(writer, sheet_name='الشكاوى', index=False)
+        
+        conn.close()
+        writer.close()
+        output.seek(0)
+        
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'comprehensive_report_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        app.logger.error(f'Excel export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to export to Excel',
+            'error_ar': 'فشل في التصدير إلى Excel'
+        }), 500
+
+
+@app.route('/api/reports/export/word')
+def export_comprehensive_reports_word():
+    """Export comprehensive reports to Word document"""
+    try:
+        from docx import Document
+        from docx.shared import Inches, Pt, RGBColor
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from io import BytesIO
+        
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get filter parameters
+        report_type = request.args.get('type', 'all')
+        from_date = request.args.get('from_date', '')
+        to_date = request.args.get('to_date', '')
+        
+        # Create Word document
+        doc = Document()
+        
+        # Add title
+        title = doc.add_heading('التقرير الشامل - نظام إدارة الإسكان', 0)
+        title.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        
+        # Add date range
+        if from_date and to_date:
+            date_para = doc.add_paragraph(f'الفترة: من {from_date} إلى {to_date}')
+            date_para.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        
+        doc.add_paragraph()
+        
+        # Add statistics summary
+        doc.add_heading('ملخص الإحصائيات', level=1)
+        
+        cursor.execute('SELECT COUNT(*) FROM residents WHERE is_active = 1')
+        total_residents = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM traffic_violations')
+        total_violations = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM security_incidents')
+        total_incidents = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM complaints WHERE status IN ("open", "مفتوحة")')
+        open_complaints = cursor.fetchone()[0]
+        
+        stats_para = doc.add_paragraph()
+        stats_para.add_run(f'• إجمالي السكان: {total_residents}\n').bold = True
+        stats_para.add_run(f'• إجمالي المخالفات: {total_violations}\n')
+        stats_para.add_run(f'• الوقائع الأمنية: {total_incidents}\n')
+        stats_para.add_run(f'• الشكاوى المعلقة: {open_complaints}\n')
+        stats_para.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        
+        # Add detailed sections based on report type
+        if report_type in ['all', 'violations']:
+            doc.add_page_break()
+            doc.add_heading('تقرير المخالفات المرورية', level=1)
+            
+            query = 'SELECT violation_date, plate_number, violation_type, location FROM traffic_violations'
+            params = []
+            if from_date:
+                query += ' WHERE date(violation_date) >= date(?)'
+                params.append(from_date)
+            query += ' ORDER BY violation_date DESC LIMIT 50'
+            
+            cursor.execute(query, params)
+            violations = cursor.fetchall()
+            
+            if violations:
+                table = doc.add_table(rows=1, cols=4)
+                table.style = 'Light Grid Accent 1'
+                header_cells = table.rows[0].cells
+                header_cells[0].text = 'التاريخ'
+                header_cells[1].text = 'رقم اللوحة'
+                header_cells[2].text = 'نوع المخالفة'
+                header_cells[3].text = 'الموقع'
+                
+                for violation in violations:
+                    row_cells = table.add_row().cells
+                    row_cells[0].text = str(violation[0])
+                    row_cells[1].text = str(violation[1])
+                    row_cells[2].text = str(violation[2])
+                    row_cells[3].text = str(violation[3])
+        
+        conn.close()
+        
+        # Save document to BytesIO
+        output = BytesIO()
+        doc.save(output)
+        output.seek(0)
+        
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'comprehensive_report_{timestamp}.docx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        app.logger.error(f'Word export error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to export to Word',
+            'error_ar': 'فشل في التصدير إلى Word'
+        }), 500
+
 
 # ==================== Car Image Upload and Analysis Routes ====================
 
