@@ -150,7 +150,8 @@ def init_database():
     cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS traffic_violations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vehicle_id INTEGER NOT NULL,
+        vehicle_id INTEGER,
+        plate_number TEXT,
         violation_type TEXT NOT NULL,
         violation_date TIMESTAMP NOT NULL,
         location TEXT,
@@ -158,10 +159,12 @@ def init_database():
         fine_amount DECIMAL(10, 2),
         status TEXT DEFAULT 'pending',
         reported_by INTEGER,
+        recorded_by INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
-        FOREIGN KEY (reported_by) REFERENCES users (id)
+        FOREIGN KEY (reported_by) REFERENCES users (id),
+        FOREIGN KEY (recorded_by) REFERENCES users (id)
     )
     '''))
     
