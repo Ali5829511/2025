@@ -6,7 +6,7 @@
     <title>التقارير الشاملة - نظام إدارة إسكان أعضاء هيئة التدريس</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal:700,400&display=swap">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/chart.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -781,6 +781,51 @@
                     </button>
                 </div>
             </div>
+
+            <!-- التقرير الشامل الكامل -->
+            <div class="report-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="report-header">
+                    <div class="report-icon" style="background: rgba(255,255,255,0.3);">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="report-title" style="color: white;">التقرير الشامل الكامل لجميع أجزاء النظام</div>
+                </div>
+                <div class="report-description" style="color: rgba(255,255,255,0.9);">
+                    تقرير تفصيلي شامل يتضمن جميع بيانات النظام: السكان، المباني، الشقق، المواقف، المخالفات، الوقائع الأمنية، الشكاوى، الزوار، الملصقات، والتراخيص - مع إحصائيات متقدمة وتحليلات معمقة
+                </div>
+                <div class="report-stats" style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: white;">42</div>
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">صفحة نظام</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: white;">21</div>
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">جدول بيانات</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: white;">100%</div>
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">تغطية شاملة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: white;">🔥</div>
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">جاهز الآن</div>
+                    </div>
+                </div>
+                <div class="report-actions">
+                    <button class="btn btn-primary" style="background: white; color: #667eea; flex: 2;" onclick="generateCompleteSystemReport()">
+                        <i class="fas fa-file-pdf"></i>
+                        إنشاء التقرير الشامل الكامل
+                    </button>
+                    <button class="btn btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border-color: white;" onclick="exportCompleteReport('excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border-color: white;" onclick="exportCompleteReport('word')">
+                        <i class="fas fa-file-word"></i>
+                        Word
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- فلاتر التقارير المتقدمة -->
@@ -1375,6 +1420,82 @@
                 })
                 .finally(() => {
                     // Restore button
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+        }
+
+        // وظيفة إنشاء التقرير الشامل الكامل
+        function generateCompleteSystemReport() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء التقرير الشامل...';
+            btn.disabled = true;
+            
+            // استدعاء API للتقرير الشامل
+            fetch('/api/reports/complete-system-report')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('فشل في إنشاء التقرير');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `complete_system_report_${new Date().toISOString().slice(0, 10)}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    alert('✅ تم إنشاء التقرير الشامل الكامل بنجاح!\n\nيتضمن التقرير:\n• جميع بيانات النظام (42 صفحة)\n• إحصائيات متقدمة\n• رسوم بيانية تفصيلية\n• تحليلات معمقة');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء إنشاء التقرير: ' + error.message);
+                })
+                .finally(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+        }
+
+        // وظيفة تصدير التقرير الشامل
+        function exportCompleteReport(format) {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+            btn.disabled = true;
+            
+            const endpoint = format === 'excel' ? '/api/reports/complete-system-report/excel' : '/api/reports/complete-system-report/word';
+            const extension = format === 'excel' ? 'xlsx' : 'docx';
+            
+            fetch(endpoint)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('فشل في تصدير التقرير');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `complete_system_report_${new Date().toISOString().slice(0, 10)}.${extension}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    alert(`✅ تم تصدير التقرير الشامل إلى ${format.toUpperCase()} بنجاح!`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء التصدير: ' + error.message);
+                })
+                .finally(() => {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 });
