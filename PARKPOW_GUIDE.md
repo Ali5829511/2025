@@ -60,7 +60,7 @@ PARKPOW_WEBHOOK_TOKEN=your-webhook-token-here
 
 **مثال:**
 ```bash
-PARKPOW_API_TOKEN=7c13be422713a758a42a0bc453cf3331fbf4d346
+PARKPOW_API_TOKEN=560a4728fc1f0fee1f76d1eb67f001d762a941d9
 PARKPOW_API_URL=https://app.parkpow.com/api/v1
 PARKPOW_WEBHOOK_TOKEN=webhook_secret_token_123
 ```
@@ -124,7 +124,6 @@ CREATE TABLE parkpow_detections (
 - ✅ نوع المخالفة (مطلوب)
 - الموقع (اختياري)
 - الوصف (اختياري)
-- قيمة الغرامة (افتراضي: 0)
 
 **أنواع المخالفات:**
 - وقوف ممنوع
@@ -225,8 +224,7 @@ Content-Type: application/json
   "plate_number": "ABC123",
   "violation_type": "وقوف ممنوع",
   "location": "موقف المبنى أ",
-  "description": "الوقوف في مكان محظور",
-  "fine_amount": 200
+  "description": "الوقوف في مكان محظور"
 }
 ```
 
