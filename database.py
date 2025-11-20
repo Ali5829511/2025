@@ -150,18 +150,21 @@ def init_database():
     cursor.execute(database_adapter.adapt_sql('''
     CREATE TABLE IF NOT EXISTS traffic_violations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vehicle_id INTEGER NOT NULL,
+        vehicle_id INTEGER,
+        plate_number TEXT,
         violation_type TEXT NOT NULL,
         violation_date TIMESTAMP NOT NULL,
         location TEXT,
         description TEXT,
-        fine_amount DECIMAL(10, 2),
+        payment_status INTEGER DEFAULT 0,
         status TEXT DEFAULT 'pending',
         reported_by INTEGER,
+        recorded_by INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
-        FOREIGN KEY (reported_by) REFERENCES users (id)
+        FOREIGN KEY (reported_by) REFERENCES users (id),
+        FOREIGN KEY (recorded_by) REFERENCES users (id)
     )
     '''))
     
@@ -365,6 +368,41 @@ def init_database():
         processed BOOLEAN DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE SET NULL
+    )
+    '''))
+    
+    # API tokens table for external API access
+    cursor.execute(database_adapter.adapt_sql('''
+    CREATE TABLE IF NOT EXISTS api_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        token TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        description TEXT,
+        permissions TEXT,
+        is_active BOOLEAN DEFAULT 1,
+        last_used TIMESTAMP,
+        expires_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_by INTEGER,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users (id)
+    )
+    '''))
+    
+    # API token usage log
+    cursor.execute(database_adapter.adapt_sql('''
+    CREATE TABLE IF NOT EXISTS api_token_usage (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        token_id INTEGER NOT NULL,
+        endpoint TEXT NOT NULL,
+        method TEXT NOT NULL,
+        ip_address TEXT,
+        user_agent TEXT,
+        status_code INTEGER,
+        request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        response_time_ms INTEGER,
+        FOREIGN KEY (token_id) REFERENCES api_tokens (id) ON DELETE CASCADE
     )
     '''))
     

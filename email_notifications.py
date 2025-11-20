@@ -191,14 +191,14 @@ def send_violation_notification(violation_data, recipient_email):
                 </div>
                 
                 <div class="info-row">
-                    <span class="info-label">مبلغ الغرامة:</span>
+                    <span class="info-label">حالة الدفع:</span>
                     <span class="info-value" style="color: #ef4444; font-weight: bold;">
-                        {violation_data.get('fine_amount', 0)} ريال
+                        {'مدفوع' if violation_data.get('payment_status', 0) == 1 else 'غير مدفوع'}
                     </span>
                 </div>
                 
                 <p style="margin-top: 20px;">
-                    <strong>للاستعلام عن المخالفة والدفع، يرجى زيارة:</strong><br>
+                    <strong>للاستعلام عن المخالفة، يرجى زيارة:</strong><br>
                     نظام المرور المتكامل - صفحة الاستعلام
                 </p>
             </div>
@@ -468,7 +468,7 @@ def send_immobilization_notification(immobilization_data, recipient_email):
                 
                 <p style="margin-top: 20px;">
                     <strong>لإفراج عن مركبتك:</strong><br>
-                    1. قم بدفع جميع الرسوم والغرامات المستحقة<br>
+                    1. قم بتسوية جميع المخالفات المستحقة<br>
                     2. توجه إلى قسم المرور مع المستندات المطلوبة<br>
                     3. احصل على إذن الإفراج
                 </p>
