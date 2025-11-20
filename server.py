@@ -13,6 +13,7 @@ import database
 import auth
 import plate_recognizer
 import parkpow_integration
+import api_token_manager
 import car_image_analyzer
 import car_data_exporter
 import vehicle_report_exporter
@@ -1062,6 +1063,10 @@ def plate_reader_api_v1():
         }), 403
     
     # Validate token format (Token <token> or Bearer <token>)
+    request_start_time = datetime.now()
+    token_data = None
+    user = None
+    
     try:
         if auth_header.startswith('Token '):
             token = auth_header.split(' ')[1]
@@ -1073,13 +1078,24 @@ def plate_reader_api_v1():
                 'status_code': 403
             }), 403
         
-        # Verify token with existing auth system
-        user = auth.verify_token(token)
-        if not user:
-            return jsonify({
-                'detail': 'Invalid authentication token.',
-                'status_code': 403
-            }), 403
+        # Try to validate as API token first
+        token_data = api_token_manager.validate_api_token(token)
+        
+        if token_data:
+            # Valid API token - create user object from token data
+            user = {
+                'id': token_data['user_id'],
+                'username': token_data['username'],
+                'role': token_data['role']
+            }
+        else:
+            # Try existing auth system token
+            user = auth.verify_token(token)
+            if not user:
+                return jsonify({
+                    'detail': 'Invalid authentication token.',
+                    'status_code': 403
+                }), 403
     
     except Exception as e:
         return jsonify({
@@ -1158,6 +1174,21 @@ def plate_reader_api_v1():
                 ip_address=request.remote_addr
             )
             
+            # Log token usage if API token was used
+            response_time_ms = int((datetime.now() - request_start_time).total_seconds() * 1000)
+            status_code = 200 if result.get('success') else 500
+            
+            if token_data:
+                api_token_manager.log_token_usage(
+                    token_data['token_id'],
+                    '/v1/plate-reader',
+                    'POST',
+                    request.remote_addr,
+                    request.headers.get('User-Agent', ''),
+                    status_code,
+                    response_time_ms
+                )
+            
             # Return in Django REST framework style
             if result.get('success'):
                 return jsonify(result), 200
@@ -1169,10 +1200,170 @@ def plate_reader_api_v1():
         
         except Exception as e:
             app.logger.error(f'Plate reader API v1 error: {str(e)}')
+            
+            # Log failed request if token was provided
+            if token_data:
+                response_time_ms = int((datetime.now() - request_start_time).total_seconds() * 1000)
+                api_token_manager.log_token_usage(
+                    token_data['token_id'],
+                    '/v1/plate-reader',
+                    'POST',
+                    request.remote_addr,
+                    request.headers.get('User-Agent', ''),
+                    500,
+                    response_time_ms
+                )
+            
             return jsonify({
                 'detail': 'Internal server error during plate recognition',
                 'status_code': 500
             }), 500
+
+
+# ==================== API Token Management ====================
+
+@app.route('/api/tokens', methods=['GET'])
+@auth.require_auth
+def list_tokens():
+    """List API tokens"""
+    try:
+        user = request.user
+        
+        # Admin can see all tokens, others see only their own
+        user_id_filter = None if user['role'] == 'admin' else user['id']
+        
+        tokens = api_token_manager.list_api_tokens(
+            user_id=user_id_filter,
+            include_inactive=user['role'] == 'admin'
+        )
+        
+        return jsonify({
+            'success': True,
+            'tokens': tokens,
+            'count': len(tokens)
+        })
+    
+    except Exception as e:
+        app.logger.error(f'List tokens error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to list API tokens',
+            'error_ar': 'فشل عرض قائمة رموز الوصول'
+        }), 500
+
+
+@app.route('/api/tokens', methods=['POST'])
+@auth.require_auth
+def create_token():
+    """Create a new API token"""
+    try:
+        user = request.user
+        data = request.get_json()
+        
+        if not data or 'name' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Token name is required',
+                'error_ar': 'اسم الرمز مطلوب'
+            }), 400
+        
+        # Admin can create tokens for any user, others only for themselves
+        target_user_id = data.get('user_id', user['id'])
+        if user['role'] != 'admin' and target_user_id != user['id']:
+            return jsonify({
+                'success': False,
+                'error': 'Unauthorized to create tokens for other users',
+                'error_ar': 'غير مصرح بإنشاء رموز لمستخدمين آخرين'
+            }), 403
+        
+        result = api_token_manager.create_api_token(
+            name=data['name'],
+            user_id=target_user_id,
+            created_by=user['id'],
+            description=data.get('description', ''),
+            permissions=data.get('permissions', 'read'),
+            expires_days=data.get('expires_days')
+        )
+        
+        # Log audit
+        database.log_audit(
+            user['id'],
+            f'Created API token: {data["name"]}',
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'Create token error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to create API token',
+            'error_ar': 'فشل إنشاء رمز الوصول'
+        }), 500
+
+
+@app.route('/api/tokens/<int:token_id>', methods=['DELETE'])
+@auth.require_auth
+def revoke_token(token_id):
+    """Revoke an API token"""
+    try:
+        user = request.user
+        
+        # Check if user owns the token or is admin
+        tokens = api_token_manager.list_api_tokens(user_id=user['id'] if user['role'] != 'admin' else None)
+        token_exists = any(t['id'] == token_id for t in tokens)
+        
+        if not token_exists and user['role'] != 'admin':
+            return jsonify({
+                'success': False,
+                'error': 'Token not found or unauthorized',
+                'error_ar': 'الرمز غير موجود أو غير مصرح'
+            }), 404
+        
+        result = api_token_manager.revoke_api_token(token_id, user['id'])
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        app.logger.error(f'Revoke token error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to revoke API token',
+            'error_ar': 'فشل إلغاء رمز الوصول'
+        }), 500
+
+
+@app.route('/api/tokens/<int:token_id>/usage', methods=['GET'])
+@auth.require_auth
+def token_usage_stats(token_id):
+    """Get token usage statistics"""
+    try:
+        user = request.user
+        days = request.args.get('days', 30, type=int)
+        
+        # Check if user owns the token or is admin
+        tokens = api_token_manager.list_api_tokens(user_id=user['id'] if user['role'] != 'admin' else None)
+        token_exists = any(t['id'] == token_id for t in tokens)
+        
+        if not token_exists and user['role'] != 'admin':
+            return jsonify({
+                'success': False,
+                'error': 'Token not found or unauthorized',
+                'error_ar': 'الرمز غير موجود أو غير مصرح'
+            }), 404
+        
+        stats = api_token_manager.get_token_usage_stats(token_id, days)
+        
+        return jsonify(stats)
+    
+    except Exception as e:
+        app.logger.error(f'Token usage stats error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get token usage statistics',
+            'error_ar': 'فشل الحصول على إحصائيات الاستخدام'
+        }), 500
 
 
 # ==================== Static File Serving ====================
