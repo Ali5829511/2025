@@ -2761,7 +2761,7 @@ def export_complete_system_report_word():
         
         # Residents details
         doc.add_heading('1. تقرير السكان', level=2)
-        cursor.execute('SELECT national_id, full_name, building_id, apartment_id, move_in_date FROM residents WHERE is_active = 1 LIMIT 20')
+        cursor.execute('SELECT national_id, name, building_id, unit_number, move_in_date FROM residents WHERE is_active = 1 LIMIT 20')
         residents = cursor.fetchall()
         
         if residents:
