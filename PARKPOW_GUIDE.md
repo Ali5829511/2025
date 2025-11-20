@@ -124,7 +124,6 @@ CREATE TABLE parkpow_detections (
 - ✅ نوع المخالفة (مطلوب)
 - الموقع (اختياري)
 - الوصف (اختياري)
-- قيمة الغرامة (افتراضي: 0)
 
 **أنواع المخالفات:**
 - وقوف ممنوع
@@ -225,8 +224,7 @@ Content-Type: application/json
   "plate_number": "ABC123",
   "violation_type": "وقوف ممنوع",
   "location": "موقف المبنى أ",
-  "description": "الوقوف في مكان محظور",
-  "fine_amount": 200
+  "description": "الوقوف في مكان محظور"
 }
 ```
 
