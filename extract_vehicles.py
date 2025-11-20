@@ -1,16 +1,18 @@
 """
-Vehicle Data Extraction System
-نظام استخراج بيانات المركبات من الصور
+Vehicle Data Extraction System with Violation Tracking
+نظام استخراج بيانات المركبات مع تتبع المخالفات
 
 This script processes a folder of vehicle images and extracts:
 - License plate numbers (رقم اللوحة)
 - Vehicle type (نوع المركبة)
 - Dominant color (اللون)
+- Violation records (without fines) (سجل المخالفات بدون غرامات)
 
 يقوم هذا السكربت بمعالجة مجلد من صور المركبات واستخراج:
 - أرقام اللوحات
 - أنواع المركبات
 - الألوان السائدة
+- سجلات المخالفات (بدون غرامات)
 
 Requirements:
 - Python 3.7+
@@ -24,6 +26,9 @@ Configuration:
     Set the following variables before running:
     - IMAGE_FOLDER: Path to folder containing vehicle images
     - API_TOKEN: Your Plate Recognizer API token
+    - TRACK_VIOLATIONS: Enable/disable violation tracking (True/False)
+    - DEFAULT_VIOLATION_TYPE: Type of violation to record
+    - DEFAULT_LOCATION: Location where images were captured
 
 For detailed documentation, see:
     - EXTRACT_VEHICLES_GUIDE.md (Comprehensive guide)
@@ -96,6 +101,23 @@ MIN_CONFIDENCE = 0.0
 # Region codes for better accuracy (e.g., ['sa'] for Saudi Arabia)
 # رموز المناطق لتحسين الدقة (مثلاً ['sa'] للسعودية)
 REGIONS = ['sa']
+
+# Violation tracking settings / إعدادات تتبع المخالفات
+# Enable/disable violation tracking
+# تفعيل/تعطيل تتبع المخالفات
+TRACK_VIOLATIONS = True
+
+# Default violation type for detected vehicles
+# نوع المخالفة الافتراضي للمركبات المكتشفة
+DEFAULT_VIOLATION_TYPE = "مخالفة مرورية"  # Traffic violation
+
+# Location where images were captured (optional)
+# موقع التقاط الصور (اختياري)
+DEFAULT_LOCATION = ""
+
+# Violation description template
+# قالب وصف المخالفة
+VIOLATION_DESCRIPTION = "تم رصد المركبة عبر نظام التعرف على اللوحات"
 
 
 # ============================================================================
@@ -336,6 +358,10 @@ def save_results(results: List[Dict], output_file: str):
             'المنطقة',
             'بدائل اللوحة',
             'الحالة',
+            'تسجيل مخالفة',
+            'نوع المخالفة',
+            'موقع المخالفة',
+            'وصف المخالفة',
             'رابط الصورة',
             'وقت المعالجة'
         ]
@@ -403,8 +429,8 @@ def process_images():
     """
     
     print("\n" + "="*70)
-    print("🚗 Vehicle Data Extraction System")
-    print("🚗 نظام استخراج بيانات المركبات")
+    print("🚗 Vehicle Data Extraction System with Violation Tracking")
+    print("🚗 نظام استخراج بيانات المركبات مع تتبع المخالفات")
     print("="*70)
     
     # Validate configuration
@@ -427,6 +453,16 @@ def process_images():
     
     print("✅ Configuration OK")
     print("✅ الإعدادات صحيحة")
+    
+    # Show violation tracking status
+    if TRACK_VIOLATIONS:
+        print("\n📝 Violation tracking: ENABLED (no fines)")
+        print("📝 تتبع المخالفات: مفعّل (بدون غرامات)")
+        print(f"   Violation type: {DEFAULT_VIOLATION_TYPE}")
+        print(f"   نوع المخالفة: {DEFAULT_VIOLATION_TYPE}")
+    else:
+        print("\n📝 Violation tracking: DISABLED")
+        print("📝 تتبع المخالفات: معطّل")
     
     # Get list of image files
     print(f"\n📁 Scanning folder: {IMAGE_FOLDER}")
@@ -498,6 +534,10 @@ def process_images():
                 'المنطقة': '',
                 'بدائل اللوحة': '',
                 'الحالة': 'فشل - صورة غير صالحة',
+                'تسجيل مخالفة': 'لا',
+                'نوع المخالفة': '',
+                'موقع المخالفة': '',
+                'وصف المخالفة': '',
                 'رابط الصورة': image_path,
                 'وقت المعالجة': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             })
@@ -517,6 +557,21 @@ def process_images():
         
         color = get_dominant_color(image_path)
         
+        # Prepare violation tracking data
+        violation_recorded = "لا"  # Default: No
+        violation_type = ""
+        violation_location = ""
+        violation_description = ""
+        
+        if TRACK_VIOLATIONS and recognition.get('success'):
+            violation_recorded = "نعم"  # Yes
+            violation_type = DEFAULT_VIOLATION_TYPE
+            violation_location = DEFAULT_LOCATION
+            violation_description = VIOLATION_DESCRIPTION
+            
+            print("   📝 Recording violation (no fines)...")
+            print("   📝 تسجيل المخالفة (بدون غرامات)...")
+        
         # Store result
         status = "نجح" if recognition.get('success') else "فشل"
         if recognition.get('error'):
@@ -534,6 +589,10 @@ def process_images():
             'المنطقة': recognition.get('region', ''),
             'بدائل اللوحة': candidates_str,
             'الحالة': status,
+            'تسجيل مخالفة': violation_recorded,
+            'نوع المخالفة': violation_type,
+            'موقع المخالفة': violation_location,
+            'وصف المخالفة': violation_description,
             'رابط الصورة': image_path,
             'وقت المعالجة': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }

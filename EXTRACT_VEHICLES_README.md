@@ -5,13 +5,14 @@
 
 ## نظرة عامة
 
-سكربت Python لاستخراج بيانات المركبات من الصور بشكل تلقائي باستخدام Plate Recognizer API.
+سكربت Python لاستخراج بيانات المركبات من الصور بشكل تلقائي باستخدام Plate Recognizer API، مع إمكانية تتبع المخالفات بدون غرامات.
 
 ### المميزات الرئيسية
 
 ✅ **استخراج رقم اللوحة** - بدقة عالية باستخدام AI  
 ✅ **اكتشاف نوع المركبة** - سيارة، شاحنة، دراجة نارية، إلخ  
 ✅ **تحديد اللون** - بالعربية مع قيم RGB  
+✅ **تتبع المخالفات** - تسجيل المخالفات بدون غرامات أو رسوم  
 ✅ **معالجة دفعات كبيرة** - دعم آلاف الصور  
 ✅ **الاستئناف التلقائي** - استمرار من آخر نقطة توقف  
 ✅ **تصدير Excel** - بأعمدة عربية  
@@ -32,6 +33,11 @@ Edit `extract_vehicles.py`:
 ```python
 IMAGE_FOLDER = r"C:\Path\To\Your\Images"
 API_TOKEN = "your_platerecognizer_api_token"
+
+# Violation tracking (optional)
+TRACK_VIOLATIONS = True  # Enable violation recording (no fines)
+DEFAULT_VIOLATION_TYPE = "مخالفة مرورية"  # Traffic violation
+DEFAULT_LOCATION = "الموقع"  # Location (optional)
 ```
 
 ### 3. Run
@@ -70,6 +76,7 @@ Open `نتائج_المركبات.xlsx` in Excel.
 - 🔍 **License Plate Recognition** - Using Plate Recognizer AI
 - 🚗 **Vehicle Type Detection** - Car, truck, motorcycle, etc.
 - 🎨 **Color Detection** - Dominant color with Arabic names
+- 📝 **Violation Tracking** - Record violations without fines or fees
 - 📊 **Excel Export** - With Arabic column names
 - 🔄 **Resume Capability** - Continue from where you left off
 - ⚡ **Batch Processing** - Process thousands of images
@@ -82,6 +89,7 @@ Open `نتائج_المركبات.xlsx` in Excel.
 - 🔁 **Alternative Readings** - Multiple plate candidates
 - 💾 **Progress Tracking** - Periodic saves to prevent data loss
 - 📝 **Detailed Logging** - Track processing status
+- 🚫 **No Payment Fields** - Violations tracked without fines or payment amounts
 
 ---
 
@@ -155,8 +163,14 @@ The script generates an Excel file with the following columns:
 | المنطقة | Region | Region code |
 | بدائل اللوحة | Alternatives | Alternative readings |
 | الحالة | Status | Success/Failed |
+| تسجيل مخالفة | Violation Recorded | Yes/No (نعم/لا) |
+| نوع المخالفة | Violation Type | Type of violation |
+| موقع المخالفة | Violation Location | Location where captured |
+| وصف المخالفة | Violation Description | Description of violation |
 | رابط الصورة | Image Path | Full path to image |
 | وقت المعالجة | Processing Time | Timestamp |
+
+**Note:** Violation tracking does NOT include fines or payment amounts. It only records the violation type, location, and description for documentation purposes.
 
 ---
 
