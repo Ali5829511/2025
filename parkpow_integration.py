@@ -228,7 +228,7 @@ def record_violation(plate_number: str, violation_data: Dict, user_id: int) -> D
         cursor.execute('''
             INSERT INTO traffic_violations 
             (vehicle_id, plate_number, violation_type, violation_date, 
-             location, description, fine_amount, status, recorded_by)
+             location, description, payment_status, status, recorded_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             vehicle_id,
@@ -237,7 +237,7 @@ def record_violation(plate_number: str, violation_data: Dict, user_id: int) -> D
             violation_data.get('violation_date', datetime.now().isoformat()),
             violation_data.get('location', ''),
             violation_data.get('description', ''),
-            violation_data.get('fine_amount', 0),
+            violation_data.get('payment_status', 0),
             'open',
             user_id
         ))

@@ -933,7 +933,7 @@ def parkpow_record_violation():
             'violation_date': data.get('violation_date', datetime.now().isoformat()),
             'location': data.get('location', ''),
             'description': data.get('description', ''),
-            'fine_amount': data.get('fine_amount', 0)
+            'payment_status': data.get('payment_status', 0)
         }
         
         # Record violation

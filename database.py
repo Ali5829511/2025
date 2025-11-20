@@ -156,7 +156,7 @@ def init_database():
         violation_date TIMESTAMP NOT NULL,
         location TEXT,
         description TEXT,
-        fine_amount DECIMAL(10, 2),
+        payment_status INTEGER DEFAULT 0,
         status TEXT DEFAULT 'pending',
         reported_by INTEGER,
         recorded_by INTEGER,
