@@ -1024,6 +1024,157 @@ def parkpow_webhook():
         }), 500
 
 
+# ==================== Django REST Framework Style API ====================
+# Image Plate Reader API - v1
+# Endpoint compatible with Django REST framework patterns
+
+@app.route('/v1/plate-reader', methods=['GET', 'POST', 'HEAD', 'OPTIONS'])
+def plate_reader_api_v1():
+    """
+    Image Plate Reader API - Django REST framework style
+    
+    GET: Returns API information and status
+    POST: Accepts image for plate recognition
+    
+    Authentication required via Authorization header
+    """
+    # Handle OPTIONS for CORS preflight
+    if request.method == 'OPTIONS':
+        response = make_response('', 204)
+        response.headers['Allow'] = 'GET, POST, HEAD, OPTIONS'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, HEAD, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    # Handle HEAD request
+    if request.method == 'HEAD':
+        response = make_response('', 200)
+        response.headers['Allow'] = 'GET, POST, HEAD, OPTIONS'
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    
+    # Check authentication
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return jsonify({
+            'detail': 'Authentication credentials were not provided.',
+            'status_code': 403
+        }), 403
+    
+    # Validate token format (Token <token> or Bearer <token>)
+    try:
+        if auth_header.startswith('Token '):
+            token = auth_header.split(' ')[1]
+        elif auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+        else:
+            return jsonify({
+                'detail': 'Invalid authentication header format. Use "Token <token>" or "Bearer <token>"',
+                'status_code': 403
+            }), 403
+        
+        # Verify token with existing auth system
+        user = auth.verify_token(token)
+        if not user:
+            return jsonify({
+                'detail': 'Invalid authentication token.',
+                'status_code': 403
+            }), 403
+    
+    except Exception as e:
+        return jsonify({
+            'detail': 'Authentication failed.',
+            'status_code': 403
+        }), 403
+    
+    # Handle GET request - API information
+    if request.method == 'GET':
+        return jsonify({
+            'status': 'active',
+            'version': 'v1',
+            'endpoint': '/v1/plate-reader',
+            'methods': ['GET', 'POST'],
+            'description': 'Image Plate Reader API',
+            'description_ar': 'واجهة برمجية لتمييز لوحات المركبات من الصور',
+            'authentication': 'Token required in Authorization header',
+            'post_format': {
+                'image': 'Base64 encoded image string or image URL',
+                'camera_id': 'Optional camera identifier'
+            },
+            'response_format': {
+                'success': 'boolean',
+                'results': 'array of detected plates',
+                'message': 'status message'
+            }
+        }), 200
+    
+    # Handle POST request - Plate recognition
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            
+            if not data:
+                return jsonify({
+                    'detail': 'Request body must be JSON',
+                    'status_code': 400
+                }), 400
+            
+            if 'image' not in data:
+                return jsonify({
+                    'detail': 'Image field is required',
+                    'status_code': 400
+                }), 400
+            
+            image_data = data.get('image')
+            camera_id = data.get('camera_id')
+            
+            # Use ParkPow integration for recognition
+            result = parkpow_integration.recognize_plate(image_data, camera_id)
+            
+            # If recognition was successful, enrich with vehicle data
+            if result.get('success') and result.get('results'):
+                for plate_data in result['results']:
+                    plate_number = plate_data.get('plate') or plate_data.get('plate_number')
+                    
+                    if plate_number:
+                        # Find vehicle in database
+                        vehicle = parkpow_integration.find_vehicle_by_plate(plate_number)
+                        
+                        # Add vehicle info to result
+                        plate_data['vehicle_info'] = vehicle
+                        
+                        # Log event
+                        parkpow_integration.log_parkpow_event(
+                            user['id'],
+                            'recognition_v1_api',
+                            plate_number,
+                            f"API v1 - Confidence: {plate_data.get('confidence', 0)}"
+                        )
+            
+            # Log audit
+            database.log_audit(
+                user['id'],
+                'Plate recognition via v1 API',
+                ip_address=request.remote_addr
+            )
+            
+            # Return in Django REST framework style
+            if result.get('success'):
+                return jsonify(result), 200
+            else:
+                return jsonify({
+                    'detail': result.get('error', 'Recognition failed'),
+                    'status_code': 500
+                }), 500
+        
+        except Exception as e:
+            app.logger.error(f'Plate reader API v1 error: {str(e)}')
+            return jsonify({
+                'detail': 'Internal server error during plate recognition',
+                'status_code': 500
+            }), 500
+
+
 # ==================== Static File Serving ====================
 
 @app.route('/')
