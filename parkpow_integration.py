@@ -128,9 +128,8 @@ def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
             'Authorization': f'Token {PLATE_RECOGNIZER_API_TOKEN}'
         }
         
-        # Remove the data URL prefix if present
+        # Remove data URL prefix if present (e.g., "data:image/jpeg;base64,")
         if image_data.startswith('data:image'):
-            # Remove the data URL prefix if present
             image_data = image_data.split(',', 1)[1] if ',' in image_data else image_data
         
         # Decode base64 to bytes
@@ -174,6 +173,8 @@ def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
                     # Try to find vehicle in database
                     vehicle = find_vehicle_by_plate(plate) if plate else None
                     
+                    # Return both 'plate' and 'plate_number' for API compatibility
+                    # (different consumers may expect different field names)
                     formatted_results.append({
                         'plate': plate,
                         'plate_number': plate,
