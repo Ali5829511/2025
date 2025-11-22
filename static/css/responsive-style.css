@@ -28,20 +28,29 @@
     outline: none;
 }
 
-/* Ensure sufficient color contrast for links */
+/* Ensure links maintain readability and color */
 .nav-responsive a {
     color: inherit;
     position: relative;
+    /* Minimum color should be set by parent to ensure contrast */
 }
 
 /* Accessible animations - respect user's motion preference */
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    /* Apply to animated components only */
+    .btn-responsive,
+    .btn-responsive::before,
+    .btn-responsive::after,
+    .card-responsive,
+    .nav-responsive a,
+    .form-control,
+    .mobile-menu-toggle {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+    
+    html {
         scroll-behavior: auto !important;
     }
 }
