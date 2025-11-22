@@ -403,8 +403,10 @@
         margin-bottom: 10px;
     }
     
-    /* تباعد أفضل للمسات */
-    a, button {
+    /* تباعد أفضل للمسات - Apply to interactive elements */
+    .btn-responsive,
+    button:not(.no-min-height),
+    a.button {
         min-height: 44px;
         display: inline-flex;
         align-items: center;
@@ -538,8 +540,10 @@
    تحسينات إضافية - Additional Improvements
    ==================================== */
 
-/* تحسين الأداء */
-* {
+/* تحسين الأداء - Performance improvements */
+button,
+.btn-responsive,
+.nav-responsive a {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
 }
