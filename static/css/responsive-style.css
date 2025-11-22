@@ -6,6 +6,60 @@
  */
 
 /* ====================================
+   إمكانية الوصول - Accessibility Improvements
+   ==================================== */
+
+/* Focus visible for keyboard navigation */
+.btn-responsive:focus-visible,
+.form-control:focus-visible,
+.nav-responsive a:focus-visible,
+.responsive-button:focus-visible,
+.card-responsive button:focus-visible,
+.form-group button:focus-visible {
+    outline: 3px solid #2e8bc0;
+    outline-offset: 2px;
+}
+
+/* Skip focus outline for mouse users */
+.btn-responsive:focus:not(:focus-visible),
+.form-control:focus:not(:focus-visible),
+.nav-responsive a:focus:not(:focus-visible),
+.responsive-button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Ensure sufficient color contrast for links */
+.nav-responsive a {
+    color: inherit;
+    position: relative;
+}
+
+/* Accessible animations - respect user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn-responsive,
+    .form-control,
+    .card-responsive {
+        border-width: 2px;
+    }
+    
+    .btn-responsive:hover {
+        transform: none;
+    }
+}
+
+/* ====================================
    نظام الشبكة المرن - Flexible Grid System
    ==================================== */
 
@@ -379,42 +433,53 @@
         min-height: 48px;
     }
     
-    /* نصوص واضحة وقابلة للقراءة */
-    body {
+    /* نصوص واضحة وقابلة للقراءة - Scoped to container */
+    .container,
+    .responsive-container {
         font-size: 16px;
         line-height: 1.6;
     }
     
-    h1 {
+    /* Scoped heading sizes for responsive containers */
+    .container h1,
+    .responsive-container h1,
+    .card-responsive h1 {
         font-size: 24px;
         line-height: 1.3;
         margin-bottom: 16px;
     }
     
-    h2 {
+    .container h2,
+    .responsive-container h2,
+    .card-responsive h2 {
         font-size: 20px;
         line-height: 1.4;
         margin-bottom: 12px;
     }
     
-    h3 {
+    .container h3,
+    .responsive-container h3,
+    .card-responsive h3 {
         font-size: 18px;
         line-height: 1.4;
         margin-bottom: 10px;
     }
     
-    /* تباعد أفضل للمسات - Apply to interactive elements */
+    /* تباعد أفضل للمسات - Better touch targets for interactive elements */
     .btn-responsive,
-    button:not(.no-min-height),
-    a.button {
+    .responsive-button,
+    .form-group button,
+    .nav-responsive a {
         min-height: 44px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
     }
     
-    /* صور متجاوبة */
-    img {
+    /* صور متجاوبة - Responsive images with opt-in */
+    .responsive-img img,
+    .card-responsive img,
+    img.responsive {
         max-width: 100%;
         height: auto;
     }
@@ -541,21 +606,26 @@
    ==================================== */
 
 /* تحسين الأداء - Performance improvements */
-button,
+/* Scope to responsive components to avoid global conflicts */
 .btn-responsive,
-.nav-responsive a {
+.nav-responsive a,
+.card-responsive button,
+.form-group button,
+.responsive-button {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
 }
 
-/* تمرير سلس */
+/* تمرير سلس - Smooth scrolling is acceptable as global setting */
 html {
     scroll-behavior: smooth;
 }
 
-/* صور متجاوبة دائماً */
-img,
-video {
+/* صور متجاوبة - Responsive images with opt-in class */
+.responsive-img img,
+.responsive-img video,
+img.responsive,
+video.responsive {
     max-width: 100%;
     height: auto;
     display: block;
