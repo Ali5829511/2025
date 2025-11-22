@@ -13,6 +13,7 @@ API Documentation: https://app.platerecognizer.com/service/snapshot-cloud/
 import os
 import requests
 import base64
+import json
 from typing import Dict, List, Optional
 from datetime import datetime
 import database
@@ -141,9 +142,14 @@ def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
         }
         
         # Prepare data with regions
+        # Plate Recognizer API expects regions as a JSON array string for multipart form data
         data = {}
-        if PLATE_RECOGNIZER_REGIONS:
-            data['regions'] = PLATE_RECOGNIZER_REGIONS
+        if PLATE_RECOGNIZER_REGIONS and len(PLATE_RECOGNIZER_REGIONS) > 0:
+            # Filter out empty strings
+            regions = [r.strip() for r in PLATE_RECOGNIZER_REGIONS if r.strip()]
+            if regions:
+                # Send as JSON array string for proper API parsing
+                data['regions'] = json.dumps(regions)
         
         # Send request to Plate Recognizer API
         response = requests.post(
