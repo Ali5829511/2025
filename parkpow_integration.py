@@ -1,42 +1,45 @@
 """
-ParkPow API Integration Module
-نظام التكامل مع خدمة ParkPow لتمييز لوحات السيارات وتسجيل المخالفات
-
-This module provides integration with ParkPow API for:
+Plate Recognizer Integration Module (Snapshot Cloud)
+نظام التكامل مع خدمة Plate Recognizer لتمييز لوحات السيارات
+ 
+This module provides integration with Plate Recognizer Snapshot Cloud API for:
 - Automatic license plate recognition
 - Traffic violation recording
 - Vehicle tracking and monitoring
+
+API Documentation: https://app.platerecognizer.com/service/snapshot-cloud/
 """
 
 import os
 import requests
 import base64
+import json
 from typing import Dict, List, Optional
 from datetime import datetime
 import database
 
-# ParkPow API Configuration
-PARKPOW_API_TOKEN = os.environ.get('PARKPOW_API_TOKEN', '')
-PARKPOW_API_URL = os.environ.get('PARKPOW_API_URL', 'https://app.parkpow.com/api/v1')
-PARKPOW_WEBHOOK_URL = f'{PARKPOW_API_URL}/webhook-receiver/'
+# Plate Recognizer API Configuration (Snapshot Cloud)
+PLATE_RECOGNIZER_API_TOKEN = os.environ.get('PLATE_RECOGNIZER_API_TOKEN', '')
+PLATE_RECOGNIZER_API_URL = os.environ.get('PLATE_RECOGNIZER_API_URL', 'https://api.platerecognizer.com/v1/plate-reader/')
+PLATE_RECOGNIZER_REGIONS = os.environ.get('PLATE_RECOGNIZER_REGIONS', 'sa').split(',')  # Default to Saudi Arabia
 
 
 def is_configured() -> bool:
     """
-    Check if ParkPow API is configured
-    التحقق من إعداد خدمة ParkPow
+    Check if Plate Recognizer API is configured
+    التحقق من إعداد خدمة Plate Recognizer
     
     Returns:
         bool: True if API token is configured, False otherwise
     """
-    return bool(PARKPOW_API_TOKEN and len(PARKPOW_API_TOKEN) > 10)
+    return bool(PLATE_RECOGNIZER_API_TOKEN and len(PLATE_RECOGNIZER_API_TOKEN) > 10)
 
 
 def get_api_status() -> Dict:
     """
-    Get ParkPow API status and configuration
-    Test API connectivity by listing vehicles (lightweight check)
-    الحصول على حالة خدمة ParkPow
+    Get Plate Recognizer API status and configuration
+    Test API connectivity using statistics endpoint
+    الحصول على حالة خدمة Plate Recognizer
     
     Returns:
         Dict containing API status information
@@ -45,32 +48,32 @@ def get_api_status() -> Dict:
         return {
             'success': False,
             'configured': False,
-            'message': 'ParkPow API is not configured',
-            'message_ar': 'خدمة ParkPow غير مفعلة'
+            'message': 'Plate Recognizer API is not configured',
+            'message_ar': 'خدمة Plate Recognizer غير مفعلة'
         }
     
     try:
         headers = {
-            'Authorization': f'Token {PARKPOW_API_TOKEN}'
+            'Authorization': f'Token {PLATE_RECOGNIZER_API_TOKEN}'
         }
         
-        # Test API connection by trying to list vehicles with page_size=1
-        # This is the lightest way to test connectivity according to the official API
+        # Test API connection using statistics endpoint
         response = requests.get(
-            f'{PARKPOW_API_URL}/vehicles/',
+            'https://api.platerecognizer.com/v1/statistics/',
             headers=headers,
-            params={'page_size': 1},
             timeout=10
         )
         
         if response.status_code == 200:
+            stats = response.json()
             return {
                 'success': True,
                 'configured': True,
-                'message': 'ParkPow API is active and working',
-                'message_ar': 'خدمة ParkPow نشطة وتعمل بشكل صحيح',
-                'api_url': PARKPOW_API_URL,
-                'webhook_url': PARKPOW_WEBHOOK_URL
+                'message': 'Plate Recognizer API is active and working',
+                'message_ar': 'خدمة Plate Recognizer نشطة وتعمل بشكل صحيح',
+                'api_url': PLATE_RECOGNIZER_API_URL,
+                'usage': stats.get('usage', {}),
+                'total_calls': stats.get('total_calls', 0)
             }
         else:
             return {
@@ -89,7 +92,7 @@ def get_api_status() -> Dict:
         }
     except Exception as e:
         # Log the actual error but don't expose it to user
-        print(f"ParkPow API error: {str(e)}")
+        print(f"Plate Recognizer API error: {str(e)}")
         return {
             'success': False,
             'configured': True,
@@ -100,15 +103,15 @@ def get_api_status() -> Dict:
 
 def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
     """
-    Send image to ParkPow for plate recognition using the log-vehicle endpoint
-    إرسال صورة لتمييز اللوحة باستخدام نقطة نهاية تسجيل المركبة
+    Send image to Plate Recognizer for plate recognition using Snapshot Cloud API
+    إرسال صورة لتمييز اللوحة باستخدام Plate Recognizer
     
-    According to ParkPow API docs, plate recognition is done through the
-    /api/v1/log-vehicle/ endpoint which creates a visit and returns plate data.
+    Uses Plate Recognizer's Snapshot Cloud API endpoint:
+    https://api.platerecognizer.com/v1/plate-reader/
     
     Args:
-        image_data: Base64 encoded image (without data:image prefix)
-        camera_id: Camera code identifier (required)
+        image_data: Base64 encoded image (with or without data:image prefix)
+        camera_id: Camera code identifier (optional, for logging purposes)
     
     Returns:
         Dict containing recognition results
@@ -116,71 +119,100 @@ def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
     if not is_configured():
         return {
             'success': False,
-            'error': 'ParkPow API is not configured',
-            'error_ar': 'خدمة ParkPow غير مفعلة'
+            'error': 'Plate Recognizer API is not configured',
+            'error_ar': 'خدمة Plate Recognizer غير مفعلة'
         }
     
     try:
         headers = {
-            'Authorization': f'Token {PARKPOW_API_TOKEN}',
-            'Content-Type': 'application/json'
+            'Authorization': f'Token {PLATE_RECOGNIZER_API_TOKEN}'
         }
         
-        # Use default camera code if not provided
-        if not camera_id:
-            camera_id = 'default_camera'
-        
-        # Prepare payload according to ParkPow API specification
-        # The image should be base64 encoded without the data:image prefix
+        # Remove data URL prefix if present (e.g., "data:image/jpeg;base64,")
         if image_data.startswith('data:image'):
-            # Remove the data URL prefix if present
             image_data = image_data.split(',', 1)[1] if ',' in image_data else image_data
         
-        payload = {
-            'camera': camera_id,
-            'image': image_data,
-            'results': []  # Empty results array as per API docs
+        # Decode base64 to bytes
+        image_bytes = base64.b64decode(image_data)
+        
+        # Prepare files for upload
+        files = {
+            'upload': ('image.jpg', image_bytes, 'image/jpeg')
         }
         
+        # Prepare data with regions
+        # Plate Recognizer API expects regions as a JSON array string for multipart form data
+        data = {}
+        if PLATE_RECOGNIZER_REGIONS and len(PLATE_RECOGNIZER_REGIONS) > 0:
+            # Filter out empty strings
+            regions = [r.strip() for r in PLATE_RECOGNIZER_REGIONS if r.strip()]
+            if regions:
+                # Send as JSON array string for proper API parsing
+                data['regions'] = json.dumps(regions)
+        
+        # Send request to Plate Recognizer API
         response = requests.post(
-            f'{PARKPOW_API_URL}/log-vehicle/',
+            PLATE_RECOGNIZER_API_URL,
             headers=headers,
-            json=payload,
+            files=files,
+            data=data,
             timeout=30
         )
         
         if response.status_code == 200:
-            data = response.json()
-            # Extract results from the paginated response
-            results_list = data.get('results', [])
+            api_response = response.json()
             
             # Format results to match expected output
             formatted_results = []
-            for visit in results_list:
-                vehicle = visit.get('vehicle', {})
-                start_data = visit.get('start_data', {})
-                
-                # Extract plate number from start_data
-                plate = start_data.get('plate', vehicle.get('license_plate', ''))
-                
-                formatted_results.append({
-                    'plate': plate,
-                    'confidence': start_data.get('score', 0),
-                    'vehicle_info': {
-                        'license_plate': vehicle.get('license_plate'),
-                        'make': vehicle.get('make'),
-                        'model': vehicle.get('model'),
-                        'color': vehicle.get('color'),
-                        'type': vehicle.get('type')
-                    }
-                })
+            
+            if 'results' in api_response:
+                for result in api_response['results']:
+                    plate = result.get('plate', '').upper()
+                    confidence = result.get('score', 0.0)
+                    
+                    # Try to find vehicle in database
+                    vehicle = find_vehicle_by_plate(plate) if plate else None
+                    
+                    # Return both 'plate' and 'plate_number' for API compatibility
+                    # (different consumers may expect different field names)
+                    formatted_results.append({
+                        'plate': plate,
+                        'plate_number': plate,
+                        'confidence': confidence,
+                        'region': result.get('region', {}).get('code', ''),
+                        'vehicle_type': result.get('vehicle', {}).get('type', ''),
+                        'vehicle_info': vehicle,
+                        'candidates': [
+                            {
+                                'plate': c.get('plate', '').upper(),
+                                'confidence': c.get('score', 0.0)
+                            }
+                            for c in result.get('candidates', [])[:5]
+                        ]
+                    })
             
             return {
                 'success': True,
                 'results': formatted_results,
+                'processing_time': api_response.get('processing_time', 0),
                 'message': 'Plate recognized successfully',
                 'message_ar': 'تم تمييز اللوحة بنجاح'
             }
+        
+        elif response.status_code == 401:
+            return {
+                'success': False,
+                'error': 'Invalid API token',
+                'error_ar': 'رمز API غير صالح'
+            }
+        
+        elif response.status_code == 402:
+            return {
+                'success': False,
+                'error': 'Insufficient credits. Please check your Plate Recognizer account.',
+                'error_ar': 'رصيد غير كافٍ. يرجى التحقق من حساب Plate Recognizer.'
+            }
+        
         else:
             return {
                 'success': False,
@@ -190,7 +222,7 @@ def recognize_plate(image_data: str, camera_id: Optional[str] = None) -> Dict:
     
     except Exception as e:
         # Log the actual error but don't expose it to user
-        print(f"ParkPow recognition error: {str(e)}")
+        print(f"Plate Recognizer recognition error: {str(e)}")
         return {
             'success': False,
             'error': 'Error during recognition',
@@ -355,8 +387,8 @@ def get_repeat_offenders(min_violations: int = 3) -> List[Dict]:
 def log_parkpow_event(user_id: int, event_type: str, plate_number: str, 
                       details: Optional[str] = None) -> bool:
     """
-    Log ParkPow activity for audit trail
-    تسجيل نشاط ParkPow للمراجعة
+    Log Plate Recognizer activity for audit trail
+    تسجيل نشاط Plate Recognizer للمراجعة
     
     Args:
         user_id: User performing the action
@@ -368,7 +400,7 @@ def log_parkpow_event(user_id: int, event_type: str, plate_number: str,
         bool: True if logged successfully
     """
     try:
-        log_message = f"ParkPow {event_type}: {plate_number}"
+        log_message = f"Plate Recognizer {event_type}: {plate_number}"
         if details:
             log_message += f" - {details}"
         
@@ -376,17 +408,20 @@ def log_parkpow_event(user_id: int, event_type: str, plate_number: str,
         return True
     
     except Exception as e:
-        print(f"Error logging ParkPow event: {e}")
+        print(f"Error logging Plate Recognizer event: {e}")
         return False
 
 
 def process_webhook_data(webhook_data: Dict) -> Dict:
     """
-    Process incoming webhook data from ParkPow
-    معالجة البيانات الواردة من ParkPow
+    Process incoming webhook data from Plate Recognizer
+    معالجة البيانات الواردة من Plate Recognizer
+    
+    Note: This function is kept for compatibility but Plate Recognizer
+    Snapshot Cloud doesn't provide webhook functionality by default.
     
     Args:
-        webhook_data: Data received from ParkPow webhook
+        webhook_data: Data received from webhook
     
     Returns:
         Dict with processing result
@@ -435,216 +470,9 @@ def process_webhook_data(webhook_data: Dict) -> Dict:
     
     except Exception as e:
         # Log the actual error but don't expose it to user
-        print(f"ParkPow webhook processing error: {str(e)}")
+        print(f"Webhook processing error: {str(e)}")
         return {
             'success': False,
             'error': 'Error processing webhook',
             'error_ar': 'خطأ في معالجة البيانات'
-        }
-
-
-def create_or_update_camera(camera_code: str, camera_name: str, 
-                            camera_type: int = 0, latitude: Optional[float] = None,
-                            longitude: Optional[float] = None, 
-                            notes: str = '') -> Dict:
-    """
-    Create or update a camera in ParkPow
-    إنشاء أو تحديث كاميرا في ParkPow
-    
-    According to ParkPow API docs, this endpoint creates or updates camera details.
-    
-    Args:
-        camera_code: Unique camera identifier (required)
-        camera_name: Human-readable camera name (required)
-        camera_type: Camera type (0=Entrance, 1=Exit, 2=Entrance & Exit, etc.)
-        latitude: Camera latitude (-90 to 90)
-        longitude: Camera longitude (-180 to 180)
-        notes: Additional notes about the camera
-    
-    Returns:
-        Dict with operation result
-    """
-    if not is_configured():
-        return {
-            'success': False,
-            'error': 'ParkPow API is not configured',
-            'error_ar': 'خدمة ParkPow غير مفعلة'
-        }
-    
-    try:
-        headers = {
-            'Authorization': f'Token {PARKPOW_API_TOKEN}',
-            'Content-Type': 'application/json'
-        }
-        
-        payload = {
-            'code': camera_code,
-            'name': camera_name,
-            'type': camera_type,
-            'notes': notes
-        }
-        
-        if latitude is not None:
-            payload['latitude'] = latitude
-        if longitude is not None:
-            payload['longitude'] = longitude
-        
-        response = requests.post(
-            f'{PARKPOW_API_URL}/create-camera/',
-            headers=headers,
-            json=payload,
-            timeout=15
-        )
-        
-        if response.status_code == 200:
-            return {
-                'success': True,
-                'camera': response.json(),
-                'message': 'Camera created/updated successfully',
-                'message_ar': 'تم إنشاء/تحديث الكاميرا بنجاح'
-            }
-        else:
-            return {
-                'success': False,
-                'error': f'Failed with status: {response.status_code}',
-                'error_ar': f'فشل برمز الحالة: {response.status_code}'
-            }
-    
-    except Exception as e:
-        print(f"ParkPow camera creation error: {str(e)}")
-        return {
-            'success': False,
-            'error': 'Error creating/updating camera',
-            'error_ar': 'خطأ في إنشاء/تحديث الكاميرا'
-        }
-
-
-def create_or_update_vehicle(license_plate: str, region: Optional[str] = None,
-                             make: Optional[str] = None,
-                             model: Optional[str] = None, color: Optional[str] = None,
-                             vehicle_type: Optional[str] = None,
-                             field1: Optional[str] = None, field2: Optional[str] = None,
-                             field3: Optional[str] = None, field4: Optional[str] = None,
-                             field5: Optional[str] = None, field6: Optional[str] = None) -> Dict:
-    """
-    Create or update a vehicle in ParkPow
-    إنشاء أو تحديث مركبة في ParkPow
-    
-    According to ParkPow API docs, this incorporates 3rd party data into ParkPow
-    so you can fully understand the vehicles captured in the dashboard.
-    
-    Args:
-        license_plate: License plate number (required)
-        region: Region code (e.g., 'us-ny')
-        make: Vehicle make
-        model: Vehicle model
-        color: Vehicle color (black, blue, brown, green, red, silver, white, yellow)
-        vehicle_type: Type (bus, sedan, motorcycle, pickup_truck, suv, big_truck, unknown, van)
-        field1-field6: Custom fields for additional data
-    
-    Returns:
-        Dict with operation result
-    """
-    if not is_configured():
-        return {
-            'success': False,
-            'error': 'ParkPow API is not configured',
-            'error_ar': 'خدمة ParkPow غير مفعلة'
-        }
-    
-    try:
-        headers = {
-            'Authorization': f'Token {PARKPOW_API_TOKEN}',
-            'Content-Type': 'application/json'
-        }
-        
-        payload = {
-            'license_plate': license_plate
-        }
-        
-        # Add optional fields only if provided
-        if region:
-            payload['region'] = region
-        if make:
-            payload['make'] = make
-        if model:
-            payload['model'] = model
-        if color:
-            payload['color'] = color
-        if vehicle_type:
-            payload['type'] = vehicle_type
-        if field1:
-            payload['field1'] = field1
-        if field2:
-            payload['field2'] = field2
-        if field3:
-            payload['field3'] = field3
-        if field4:
-            payload['field4'] = field4
-        if field5:
-            payload['field5'] = field5
-        if field6:
-            payload['field6'] = field6
-        
-        response = requests.post(
-            f'{PARKPOW_API_URL}/create-vehicle/',
-            headers=headers,
-            json=payload,
-            timeout=15
-        )
-        
-        if response.status_code == 200:
-            return {
-                'success': True,
-                'vehicle': response.json(),
-                'message': 'Vehicle created/updated successfully',
-                'message_ar': 'تم إنشاء/تحديث المركبة بنجاح'
-            }
-        else:
-            return {
-                'success': False,
-                'error': f'Failed with status: {response.status_code}',
-                'error_ar': f'فشل برمز الحالة: {response.status_code}'
-            }
-    
-    except Exception as e:
-        print(f"ParkPow vehicle creation error: {str(e)}")
-        return {
-            'success': False,
-            'error': 'Error creating/updating vehicle',
-            'error_ar': 'خطأ في إنشاء/تحديث المركبة'
-        }
-
-
-def sync_vehicle_to_parkpow(vehicle_data: Dict) -> Dict:
-    """
-    Sync a vehicle from local database to ParkPow
-    مزامنة مركبة من قاعدة البيانات المحلية إلى ParkPow
-    
-    Args:
-        vehicle_data: Dict containing vehicle information from local database
-    
-    Returns:
-        Dict with sync result
-    """
-    try:
-        # Extract relevant fields from local vehicle data
-        return create_or_update_vehicle(
-            license_plate=vehicle_data.get('plate_number', ''),
-            make=vehicle_data.get('make'),
-            model=vehicle_data.get('model'),
-            color=vehicle_data.get('color'),
-            vehicle_type=vehicle_data.get('vehicle_type'),
-            field1=vehicle_data.get('owner_name'),
-            field2=vehicle_data.get('national_id'),
-            field3=vehicle_data.get('department'),
-            field4=vehicle_data.get('unit_number'),
-            field5=vehicle_data.get('building_name')
-        )
-    except Exception as e:
-        print(f"Error syncing vehicle to ParkPow: {str(e)}")
-        return {
-            'success': False,
-            'error': 'Error syncing vehicle',
-            'error_ar': 'خطأ في مزامنة المركبة'
         }
