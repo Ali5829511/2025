@@ -418,10 +418,8 @@ chmod 644 traffic.db
 
 ## 📚 Additional Resources
 
-- [TRAFFIC_README.md](TRAFFIC_README.md) - System documentation
-- [TRAFFIC_DEPLOYMENT_FIX.md](TRAFFIC_DEPLOYMENT_FIX.md) - Deployment fix details
-- [TRAFFIC_FIX_ARABIC.md](TRAFFIC_FIX_ARABIC.md) - Arabic summary
-- [.env.traffic](.env.traffic) - Environment variables template
+- [TRAFFIC_README.md](../TRAFFIC_README.md) - System documentation
+- [.env.traffic.example](../../.env.traffic.example) - Environment variables template
 
 ---
 

@@ -439,7 +439,7 @@ curl -H "Authorization: Token 22ba3cf7155a1ea730a0b64787f98ab5f9a3de94" \
 ### الموارد:
 - 📚 [Plate Recognizer Documentation](https://docs.platerecognizer.com/)
 - 📚 [API Dashboard](https://app.platerecognizer.com/)
-- 📚 [System Documentation](README.md)
+- 📚 [System Documentation](../../README.md)
 
 ---
 

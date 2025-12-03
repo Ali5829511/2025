@@ -291,7 +291,7 @@ git push heroku main
 - [دليل تشغيل النظام](دليل%20تشغيل%20نظام%20إدارة%20إسكان%20أعضاء%20هيئة%20التدريس.md)
 
 ### للمطورين / For Developers
-- [README.md](README.md) - نظرة عامة شاملة
+- [README.md](../README.md) - نظرة عامة شاملة
 - [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) - دليل التثبيت
 - [API_DOCUMENTATION.md](API_DOCUMENTATION.md) - توثيق API
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - حل المشاكل

@@ -147,7 +147,7 @@ docker-compose up -d
 ## 🎓 الموارد / Resources
 
 ### التوثيق الأساسي / Core Documentation
-- [README.md](README.md) - نظرة عامة / Overview
+- [README.md](../README.md) - نظرة عامة / Overview
 - [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md) - دليل الجاهزية / Readiness guide
 - [CHANGELOG.md](CHANGELOG.md) - سجل التغييرات / Changelog
 
@@ -240,7 +240,7 @@ No known issues in this release.
 
 ### روابط مفيدة / Useful Links
 - [Repository](https://github.com/Ali5829511/2025)
-- [Documentation](README.md)
+- [Documentation](../README.md)
 - [Deployment Guide](DEPLOYMENT_READY.md)
 
 ---

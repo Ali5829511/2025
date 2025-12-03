@@ -591,7 +591,7 @@ cat security_test_results.txt
 
 **الوثائق المتاحة / Available Documentation:**
 
-- ✅ [README.md](README.md) - نظرة عامة على النظام / System overview
+- ✅ [README.md](../../README.md) - نظرة عامة على النظام / System overview
 - ✅ [SECURITY.md](SECURITY.md) - سياسة الأمان / Security policy
 - ✅ [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - دليل النشر / Deployment guide
 - ✅ [PRODUCTION_DEPLOYMENT_GUIDE.md](PRODUCTION_DEPLOYMENT_GUIDE.md) - هذا الملف / This file

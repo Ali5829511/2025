@@ -119,9 +119,8 @@ curl http://localhost:5000/api/health
 ---
 
 **للمزيد من التفاصيل / For more details:**
-- [README.md](README.md) - الدليل الشامل
-- [SYSTEM_VALIDATION_REPORT.md](SYSTEM_VALIDATION_REPORT.md) - وثائق التقرير
-- [تقرير_المراجعة_الشاملة.md](تقرير_المراجعة_الشاملة.md) - دليل عربي
+- [README.md](../../README.md) - الدليل الشامل
+- [DOCUMENTATION_INDEX.md](../../DOCUMENTATION_INDEX.md) - فهرس الوثائق
 
 ---
 
