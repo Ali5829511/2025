@@ -89,29 +89,51 @@ This report documents the repository cleanup and reorganization to create an int
 
 ---
 
-## 🌿 Branch Recommendations / توصيات الفروع
+## 🌿 Branch Cleanup / تنظيف الفروع
 
-The repository has 90+ branches. Here are recommendations for branch cleanup:
+The repository has 90+ branches. A cleanup script has been created to help delete unnecessary branches.
 
-المستودع يحتوي على أكثر من 90 فرعًا. فيما يلي توصيات لتنظيف الفروع:
+المستودع يحتوي على أكثر من 90 فرعًا. تم إنشاء سكريبت للمساعدة في حذف الفروع غير الضرورية.
 
-### Branches to Keep / الفروع للاحتفاظ
+### Branches to Keep / الفروع للاحتفاظ بها
 - `main` - Main production branch / الفرع الرئيسي للإنتاج
 - `copilot/clean-repo-and-branches` - This cleanup branch / فرع التنظيف هذا
 
-### Branches to Consider Deleting / فروع يُنصح بحذفها
+### How to Delete Branches / كيفية حذف الفروع
 
-Most `copilot/*` branches are feature branches that have been merged or are no longer needed:
+#### Option 1: Use the cleanup script / استخدام سكريبت التنظيف
 
-معظم فروع `copilot/*` هي فروع ميزات تم دمجها أو لم تعد مطلوبة:
+```bash
+# Clone the repository locally / استنساخ المستودع محليًا
+git clone https://github.com/Ali5829511/2025.git
+cd 2025
 
-1. **Merged branches** - Already in main
-2. **Stale branches** - No recent activity
-3. **Duplicate branches** - Similar functionality
+# Run the cleanup script / تشغيل سكريبت التنظيف
+chmod +x scripts/cleanup_branches.sh
+./scripts/cleanup_branches.sh
+```
 
-**⚠️ Note:** Branch deletion must be done manually through GitHub UI or by repository owner.
+#### Option 2: Delete via GitHub UI / الحذف عبر واجهة GitHub
 
-**⚠️ ملاحظة:** يجب حذف الفروع يدويًا من خلال واجهة GitHub أو بواسطة مالك المستودع.
+1. Go to: https://github.com/Ali5829511/2025/branches
+2. Click the 🗑️ icon next to each branch to delete
+3. Keep only `main` and any active branches
+
+#### Option 3: Delete via command line / الحذف عبر سطر الأوامر
+
+```bash
+# Delete a single branch / حذف فرع واحد
+git push origin --delete <branch-name>
+
+# Example / مثال:
+git push origin --delete copilot/add-apartment-parking-data
+```
+
+### Branches to Delete (90+ branches) / الفروع المراد حذفها
+
+All `copilot/*` branches except `copilot/clean-repo-and-branches` and all `revert-*` branches.
+
+جميع فروع `copilot/*` باستثناء `copilot/clean-repo-and-branches` وجميع فروع `revert-*`.
 
 ---
 
