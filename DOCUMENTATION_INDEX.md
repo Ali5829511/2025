@@ -152,6 +152,7 @@ This file provides a comprehensive index of all documentation in this repository
 - [docs/DELIVERABLES.md](docs/DELIVERABLES.md) - Project deliverables
 - [CHANGELOG.md](CHANGELOG.md) - Change log
 - [docs/RELEASE_NOTES_v2.0.1.md](docs/RELEASE_NOTES_v2.0.1.md) - Version 2.0.1 release notes
+- **⭐ [docs/LARGE_COMMITS_REFERENCE.md](docs/LARGE_COMMITS_REFERENCE.md)** - Complete reference for hidden content in large commits / مرجع شامل للمحتوى المخفي في الالتزامات الكبيرة
 
 ---
 
@@ -195,8 +196,9 @@ Located in `data/` directory:
 3. **Deployment**: Start with [docs/arabic/دليل_النشر_السحابي.md](docs/arabic/دليل_النشر_السحابي.md) for quickest deployment
 4. **System Review**: Check [docs/COMPREHENSIVE_SYSTEM_REVIEW.md](docs/COMPREHENSIVE_SYSTEM_REVIEW.md) for system status
 5. **Troubleshooting**: Refer to [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues
+6. **Large Commits**: Refer to [docs/LARGE_COMMITS_REFERENCE.md](docs/LARGE_COMMITS_REFERENCE.md) for hidden content in large commits
 
 ---
 
-**Last Updated**: 2025-12-03  
-**Version**: 2.0.2
+**Last Updated**: 2025-12-04  
+**Version**: 2.0.3
