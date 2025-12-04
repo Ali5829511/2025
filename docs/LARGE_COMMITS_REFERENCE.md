@@ -232,13 +232,28 @@ docs/guides/START_HERE.md                      # ابدأ من هنا
 
 ### 📁 ملفات البيانات / data/ Directory
 
+> ⚠️ **ملاحظة / Note:** أسماء الملفات العربية قد تتطلب ترميز UTF-8  
+> Arabic file names may require UTF-8 encoding for proper handling
+
 ```
-data/المواقف.xlsx                                      # بيانات المواقف
-data/الوحدات السكنية.xlsx                              # بيانات الوحدات السكنية
-data/بيانات السكان.xlsx                                 # بيانات السكان
-data/تقرير تفصيلي شامل_ بيانات وحدة إسكان هيئة التدريس.docx  # التقرير التفصيلي الشامل
-data/مخطط الموقع العام للاسكان القديم.pdf                # مخطط الموقع العام
-data/ملصقات السيارات.xlsx                              # بيانات ملصقات السيارات
+data/المواقف.xlsx                                      # بيانات المواقف / Parking data
+data/الوحدات السكنية.xlsx                              # بيانات الوحدات السكنية / Residential units data
+data/بيانات السكان.xlsx                                 # بيانات السكان / Residents data
+data/تقرير تفصيلي شامل_ بيانات وحدة إسكان هيئة التدريس.docx  # التقرير التفصيلي الشامل / Detailed report
+data/مخطط الموقع العام للاسكان القديم.pdf                # مخطط الموقع العام / Site map
+data/ملصقات السيارات.xlsx                              # بيانات ملصقات السيارات / Car stickers data
+```
+
+**للتعامل مع الملفات العربية / Handling Arabic file names:**
+```bash
+# تأكد من إعداد Git لدعم UTF-8
+git config core.quotepath false
+
+# لاستعراض الملفات العربية
+ls -la data/
+
+# لنسخ ملف عربي
+cp "data/المواقف.xlsx" destination/
 ```
 
 ---
@@ -246,9 +261,9 @@ data/ملصقات السيارات.xlsx                              # بيان�
 ### 📁 ملفات الأصول / assets/ Directory
 
 ```
-assets/IMG_1093.png                          # صورة 1093
-assets/شعار.jpg                               # شعار الجامعة
-assets/هوية بصرية لنافذه الدخول.jpeg           # الهوية البصرية
+assets/IMG_1093.png                          # صورة 1093 / Image 1093
+assets/شعار.jpg                               # شعار الجامعة / University logo
+assets/هوية بصرية لنافذه الدخول.jpeg           # الهوية البصرية / Visual identity
 ```
 
 ---
@@ -334,21 +349,57 @@ docker-compose.traffic-standalone.yml  # تكوين Docker المستقل للم
 
 ## 🔍 كيفية الوصول للمحتوى المخفي / How to Access Hidden Content
 
-### على GitHub:
-1. انتقل إلى صفحة الالتزام / Go to the commit page
-2. استخدم مربع البحث "Search this commit" / Use the "Search this commit" box
-3. أو انقر على "Load diff" لأي ملف مخفي / Or click "Load diff" for any hidden file
+### على GitHub / On GitHub:
+
+1. **انتقل إلى صفحة الالتزام / Go to the commit page:**
+   - مثال / Example: `https://github.com/Ali5829511/2025/commit/23b35275d87421288ba752e8a63f9fcbb31dd150`
+
+2. **استخدم مربع البحث / Use the search box:**
+   - ابحث عن أنواع الملفات / Search for file types: `.html`, `.py`, `.md`
+   - ابحث عن مجلدات / Search for folders: `docs/`, `scripts/`, `templates/`
+   - أمثلة بحث / Search examples:
+     - `server.py` - للعثور على الخادم الرئيسي
+     - `docs/guides/` - لجميع أدلة المستخدم
+     - `.html` - لجميع ملفات HTML
+
+3. **انقر على "Load diff" / Click "Load diff":**
+   - عند ظهور رسالة "Large diffs are not rendered by default"
+   - انقر على الزر لتحميل المحتوى
+
+### أمثلة بحث مفيدة / Useful Search Examples:
+
+| البحث / Search | الوصف / Description |
+|----------------|---------------------|
+| `server.py` | الخادم الرئيسي (3,971 سطر) |
+| `database.py` | قاعدة البيانات |
+| `docs/deployment/` | أدلة النشر |
+| `docs/arabic/` | التوثيق العربي |
+| `import_` | جميع سكريبتات الاستيراد |
+| `enhanced_` | الصفحات المحسنة |
+| `.xlsx` | ملفات البيانات |
+| `traffic` | ملفات نظام المرور |
 
 ### محلياً / Locally:
 ```bash
 # عرض جميع الملفات المتغيرة في التزام معين
-git show --stat <commit-sha>
+# View all changed files in a specific commit
+git show --stat 23b35275d87421288ba752e8a63f9fcbb31dd150
 
 # عرض التغييرات الكاملة لملف معين
-git show <commit-sha> -- <file-path>
+# View full changes for a specific file
+git show 23b35275d87421288ba752e8a63f9fcbb31dd150 -- server.py
 
 # عرض قائمة الملفات فقط
-git diff-tree --no-commit-id --name-only -r <commit-sha>
+# List only file names
+git diff-tree --no-commit-id --name-only -r 23b35275d87421288ba752e8a63f9fcbb31dd150
+
+# البحث عن ملف معين في الالتزام
+# Search for a specific file in the commit
+git show --stat 23b35275d87421288ba752e8a63f9fcbb31dd150 | grep "server.py"
+
+# عرض جميع ملفات Python
+# Show all Python files
+git diff-tree --no-commit-id --name-only -r 23b35275d87421288ba752e8a63f9fcbb31dd150 | grep ".py$"
 ```
 
 ---
