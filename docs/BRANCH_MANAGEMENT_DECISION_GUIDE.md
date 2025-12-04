@@ -343,7 +343,7 @@ git fetch --prune
 ### وثائق هذا المستودع / This Repository's Documents
 - 📄 [MERGE_STATUS_REPORT.md](MERGE_STATUS_REPORT.md) - تحليل تفصيلي لحالة الدمج
 - 📄 [MERGE_SUMMARY_AR.md](MERGE_SUMMARY_AR.md) - ملخص ثنائي اللغة
-- 📄 [README.md](README.md) - دليل المستخدم الرئيسي
+- 📄 [README.md](../README.md) - دليل المستخدم الرئيسي
 
 ### موارد خارجية / External Resources
 - 🔗 [Git Branching Model](https://nvie.com/posts/a-successful-git-branching-model/)

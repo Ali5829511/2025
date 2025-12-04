@@ -220,7 +220,7 @@ This is normal - the system protects data from duplication automatically
 ### الوثائق / Documentation
 - [دليل الاستيراد الشامل](IMPORT_GUIDE.md)
 - [قاعدة البيانات](DATABASE.md)
-- [دليل المستخدم](README.md)
+- [دليل المستخدم](../../README.md)
 
 ### الأدوات / Tools
 - [واجهة استيراد إيجار](ejar_import.html)

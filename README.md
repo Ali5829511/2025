@@ -200,30 +200,30 @@ http://localhost:5000
 ## هيكل المشروع / Project Structure
 
 ```
-├── index.html                          # صفحة تسجيل الدخول / Login page
-├── main_dashboard.html                 # لوحة التحكم الرئيسية / Main dashboard
-├── buildings_management_updated.html   # إدارة المباني / Buildings management
-├── apartments_management.html          # إدارة الشقق / Apartments management
-├── residents_management_updated.html   # إدارة السكان / Residents management
-├── enhanced_parking_management.html    # إدارة المواقف / Parking management
-├── enhanced_stickers_management.html   # إدارة الملصقات / Stickers management
-├── enhanced_immobilized_cars.html      # السيارات المكبوحة / Immobilized cars
-├── enhanced_traffic_violations_updated.html  # المخالفات المرورية / Traffic violations
-├── enhanced_traffic_accidents.html     # الحوادث المرورية / Traffic accidents
-├── security_incidents.html             # الوقائع الأمنية / Security incidents
-├── complaints_management.html          # إدارة الشكاوى / Complaints management
-├── visitors_management.html            # إدارة الزوار / Visitors management
-├── access_monitoring.html              # مراقبة الدخول / Access monitoring
-├── comprehensive_reports_enhanced.html # التقارير الشاملة / Comprehensive reports
-├── advanced_users_management.html      # إدارة المستخدمين / Users management
-├── admin_permissions.js                # صلاحيات المدير / Admin permissions
-├── server.py                           # ✅ خادم Flask مع قاعدة البيانات / Flask server with database
-├── database.py                         # ✅ نظام قاعدة البيانات / Database system
-├── auth.py                             # ✅ نظام المصادقة والجلسات / Authentication and session system
-├── housing.db                          # قاعدة بيانات SQLite (تُنشأ تلقائياً) / SQLite database (auto-created)
-├── requirements.txt                    # متطلبات Python / Python dependencies
-├── .env.example                        # مثال ملف التكوين / Configuration file example
-└── README.md                           # هذا الملف / This file
+├── docs/                               # 📚 جميع ملفات التوثيق / All documentation files
+│   ├── api/                           # توثيق الواجهات / API documentation
+│   ├── arabic/                        # الوثائق العربية / Arabic documentation
+│   ├── deployment/                    # أدلة النشر / Deployment guides
+│   └── guides/                        # أدلة المستخدم / User guides
+├── data/                              # 📊 ملفات البيانات / Data files (xlsx, pdf)
+├── assets/                            # 🎨 الصور والشعارات / Images and logos
+├── static/                            # 🌐 الملفات الثابتة / Static web files
+│   ├── css/                          # أنماط CSS / CSS styles
+│   ├── js/                           # سكريبتات JavaScript / JavaScript files
+│   └── images/                       # صور النظام / System images
+├── templates/                         # 📄 قوالب HTML / HTML templates
+├── scripts/                           # 🔧 سكريبتات مساعدة / Helper scripts
+├── config/                            # ⚙️ ملفات التكوين / Configuration files
+├── pages/                             # 📱 صفحات إضافية / Additional pages
+├── backups/                           # 💾 النسخ الاحتياطية / Backup files
+├── index.html                         # صفحة تسجيل الدخول / Login page
+├── main_dashboard.html                # لوحة التحكم الرئيسية / Main dashboard
+├── server.py                          # ✅ خادم Flask / Flask server
+├── database.py                        # ✅ نظام قاعدة البيانات / Database system
+├── auth.py                            # ✅ نظام المصادقة / Authentication system
+├── requirements.txt                   # متطلبات Python / Python dependencies
+├── Dockerfile                         # إعداد Docker / Docker setup
+└── README.md                          # هذا الملف / This file
 ```
 
 ## الوثائق / Documentation
@@ -231,16 +231,15 @@ http://localhost:5000
 📚 **[فهرس الوثائق الشامل / Comprehensive Documentation Index](DOCUMENTATION_INDEX.md)** - دليل كامل لجميع الوثائق المتاحة
 
 ### وثائق النظام / System Documentation
-- [الدليل التشغيلي الشامل](الدليل%20التشغيلي%20الشامل%20لنظام%20إدارة%20الإسكان%20الجامعي.md)
-- [دليل تشغيل النظام](دليل%20تشغيل%20نظام%20إدارة%20إسكان%20أعضاء%20هيئة%20التدريس.md)
-- [مخطط الدليل التشغيلي](user_manual_outline.md)
-- [دليل المستخدم (PDF)](user_manual_with_images.pdf)
-- [**دليل استخدام نظام تمييز لوحات السيارات**](PLATE_RECOGNIZER_GUIDE.md) ⭐ NEW!
-- [**إدارة رمز-برو (نظام الملصقات)**](RAMZ_PRO_MANAGEMENT.md) | [النسخة العربية](إدارة_رمز_برو.md) ⭐ NEW!
+- [الدليل التشغيلي الشامل](docs/arabic/الدليل%20التشغيلي%20الشامل%20لنظام%20إدارة%20الإسكان%20الجامعي.md)
+- [دليل تشغيل النظام](docs/arabic/دليل%20تشغيل%20نظام%20إدارة%20إسكان%20أعضاء%20هيئة%20التدريس.md)
+- [مخطط الدليل التشغيلي](docs/user_manual_outline.md)
+- [دليل المستخدم (PDF)](docs/user_manual_with_images.pdf)
+- [**دليل استخدام نظام تمييز لوحات السيارات**](docs/guides/PLATE_RECOGNIZER_GUIDE.md) ⭐
+- [**إدارة رمز-برو (نظام الملصقات)**](docs/RAMZ_PRO_MANAGEMENT.md) | [النسخة العربية](docs/arabic/إدارة_رمز_برو.md) ⭐
 
 ### التقارير والمراجعة / Reports & Review
-- [تقرير المراجعة الشاملة](تقرير_المراجعة_الشاملة.md) - تقرير كامل عن حالة النظام والبيانات
-- [System Validation Report Documentation](SYSTEM_VALIDATION_REPORT.md) - Technical documentation for validation report
+- [تقرير المراجعة الشاملة](docs/COMPREHENSIVE_SYSTEM_REVIEW.md) - تقرير كامل عن حالة النظام والبيانات
 - [تقرير التحقق من النظام (صفحة ويب)](system_validation_report.html) - أداة تفاعلية لمراجعة البيانات
 
 ### إدارة الفروع والمستودع / Branch and Repository Management
@@ -252,16 +251,14 @@ http://localhost:5000
 - 📊 [ملخص الدمج (عربي)](MERGE_SUMMARY_AR.md) - ملخص ثنائي اللغة
 
 ### النشر والتثبيت / Deployment & Installation
-- 🐳 **[دليل Docker Hub](DOCKER_HUB_GUIDE.md)** - نشر ومشاركة الصور على Docker Hub ⭐ **NEW!**
-- 🔐 **[إعداد أسرار النشر](DEPLOYMENT_SECRETS_SETUP.md)** - تكوين أسرار GitHub لـ Docker Hub و Fly.io ⭐ **NEW!**
-- 🌟 **[دليل النشر السحابي السريع](دليل_النشر_السحابي.md)** - ابدأ هنا! النشر في 10 دقائق ⭐ NEW!
-- ☁️ **[خيارات الاستضافة السحابية](CLOUD_HOSTING_OPTIONS.md)** - مقارنة شاملة للمنصات مع فترة تجريبية ⭐ NEW!
-- ✈️ **[النشر على Fly.io](FLY_IO_DEPLOYMENT.md)** - منصة حديثة مع طبقة مجانية سخية (موصى به!) ⭐ **NEW!**
-- 🎯 **[النشر على Render.com](RENDER_DEPLOYMENT.md)** - الطريقة الموصى بها (لا يحتاج بطاقة ائتمانية) ⭐ NEW!
-- 🚀 **[دليل النشر الكامل](دليل_النشر_الكامل.md)** - دليل شامل للنشر الاحترافي مع Nginx وPostgreSQL
-- 🐳 **[النشر باستخدام Docker](النشر_باستخدام_Docker.md)** - الطريقة الأسرع للنشر (5 دقائق فقط!)
-- ⚡ [QUICK_START.md](QUICK_START.md) - البدء السريع للتطوير المحلي
-- 🔧 [حل_خطأ_500.md](حل_خطأ_500.md) - استكشاف الأخطاء وإصلاحها
+- 🐳 **[دليل Docker Hub](docs/deployment/DOCKER_HUB_GUIDE.md)** - نشر ومشاركة الصور على Docker Hub ⭐
+- 🔐 **[إعداد أسرار النشر](docs/deployment/DEPLOYMENT_SECRETS_SETUP.md)** - تكوين أسرار GitHub لـ Docker Hub و Fly.io ⭐
+- 🌟 **[دليل النشر السحابي السريع](docs/arabic/دليل_النشر_السحابي.md)** - ابدأ هنا! النشر في 10 دقائق ⭐
+- ☁️ **[خيارات الاستضافة السحابية](docs/deployment/CLOUD_HOSTING_OPTIONS.md)** - مقارنة شاملة للمنصات مع فترة تجريبية ⭐
+- ✈️ **[النشر على Fly.io](docs/deployment/FLY_IO_DEPLOYMENT.md)** - منصة حديثة مع طبقة مجانية سخية (موصى به!) ⭐
+- 🎯 **[النشر على Render.com](docs/deployment/RENDER_DEPLOYMENT.md)** - الطريقة الموصى بها (لا يحتاج بطاقة ائتمانية) ⭐
+- ⚡ [QUICK_START.md](docs/guides/QUICK_START.md) - البدء السريع للتطوير المحلي
+- 🔧 [حل_خطأ_500.md](docs/arabic/حل_خطأ_500.md) - استكشاف الأخطاء وإصلاحها
 
 ## الأمان / Security
 

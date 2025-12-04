@@ -282,8 +282,8 @@ The repository is now:
 ## 📚 المراجع / References
 
 ### الوثائق ذات الصلة / Related Documentation
-- [README.md](README.md) - الوثائق الرئيسية
-- [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) - فهرس الوثائق الشامل
+- [README.md](../README.md) - الوثائق الرئيسية
+- [DOCUMENTATION_INDEX.md](../DOCUMENTATION_INDEX.md) - فهرس الوثائق الشامل
 - [COMPREHENSIVE_SYSTEM_REVIEW.md](COMPREHENSIVE_SYSTEM_REVIEW.md) - مراجعة النظام الشاملة
 - [.gitignore](.gitignore) - قائمة الملفات المُستثناة
 
