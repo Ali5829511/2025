@@ -186,7 +186,7 @@ print_success "تم حذف / Deleted: $deleted_count فرع"
 if [ $failed_count -gt 0 ]; then
     print_error "فشل حذف / Failed to delete: $failed_count فرع"
 fi
-print_info "الفروع المتبقية / Remaining branches: $(git branch -r | grep -v HEAD | wc -l)"
+print_info "الفروع المتبقية / Remaining branches: $(git branch -r | grep -v 'HEAD' | grep -v '\->' | wc -l)"
 
 echo ""
 print_success "🎉 اكتمل تنظيف الفروع! / Branch cleanup completed!"
