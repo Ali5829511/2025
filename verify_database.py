@@ -49,7 +49,7 @@ def verify_table_structure():
         'users', 'sessions', 'buildings', 'residents', 'vehicles', 'stickers',
         'traffic_violations', 'complaints', 'visitors', 'security_incidents',
         'audit_log', 'plate_recognition_log', 'apartments', 'parking_spots',
-        'car_images', 'car_analysis', 'car_violations_mapping', 'parkpow_detections'
+        'car_images', 'car_analysis', 'car_violations_mapping', 
     ]
     
     print(f"\n✅ Found {len(tables)} tables in database:")

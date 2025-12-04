@@ -1,12 +1,15 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -23,146 +26,58 @@ wheels/
 .installed.cfg
 *.egg
 
-# Flask
-instance/
-.webassets-cache
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Database backups (keep backups/ directory but ignore contents)
-backups/*.db
-backups/*.db.gz
-backups/*.sql
-backups/*.sql.gz
-
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-*.bak
-*.backup
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+housing_system.db
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+temp/
+tmp/
 
 # OS
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# Logs
-*.log
-logs/*.log
-
-# Temporary files
-/tmp/
-*.tmp
-*.pid
-*_summary.txt
-test_*.html
-*_test.html
-
-# Environment variables - SECURITY CRITICAL
-.env
-.env.local
-.env.production
-.env.traffic
-
-# Uploads and exports
-uploads/
-uploads/*
-exports/
-exports/*
-
-# Vehicle extraction outputs
-نتائج_المركبات*.xlsx
-*_progress.json
-vehicle_results*.xlsx
-
-# Thumbnails
-thumbnails/
-static/uploads/thumbnails/*
-
-# Historical documentation (keep these out of commits)
-*_SUMMARY.md
-*_COMPLETE.md
-*_STATUS.md
-*_FIX.md
-*_VERIFICATION.md
-COMPLETION_*.md
-PROJECT_*.md
-TASK_*.md
-FINAL_*.md
-REVIEW_*.md
-FIX_*.md
-DEPLOY_NOW.md
-QUICK_DEPLOY.md
-PRE_DEPLOYMENT_CHECKLIST.md
-COMPLETION_CHECKLIST.md
-todo.md
-pull_request.md
-IMPLEMENTATION_SUMMARY.txt
-
-# Traffic system database
-traffic.db
-
-# Security and test reports
-security_test_results*.txt
-penetration_test*.txt
-vulnerability_scan*.html
-
-# SSL/TLS certificates and keys - SECURITY CRITICAL
-*.pem
-*.key
-*.crt
-*.csr
-*.p12
-*.pfx
-ssl/
-certs/
-
-# Secrets and credentials - SECURITY CRITICAL
-secrets/
-credentials/
-*.secret
-*_token.txt
-*_password.txt
-
-# Session files
-flask_session/
-sessions/
-
-# Cache
-.cache/
-*.cache
-
-# Coverage reports
-htmlcov/
-.coverage
-coverage.xml
-*.cover
 
 # Testing
 .pytest_cache/
-.tox/
+.coverage
+htmlcov/
 
-# Docker
-docker-compose.override.yml
+# Build
+dist/
+build/
+*.egg-info/
 
-# Backup files
-*~
-*.orig
-*.rej
+# IDE specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
-# System monitoring
-*.pid.lock
-*.sock
+# Node (if using frontend build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
 
-# Keep these directories but ignore their contents
-!logs/.gitkeep
-!backups/.gitkeep
-!uploads/.gitkeep
-!exports/.gitkeep
-
+# Render specific
+render.json

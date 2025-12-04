@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>لوحة التحكم المحسّنة - نظام إدارة إسكان أعضاء هيئة التدريس</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/mobile-responsive.css">
+    <style>
+        :root {
+            --primary-color: #1e5a7d;
+            --secondary-color: #3b8ab8;
+            --accent-color: #7BA7BC;
+            --light-bg: #e8eef3;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --border-color: #d0d0d0;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--light-bg) 0%, #d0e0eb 100%);
+            direction: rtl;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-box {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(30, 90, 125, 0.2);
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+            padding-right: 15px;
+            border-right: 2px solid var(--border-color);
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 3px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .logout-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success-color);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, var(--light-bg), #f0f5fa);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .quick-actions h2 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(30, 90, 125, 0.3);
+        }
+
+        .action-btn i {
+            font-size: 24px;
+        }
+
+        /* Recent Activity */
+        .activity-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .activity-section h2 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .activity-icon.add {
+            background: #d4edda;
+            color: var(--success-color);
+        }
+
+        .activity-icon.edit {
+            background: #fff3cd;
+            color: var(--warning-color);
+        }
+
+        .activity-icon.delete {
+            background: #f8d7da;
+            color: var(--danger-color);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 3px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-top: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .user-info {
+                border-right: none;
+                border-bottom: 2px solid var(--border-color);
+                padding-right: 0;
+                padding-bottom: 15px;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .logo-box {
+                width: 60px;
+                height: 60px;
+            }
+
+            .header-title h1 {
+                font-size: 20px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo-box">
+                    <img src="static/images/university_logo.png" alt="شعار الجامعة">
+                </div>
+                <div class="header-title">
+                    <h1>لوحة التحكم</h1>
+                    <p>نظام إدارة إسكان أعضاء هيئة التدريس</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-name" id="userName">مستخدم</div>
+                    <div class="user-role" id="userRole">الدور</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-label">المباني</div>
+                <div class="stat-value" id="buildingsCount">0</div>
+                <div class="stat-change">↑ 0% من الشهر الماضي</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-icon">🏠</div>
+                <div class="stat-label">الشقق</div>
+                <div class="stat-value" id="apartmentsCount">0</div>
+                <div class="stat-change">↑ 0% من الشهر الماضي</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">السكان</div>
+                <div class="stat-value" id="residentsCount">0</div>
+                <div class="stat-change">↑ 0% من الشهر الماضي</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-label">المخالفات</div>
+                <div class="stat-value" id="violationsCount">0</div>
+                <div class="stat-change negative">↑ 0% من الشهر الماضي</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-chart-bar"></i>
+                    توزيع الشقق حسب المبنى
+                </div>
+                <div class="chart-placeholder">جاري تحميل الرسم البياني...</div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-chart-pie"></i>
+                    حالة الشقق
+                </div>
+                <div class="chart-placeholder">جاري تحميل الرسم البياني...</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>الإجراءات السريعة</h2>
+            <div class="actions-grid">
+                <a href="residents_management_updated.html" class="action-btn">
+                    <i class="fas fa-users"></i>
+                    إدارة السكان
+                </a>
+                <a href="apartments_management.html" class="action-btn">
+                    <i class="fas fa-home"></i>
+                    إدارة الشقق
+                </a>
+                <a href="enhanced_traffic_violations_updated.html" class="action-btn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    المخالفات
+                </a>
+                <a href="enhanced_parking_management.html" class="action-btn">
+                    <i class="fas fa-parking"></i>
+                    المواقف
+                </a>
+                <a href="visitors_management.html" class="action-btn">
+                    <i class="fas fa-user-tie"></i>
+                    الزوار
+                </a>
+                <a href="security_incidents.html" class="action-btn">
+                    <i class="fas fa-shield-alt"></i>
+                    الأمان
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <h2>آخر الأنشطة</h2>
+            <div id="activityList">
+                <div class="activity-item">
+                    <div class="activity-icon add">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">تم إضافة ساكن جديد</div>
+                        <div class="activity-time">منذ ساعة</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon edit">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">تم تحديث بيانات شقة</div>
+                        <div class="activity-time">منذ ساعتين</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon delete">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">تم حذف مخالفة</div>
+                        <div class="activity-time">منذ 3 ساعات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>جميع الحقوق محفوظة © جامعة الإمام محمد بن سعود الإسلامية 2025</p>
+    </footer>
+
+    <script src="static/js/mobile-enhancements.js"></script>
+    <script>
+        // Load user data
+        function loadUserData() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('userName').textContent = user.username;
+                    document.getElementById('userRole').textContent = getRoleLabel(user.role);
+                } catch (e) {
+                    console.error('Error loading user data:', e);
+                }
+            }
+        }
+
+        function getRoleLabel(role) {
+            const roles = {
+                'admin': 'مسؤول النظام',
+                'violations_officer': 'مسؤول المخالفات',
+                'visitors_officer': 'مسؤول الزوار',
+                'viewer': 'مشاهد',
+                'violation_entry': 'مسجل المخالفات'
+            };
+            return roles[role] || role;
+        }
+
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('buildingsCount').textContent = data.buildings || 0;
+                    document.getElementById('apartmentsCount').textContent = data.apartments || 0;
+                    document.getElementById('residentsCount').textContent = data.residents || 0;
+                    document.getElementById('violationsCount').textContent = data.violations || 0;
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            loadUserData();
+            loadStatistics();
+        });
+
+        // Check authentication
+        window.addEventListener('load', () => {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

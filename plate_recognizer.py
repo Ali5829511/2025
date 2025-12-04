@@ -1,8 +1,8 @@
 """
-Plate Recognizer ParkPow API Integration Module
-نظام التكامل مع خدمة Plate Recognizer ParkPow لتمييز لوحات السيارات
+Plate Recognizer API Integration Module
+نظام التكامل مع خدمة Plate Recognizer لتمييز لوحات السيارات
 
-This module provides integration with Plate Recognizer's ParkPow service
+This module provides integration with Plate Recognizer service
 for automatic license plate recognition from images.
 """
 
