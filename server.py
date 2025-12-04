@@ -967,14 +967,7 @@ def plate_reader_api_v1():
                         # Find vehicle in database
                         
                         # Add vehicle info to result
-                        plate_data['vehicle_info'] = vehicle
-                        
-                        # Log event
-                            user['id'],
-                            'recognition_v1_api',
-                            plate_number,
-                            f"API v1 - Confidence: {plate_data.get('confidence', 0)}"
-                        )
+                        plate_data['vehicle_info'] = None
             
             # Log audit
             database.log_audit(
@@ -3755,6 +3748,101 @@ def get_licenses_stats():
             'success': False,
             'error': 'Failed to load statistics',
             'error_ar': 'فشل في تحميل الإحصائيات'
+        }), 500
+
+# ==================== Advanced Reports API ====================
+
+@app.route('/api/reports/advanced', methods=['GET'])
+@auth.require_auth
+def get_advanced_reports():
+    """Get advanced reports data"""
+    try:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get buildings count
+        cursor.execute('SELECT COUNT(*) FROM buildings')
+        buildings = cursor.fetchone()[0]
+        
+        # Get apartments count
+        cursor.execute('SELECT COUNT(*) FROM apartments')
+        apartments = cursor.fetchone()[0]
+        
+        # Get residents count
+        cursor.execute('SELECT COUNT(*) FROM residents')
+        residents = cursor.fetchone()[0]
+        
+        # Get vehicles count
+        cursor.execute('SELECT COUNT(*) FROM vehicles')
+        vehicles = cursor.fetchone()[0]
+        
+        # Get building data
+        cursor.execute('''
+            SELECT b.name, COUNT(a.id) as apartment_count
+            FROM buildings b
+            LEFT JOIN apartments a ON b.id = a.building_id
+            GROUP BY b.id, b.name
+            ORDER BY b.name
+        ''')
+        building_results = cursor.fetchall()
+        building_labels = [row[0] for row in building_results]
+        building_data = [row[1] for row in building_results]
+        
+        # Get apartment status
+        cursor.execute("SELECT COUNT(*) FROM apartments WHERE status = 'occupied'")
+        occupied = cursor.fetchone()[0]
+        vacant = apartments - occupied
+        
+        # Get parking status
+        cursor.execute('SELECT COUNT(*) FROM parking_spaces')
+        total_parking = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM parking_spaces WHERE status = 'occupied'")
+        parking_occupied = cursor.fetchone()[0]
+        parking_vacant = total_parking - parking_occupied
+        
+        # Get sticker status
+        cursor.execute("SELECT COUNT(*) FROM stickers WHERE status = 'active'")
+        active_stickers = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM stickers WHERE status = 'expired'")
+        expired_stickers = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM stickers WHERE status = 'cancelled'")
+        cancelled_stickers = cursor.fetchone()[0]
+        
+        # Get violations data (last 6 months)
+        cursor.execute('''
+            SELECT strftime('%Y-%m', date) as month, COUNT(*) as count
+            FROM violations
+            WHERE date >= date('now', '-6 months')
+            GROUP BY month
+            ORDER BY month
+        ''')
+        violation_results = cursor.fetchall()
+        violation_months = [row[0] for row in violation_results]
+        violation_data = [row[1] for row in violation_results]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'buildings': buildings,
+            'apartments': apartments,
+            'residents': residents,
+            'vehicles': vehicles,
+            'buildingLabels': building_labels,
+            'buildingData': building_data,
+            'apartmentStatus': [occupied, vacant],
+            'parkingStatus': [parking_occupied, parking_vacant],
+            'stickerStatus': [active_stickers, expired_stickers, cancelled_stickers],
+            'violationMonths': violation_months,
+            'violationData': violation_data
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Get advanced reports error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to load reports',
+            'error_ar': 'فشل في تحميل التقارير'
         }), 500
 
 # ==================== Startup ====================
