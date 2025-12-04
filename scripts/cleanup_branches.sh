@@ -1,94 +1,193 @@
 #!/bin/bash
-# 🧹 Branch Cleanup Script / سكريبت تنظيف الفروع
-# This script helps delete unnecessary branches from the repository
-# هذا السكريبت يساعد على حذف الفروع غير الضرورية من المستودع
+# ==============================================================================
+# سكريبت تنظيف الفروع / Branch Cleanup Script
+# ==============================================================================
+# 
+# الوصف: يقوم هذا السكريبت بحذف الفروع القديمة والمدموجة من المستودع
+# Description: This script deletes old and merged branches from the repository
 #
-# Usage / الاستخدام:
+# الاستخدام / Usage:
 #   chmod +x scripts/cleanup_branches.sh
 #   ./scripts/cleanup_branches.sh
 #
-# ⚠️ WARNING: This will permanently delete branches!
-# ⚠️ تحذير: سيتم حذف الفروع بشكل دائم!
+# ==============================================================================
 
-echo "🧹 Repository Branch Cleanup Script"
-echo "======================================"
-echo ""
+set -e
 
-# Branches to keep / الفروع للاحتفاظ بها
-KEEP_BRANCHES=(
+# الألوان للإخراج
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# قائمة الفروع المحمية التي لن يتم حذفها
+PROTECTED_BRANCHES=(
     "main"
     "copilot/clean-repo-and-branches"
+    "copilot/clean-repo-and-branches-again"
 )
 
-# Get all remote branches / الحصول على جميع الفروع البعيدة
-echo "📋 Fetching all branches..."
-git fetch --all --prune
+# دالة لطباعة رسائل ملونة
+print_header() {
+    echo ""
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}========================================${NC}"
+    echo ""
+}
 
-# List all branches that will be deleted / عرض الفروع التي سيتم حذفها
-echo ""
-echo "🗑️ Branches to be deleted / الفروع المراد حذفها:"
-echo "---------------------------------------------------"
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
 
-count=0
-for branch in $(git branch -r | grep -v HEAD | sed 's/origin\///' ); do
-    skip=false
-    for keep in "${KEEP_BRANCHES[@]}"; do
-        if [[ "$branch" == "$keep" ]]; then
-            skip=true
-            break
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+# دالة للتحقق مما إذا كان الفرع محمياً
+is_protected() {
+    local branch=$1
+    for protected in "${PROTECTED_BRANCHES[@]}"; do
+        if [ "$branch" == "$protected" ]; then
+            return 0
         fi
     done
-    
-    if [[ "$skip" == false ]]; then
-        echo "  - $branch"
-        ((count++))
+    return 1
+}
+
+# التحقق من أننا في مستودع git
+if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    print_error "هذا السكريبت يجب أن يُشغّل داخل مستودع Git"
+    print_error "This script must be run inside a Git repository"
+    exit 1
+fi
+
+print_header "🧹 سكريبت تنظيف الفروع / Branch Cleanup Script"
+
+# جلب أحدث المعلومات من المستودع البعيد
+print_info "جاري جلب أحدث المعلومات من المستودع البعيد..."
+git fetch --all --prune
+
+# الحصول على جميع الفروع البعيدة
+print_info "جاري تحليل الفروع..."
+branches=$(git branch -r | grep -v HEAD | grep -v '\->' | sed 's/origin\///' | tr -d ' ')
+
+# إحصائيات
+total_branches=0
+protected_count=0
+to_delete_count=0
+
+# قوائم الفروع
+declare -a branches_to_delete=()
+declare -a protected_branches_found=()
+
+# تصنيف الفروع
+for branch in $branches; do
+    ((total_branches++))
+    if is_protected "$branch"; then
+        ((protected_count++))
+        protected_branches_found+=("$branch")
+    else
+        ((to_delete_count++))
+        branches_to_delete+=("$branch")
     fi
 done
 
-echo ""
-echo "📊 Total branches to delete: $count"
-echo ""
+# عرض الإحصائيات
+print_header "📊 إحصائيات الفروع / Branch Statistics"
+echo "إجمالي الفروع / Total branches: $total_branches"
+echo "فروع محمية / Protected branches: $protected_count"
+echo "فروع للحذف / Branches to delete: $to_delete_count"
 
-# Ask for confirmation / طلب التأكيد
-read -p "⚠️ Are you sure you want to delete these branches? (yes/no): " confirm
+# عرض الفروع المحمية
+print_header "🔒 الفروع المحمية / Protected Branches"
+for branch in "${protected_branches_found[@]}"; do
+    echo "  ✅ $branch"
+done
 
-if [[ "$confirm" != "yes" ]]; then
-    echo "❌ Aborted. No branches were deleted."
+# عرض الفروع التي سيتم حذفها
+print_header "🗑️  الفروع التي سيتم حذفها / Branches to Delete"
+if [ ${#branches_to_delete[@]} -eq 0 ]; then
+    print_info "لا توجد فروع للحذف"
+    print_info "No branches to delete"
     exit 0
 fi
 
+# تجميع الفروع حسب النوع
 echo ""
-echo "🗑️ Deleting branches..."
-echo ""
-
-deleted=0
-failed=0
-
-for branch in $(git branch -r | grep -v HEAD | sed 's/origin\///' ); do
-    skip=false
-    for keep in "${KEEP_BRANCHES[@]}"; do
-        if [[ "$branch" == "$keep" ]]; then
-            skip=true
-            break
-        fi
-    done
-    
-    if [[ "$skip" == false ]]; then
-        echo -n "  Deleting $branch... "
-        if git push origin --delete "$branch" 2>/dev/null; then
-            echo "✅"
-            ((deleted++))
-        else
-            echo "❌ Failed"
-            ((failed++))
-        fi
+echo -e "${YELLOW}فروع Copilot:${NC}"
+for branch in "${branches_to_delete[@]}"; do
+    if [[ "$branch" == copilot/* ]]; then
+        echo "  - $branch"
     fi
 done
 
 echo ""
-echo "======================================"
-echo "🎉 Cleanup Complete!"
-echo "   ✅ Deleted: $deleted branches"
-echo "   ❌ Failed: $failed branches"
-echo "   📌 Kept: ${#KEEP_BRANCHES[@]} branches (main, copilot/clean-repo-and-branches)"
-echo "======================================"
+echo -e "${YELLOW}فروع Revert:${NC}"
+for branch in "${branches_to_delete[@]}"; do
+    if [[ "$branch" == revert-* ]]; then
+        echo "  - $branch"
+    fi
+done
+
+echo ""
+echo -e "${YELLOW}فروع أخرى:${NC}"
+for branch in "${branches_to_delete[@]}"; do
+    if [[ ! "$branch" == copilot/* ]] && [[ ! "$branch" == revert-* ]]; then
+        echo "  - $branch"
+    fi
+done
+
+# طلب التأكيد
+echo ""
+print_warning "سيتم حذف $to_delete_count فرع!"
+print_warning "$to_delete_count branches will be deleted!"
+echo ""
+read -p "هل تريد المتابعة؟ / Do you want to continue? (y/N): " confirm
+
+if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+    print_error "تم الإلغاء / Cancelled"
+    exit 0
+fi
+
+# تنفيذ الحذف
+print_header "🗑️  جاري حذف الفروع / Deleting Branches"
+
+deleted_count=0
+failed_count=0
+
+for branch in "${branches_to_delete[@]}"; do
+    echo -n "حذف / Deleting: $branch... "
+    if git push origin --delete "$branch" 2>/dev/null; then
+        print_success "تم"
+        ((deleted_count++))
+    else
+        print_error "فشل"
+        ((failed_count++))
+    fi
+done
+
+# تنظيف المراجع المحلية
+print_header "🧹 تنظيف المراجع المحلية / Cleaning Local References"
+git fetch --prune
+
+# ملخص النتائج
+print_header "📋 ملخص النتائج / Results Summary"
+print_success "تم حذف / Deleted: $deleted_count فرع"
+if [ $failed_count -gt 0 ]; then
+    print_error "فشل حذف / Failed to delete: $failed_count فرع"
+fi
+print_info "الفروع المتبقية / Remaining branches: $(git branch -r | grep -v 'HEAD' | grep -v '\->' | wc -l)"
+
+echo ""
+print_success "🎉 اكتمل تنظيف الفروع! / Branch cleanup completed!"
+echo ""

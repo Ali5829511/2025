@@ -243,10 +243,12 @@ http://localhost:5000
 - [تقرير التحقق من النظام (صفحة ويب)](system_validation_report.html) - أداة تفاعلية لمراجعة البيانات
 
 ### إدارة الفروع والمستودع / Branch and Repository Management
-- 🌿 **[دليل اتخاذ القرار: دمج الفروع أو تركها](docs/BRANCH_MANAGEMENT_DECISION_GUIDE.md)** - دليل شامل ثنائي اللغة ⭐
-- 🌿 **[دليل إدارة الفروع](docs/arabic/دليل_إدارة_الفروع.md)** - دليل عربي مفصل مع أمثلة عملية ⭐
-- 📊 [تقرير حالة الدمج](docs/MERGE_STATUS_REPORT.md) - تحليل تفصيلي لحالة دمج الفروع
-- 📊 [ملخص الدمج (عربي)](docs/MERGE_SUMMARY_AR.md) - ملخص ثنائي اللغة
+- 🧹 **[تقرير تنظيف الفروع](BRANCH_CLEANUP_REPORT.md)** - قائمة الفروع للحذف مع سكريبت التنفيذ ⭐ **NEW!**
+- 🌿 **[دليل اتخاذ القرار: دمج الفروع أو تركها](BRANCH_MANAGEMENT_DECISION_GUIDE.md)** - دليل شامل ثنائي اللغة
+- 🌿 **[دليل إدارة الفروع](دليل_إدارة_الفروع.md)** - دليل عربي مفصل مع أمثلة عملية
+- 📋 **[ملخص قرار إدارة الفروع](BRANCH_DECISION_SUMMARY.md)** - إجابة مباشرة على "دمج أو ترك؟"
+- 📊 [تقرير حالة الدمج](MERGE_STATUS_REPORT.md) - تحليل تفصيلي لحالة دمج الفروع
+- 📊 [ملخص الدمج (عربي)](MERGE_SUMMARY_AR.md) - ملخص ثنائي اللغة
 
 ### النشر والتثبيت / Deployment & Installation
 - 🐳 **[دليل Docker Hub](docs/deployment/DOCKER_HUB_GUIDE.md)** - نشر ومشاركة الصور على Docker Hub ⭐
