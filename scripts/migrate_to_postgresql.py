@@ -378,7 +378,6 @@ def migrate_table(sqlite_conn, pg_conn, table_name, batch_size=1000):
         # For SQLite: table name is already validated, safe to use in f-string
         sqlite_cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
         total = sqlite_cursor.fetchone()[0]
-        total = sqlite_cursor.fetchone()[0]
         
         if total == 0:
             logger.info(f"  ⚠️  Table {table_name} is empty, skipping")

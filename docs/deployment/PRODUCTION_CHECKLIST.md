@@ -162,10 +162,10 @@ This comprehensive checklist ensures your Housing Management System is productio
   crontab -e
   
   # Add daily backup at 2 AM
-  0 2 * * * /path/to/2025/scripts/backup_database.sh
+  0 2 * * * /var/www/housing-system/scripts/backup_database.sh
   
   # Add weekly backup on Sunday
-  0 3 * * 0 /path/to/2025/scripts/backup_database.sh
+  0 3 * * 0 /var/www/housing-system/scripts/backup_database.sh
   ```
   
   **Using systemd timer (Linux):**
@@ -242,33 +242,33 @@ This comprehensive checklist ensures your Housing Management System is productio
 - [ ] **Set proper file permissions**
   ```bash
   # Application files
-  chmod 755 /path/to/2025
-  find /path/to/2025 -type f -name "*.py" -exec chmod 644 {} \;
-  find /path/to/2025 -type f -name "*.sh" -exec chmod 755 {} \;
+  chmod 755 /var/www/housing-system
+  find /var/www/housing-system -type f -name "*.py" -exec chmod 644 {} \;
+  find /var/www/housing-system -type f -name "*.sh" -exec chmod 755 {} \;
   
   # Environment files (sensitive)
-  chmod 600 /path/to/2025/.env*
+  chmod 600 /var/www/housing-system/.env*
   
   # Database files
-  chmod 660 /path/to/2025/*.db
+  chmod 660 /var/www/housing-system/*.db
   
   # Logs directory
-  chmod 750 /path/to/2025/logs
-  chmod 640 /path/to/2025/logs/*.log
+  chmod 750 /var/www/housing-system/logs
+  chmod 640 /var/www/housing-system/logs/*.log
   
   # Uploads directory
-  chmod 755 /path/to/2025/uploads
+  chmod 755 /var/www/housing-system/uploads
   ```
 
 #### 6.2 Ownership / الملكية
 - [ ] **Set proper ownership**
   ```bash
   # Change owner to application user
-  sudo chown -R app_user:app_group /path/to/2025
+  sudo chown -R app_user:app_group /var/www/housing-system
   
   # For Nginx/Apache
-  sudo chown -R app_user:www-data /path/to/2025/static
-  sudo chown -R app_user:www-data /path/to/2025/uploads
+  sudo chown -R app_user:www-data /var/www/housing-system/static
+  sudo chown -R app_user:www-data /var/www/housing-system/uploads
   ```
 
 ### 7. Logging and Monitoring / السجلات والمراقبة
@@ -286,7 +286,7 @@ This comprehensive checklist ensures your Housing Management System is productio
   sudo nano /etc/logrotate.d/housing-system
   
   # Add configuration
-  /path/to/2025/logs/*.log {
+  /var/www/housing-system/logs/*.log {
       daily
       rotate 30
       compress
@@ -499,7 +499,7 @@ chmod +x scripts/backup_database.sh
 
 # Add to crontab
 crontab -e
-# Add: 0 2 * * * /path/to/2025/scripts/backup_database.sh
+# Add: 0 2 * * * /var/www/housing-system/scripts/backup_database.sh
 
 # Test backup
 ./scripts/backup_database.sh

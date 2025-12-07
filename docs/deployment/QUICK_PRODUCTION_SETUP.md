@@ -114,7 +114,7 @@ sudo cp docs/deployment/nginx-housing.conf /etc/nginx/sites-available/housing-sy
 sudo nano /etc/nginx/sites-available/housing-system
 # Replace:
 #   - yourdomain.com with your actual domain
-#   - /path/to/2025 with /var/www/housing-system
+#   - /var/www/housing-system with /var/www/housing-system
 
 # Enable site
 sudo ln -s /etc/nginx/sites-available/housing-system /etc/nginx/sites-enabled/
