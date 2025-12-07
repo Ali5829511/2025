@@ -139,6 +139,11 @@ server {
     add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
     
     # Content Security Policy
+    # Note: 'unsafe-inline' and 'unsafe-eval' are used for compatibility with existing inline scripts
+    # For enhanced security in production, consider:
+    # 1. Moving inline scripts to external files
+    # 2. Using CSP nonces for necessary inline scripts
+    # 3. Removing 'unsafe-eval' if not required by dependencies
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self';" always;
     
     # ==============================================================================
@@ -188,7 +193,7 @@ server {
     
     # Static directory
     location /static/ {
-        alias /path/to/2025/static/;
+        alias /var/www/housing-system/static/;
         expires 1y;
         add_header Cache-Control "public, immutable";
         access_log off;
@@ -196,7 +201,7 @@ server {
     
     # Uploads directory
     location /uploads/ {
-        alias /path/to/2025/uploads/;
+        alias /var/www/housing-system/uploads/;
         expires 30d;
         add_header Cache-Control "public";
     }
@@ -457,7 +462,7 @@ sudo cp proxy_params /etc/nginx/
 sudo nano /etc/nginx/sites-available/housing-system
 # Change:
 # - yourdomain.com to your actual domain
-# - /path/to/2025 to your application path
+# - /var/www/housing-system to your application path
 # - SSL certificate paths if different
 ```
 
@@ -611,8 +616,8 @@ sudo systemctl reload nginx
 ps aux | grep nginx
 
 # Fix static file permissions
-sudo chown -R www-data:www-data /path/to/2025/static
-sudo chmod -R 755 /path/to/2025/static
+sudo chown -R www-data:www-data /var/www/housing-system/static
+sudo chmod -R 755 /var/www/housing-system/static
 ```
 
 ---

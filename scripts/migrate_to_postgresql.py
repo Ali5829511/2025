@@ -15,6 +15,8 @@ from psycopg2 import sql, extras
 from datetime import datetime
 from urllib.parse import urlparse
 import logging
+import subprocess
+import shutil
 
 # Setup logging
 logging.basicConfig(
@@ -345,15 +347,30 @@ def create_postgres_schema(pg_conn):
         raise
 
 
+def validate_table_name(table_name):
+    """Validate table name to prevent SQL injection"""
+    # Allow only alphanumeric characters and underscores
+    import re
+    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', table_name):
+        raise ValueError(f"Invalid table name: {table_name}")
+    return table_name
+
+
 def migrate_table(sqlite_conn, pg_conn, table_name, batch_size=1000):
     """Migrate data from SQLite table to PostgreSQL"""
     logger.info(f"📊 Migrating table: {table_name}")
+    
+    # Validate table name
+    table_name = validate_table_name(table_name)
     
     sqlite_cursor = sqlite_conn.cursor()
     pg_cursor = pg_conn.cursor()
     
     try:
-        # Get total count
+        # Get total count - use sql.Identifier for table name
+        query = sql.SQL("SELECT COUNT(*) FROM {}").format(sql.Identifier(table_name))
+        pg_cursor.execute(query)
+        # For SQLite, use parameterized query
         sqlite_cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
         total = sqlite_cursor.fetchone()[0]
         
@@ -385,12 +402,12 @@ def migrate_table(sqlite_conn, pg_conn, table_name, batch_size=1000):
                 row_dict.pop('id', None)
                 values.append(tuple(row_dict.values()))
             
-            # Build insert query
-            placeholders = ','.join(['%s'] * len(insert_columns))
-            insert_query = f"""
-                INSERT INTO {table_name} ({','.join(insert_columns)})
-                VALUES ({placeholders})
-            """
+            # Build insert query using psycopg2.sql for safe table/column names
+            insert_query = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
+                sql.Identifier(table_name),
+                sql.SQL(',').join(map(sql.Identifier, insert_columns)),
+                sql.SQL(',').join(sql.Placeholder() * len(insert_columns))
+            )
             
             # Execute batch insert
             extras.execute_batch(pg_cursor, insert_query, values)
@@ -399,12 +416,13 @@ def migrate_table(sqlite_conn, pg_conn, table_name, batch_size=1000):
             migrated += len(rows)
             logger.info(f"  ✓ Migrated {migrated}/{total} rows from {table_name}")
         
-        # Reset sequence for id column
-        pg_cursor.execute(f"""
-            SELECT setval(pg_get_serial_sequence('{table_name}', 'id'), 
-                         COALESCE((SELECT MAX(id) FROM {table_name}), 1), 
+        # Reset sequence for id column using sql.Identifier
+        reset_query = sql.SQL("""
+            SELECT setval(pg_get_serial_sequence({}, 'id'), 
+                         COALESCE((SELECT MAX(id) FROM {}), 1), 
                          true)
-        """)
+        """).format(sql.Literal(table_name), sql.Identifier(table_name))
+        pg_cursor.execute(reset_query)
         pg_conn.commit()
         
         logger.info(f"✅ Table {table_name} migrated successfully ({migrated} rows)")
@@ -432,12 +450,16 @@ def verify_migration(sqlite_conn, pg_conn):
     all_match = True
     for table in tables:
         try:
+            # Validate table name
+            table = validate_table_name(table)
+            
             # Count rows in SQLite
             sqlite_cursor.execute(f"SELECT COUNT(*) FROM {table}")
             sqlite_count = sqlite_cursor.fetchone()[0]
             
-            # Count rows in PostgreSQL
-            pg_cursor.execute(f"SELECT COUNT(*) FROM {table}")
+            # Count rows in PostgreSQL using safe query
+            count_query = sql.SQL("SELECT COUNT(*) FROM {}").format(sql.Identifier(table))
+            pg_cursor.execute(count_query)
             pg_count = pg_cursor.fetchone()[0]
             
             if sqlite_count == pg_count:
@@ -468,7 +490,11 @@ def main():
     # Check if backup exists
     backup_file = f"{SQLITE_DB}.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     logger.info(f"📦 Creating backup: {backup_file}")
-    os.system(f"cp {SQLITE_DB} {backup_file}")
+    try:
+        shutil.copy2(SQLITE_DB, backup_file)
+    except Exception as e:
+        logger.error(f"Failed to create backup: {e}")
+        sys.exit(1)
     
     # Get connections
     logger.info("🔌 Connecting to databases...")
