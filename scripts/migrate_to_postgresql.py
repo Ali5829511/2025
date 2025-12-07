@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 import logging
 import subprocess
 import shutil
+import re
 
 # Setup logging
 logging.basicConfig(
@@ -348,9 +349,15 @@ def create_postgres_schema(pg_conn):
 
 
 def validate_table_name(table_name):
-    """Validate table name to prevent SQL injection"""
+    """
+    Validate table name to prevent SQL injection.
+    
+    Security Note:
+    All table names are validated before use to prevent SQL injection.
+    For SQLite queries, validated table names are used in f-strings (safe after validation).
+    For PostgreSQL queries, we use psycopg2.sql.Identifier for additional safety.
+    """
     # Allow only alphanumeric characters and underscores
-    import re
     if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', table_name):
         raise ValueError(f"Invalid table name: {table_name}")
     return table_name
@@ -367,25 +374,24 @@ def migrate_table(sqlite_conn, pg_conn, table_name, batch_size=1000):
     pg_cursor = pg_conn.cursor()
     
     try:
-        # Get total count - use sql.Identifier for table name
-        query = sql.SQL("SELECT COUNT(*) FROM {}").format(sql.Identifier(table_name))
-        pg_cursor.execute(query)
-        # For SQLite, use parameterized query
+        # Get total count
+        # For SQLite: table name is already validated, safe to use in f-string
         sqlite_cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+        total = sqlite_cursor.fetchone()[0]
         total = sqlite_cursor.fetchone()[0]
         
         if total == 0:
             logger.info(f"  ⚠️  Table {table_name} is empty, skipping")
             return
         
-        # Get column names
+        # Get column names (SQLite query with validated table name)
         sqlite_cursor.execute(f"SELECT * FROM {table_name} LIMIT 1")
         columns = [description[0] for description in sqlite_cursor.description]
         
         # Adjust column names for PostgreSQL (id is auto-increment)
         insert_columns = [col for col in columns if col != 'id']
         
-        # Fetch and insert data in batches
+        # Fetch and insert data in batches (SQLite query with validated table name)
         sqlite_cursor.execute(f"SELECT * FROM {table_name}")
         
         migrated = 0
@@ -453,7 +459,7 @@ def verify_migration(sqlite_conn, pg_conn):
             # Validate table name
             table = validate_table_name(table)
             
-            # Count rows in SQLite
+            # Count rows in SQLite (validated table name, safe to use in f-string)
             sqlite_cursor.execute(f"SELECT COUNT(*) FROM {table}")
             sqlite_count = sqlite_cursor.fetchone()[0]
             
